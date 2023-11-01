@@ -1,14 +1,29 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
     <head>
         <meta charset="utf-8" />
-        <title>{% block title %}Decide!{% endblock %}</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Decide | {% block title %}{% endblock %}</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500&family=Open+Sans&family=Poppins:wght@500&display=swap" rel="stylesheet">        
         {% block extrahead %}{% endblock %}
     </head>
     <body>
+        <header class="header">
+            <h1>Decide</h1>
+            <div>
+                <a href="">Registrarse</a>
+                <a href="">Iniciar Sesión</a>
+            </div>
+        </header>
         {% block content %}
         {% endblock %}
 
         {% block extrabody %}{% endblock %}
+        <footer>
+            <p>&copy; 2023 Decide. Todos los derechos reservados.</p>
+            <a href="https://github.com/EGC-zambrano/decide-part-zambrano" target="_blank">GitHub</a>
+        </footer>
     </body>
 </html>

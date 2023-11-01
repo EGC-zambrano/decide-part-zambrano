@@ -15,19 +15,17 @@ Including another URLconf
 """
 from django.conf import settings
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework_swagger.views import get_swagger_view
 
-
-schema_view = get_swagger_view(title='Decide API')
+schema_view = get_swagger_view(title="Decide API")
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('doc/', schema_view),
-    path('gateway/', include('gateway.urls')),
+    path("admin/", admin.site.urls),
+    path("doc/", schema_view),
+    path("gateway/", include("gateway.urls")),
+    path("", include("booth.urls")),  # Booth routes
 ]
 
 for module in settings.MODULES:
-    urlpatterns += [
-        path('{}/'.format(module), include('{}.urls'.format(module)))
-    ]
+    urlpatterns += [path("{}/".format(module), include("{}.urls".format(module)))]
