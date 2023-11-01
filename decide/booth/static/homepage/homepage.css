@@ -90,22 +90,12 @@ section {
     gap:20px
 }
 
-#text1 {  
+#hero-text {
     text-align: center;
     font-weight: bold;
     position: absolute;
     width: 100%;
     top: 20%;
-    left: 1%;
-    color: var(--neutral-background)
-}
-
-#text2 {  
-    text-align: center;
-    font-weight: bold;
-    position: absolute;
-    width: 100%;
-    top: 26%;
     left: 1%;
     color: var(--neutral-background)
 }
