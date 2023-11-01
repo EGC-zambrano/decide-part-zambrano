@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}Login{% endblock %}
+
+{% block extrahead %}   
+    <link rel="stylesheet" href="{% static "auth/style.css" %}">
+{% endblock %}
+
+{% block content %}
+    <!-- Login form using django form object and msg -->
+    <section class="form-card">
+        <section class="form-title">
+        </section>
+        <section class="form-msg">
+            {% if msg %}
+              <p>{{ msg }}</p>
+            {% else %}
+              <p>
+                Add your credentials
+              </p>
+            {% endif %}
+        </section>
+        <form method=POST>
+            {% csrf_token %}
+            <section class="form-content">
+            {{ form.username }}
+            {{ form.password }}
+            </section>
+            <section class="form-confirmation">
+                <button type="submit" class="btn btn-primary">Login</button>
+            </section>
+        </form>
+    </section>
+
+{% endblock %}
