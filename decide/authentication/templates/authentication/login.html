@@ -9,23 +9,35 @@
 
 {% block content %}
     <!-- Login form using django form object and msg -->
-    <section class="form-card">
-        <section class="form-title">
-        </section>
+    <section class="card form-card">
+        <section class="form-title"> </section>
         <section class="form-msg">
+            <b>
+                Welcome to Decide!
+            </b>
             {% if msg %}
-              <p>{{ msg }}</p>
-            {% else %}
-              <p>
-                Add your credentials
-              </p>
+                <div class="form-errors">
+                    <p>
+                    {{ msg }}
+                    </p>
+                </div>
             {% endif %}
         </section>
         <form method=POST>
             {% csrf_token %}
             <section class="form-content">
-            {{ form.username }}
-            {{ form.password }}
+                <div class="input-group">
+                    <i class="material-icons">person</i>
+                    {{ form.username }}
+                </div>
+                <div class="input-group">
+                    <i class="material-icons">lock</i>
+                    {{ form.password }}
+                </div>
+            </section>
+            <section class="remember-me">
+                {{ form.remember_me }}
+                <p>Remember me</p>
             </section>
             <section class="form-confirmation">
                 <button type="submit" class="btn btn-primary">Login</button>

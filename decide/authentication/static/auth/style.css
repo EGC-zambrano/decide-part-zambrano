@@ -1,0 +1,85 @@
+.card {
+    width: fit-content;
+    padding: 2em;
+    background-color: var(--card-background);
+    border-radius: 1em;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+.form-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    overflow-x: hidden;
+    margin-top: 50px;
+}
+
+.form-confirmation {
+    display: flex;
+    margin: auto auto;
+    max-width: 50%;
+    justify-content: center;
+}
+
+.form-msg p {
+    font-family: var(--fuente2);
+}
+
+.form-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 1em;
+    margin: 0.5em;
+    border-radius: .25em;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+    color: var(--input-text);
+    font-family: var(--fuente2);
+}
+
+.input-group i{
+    text-size: 1.5em;
+}
+
+.form-confirmation {
+    display: flex;
+    margin: 1em auto 0 auto;
+    max-width: 50%;
+    justify-content: center;
+}
+
+.form-errors {
+    background-color: var(--red-color);
+    border: 1px solid var(--red-dark-color);
+    border-radius: 0.25em;
+    padding: 0.5em;
+}
+
+.remember-me {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: left;
+    margin: 0.5em;
+}
+
+.remember-me input {
+    border-radius: 0.25em;
+    box-shadow: 0 0 1px rgba(0, 0, 0, 0.5);
+}
+
+.remember-me p {
+    font-family: var(--fuente2);
+    font-size: 0.8em;
+}
