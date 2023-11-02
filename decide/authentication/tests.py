@@ -1,12 +1,12 @@
-from django.test import TestCase
+from django.test import TestCase, Client
+from django.urls import reverse
+from django.contrib.auth.models import User
+from .forms import LoginForm
+from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 from rest_framework.test import APITestCase
 
-from django.contrib.auth.models import User
-from rest_framework.authtoken.models import Token
-
 from base import mods
-
 
 class AuthTestCase(APITestCase):
 
@@ -128,3 +128,39 @@ class AuthTestCase(APITestCase):
             sorted(list(response.json().keys())),
             ['token', 'user_pk']
         )
+
+class LoginViewTestCase(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.url = reverse("signin")
+        self.user = User.objects.create_user(
+            username="testuser", password="testpass"
+        )
+
+    def test_get(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "authentication/login.html")
+        self.assertIsInstance(response.context["form"], LoginForm)
+        self.assertIsNone(response.context["msg"])
+
+    def test_post_valid_credentials(self):
+        data = {"username": "testuser", "password": "testpass", "remember_me": False}
+        response = self.client.post(self.url, data)
+        self.assertRedirects(response, "/")
+
+    def test_post_invalid_credentials(self):
+        data = {"username": "testuser", "password": "wrongpass", "remember_me": False}
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "authentication/login.html")
+        self.assertIsInstance(response.context["form"], LoginForm)
+        self.assertEqual(response.context["msg"], "Invalid credentials")
+
+    def test_post_invalid_form(self):
+        data = {"username": "", "password": "", "remember_me": False}
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "authentication/login.html")
+        self.assertIsInstance(response.context["form"], LoginForm)
+        self.assertEqual(response.context["msg"], "Error validating the form")
