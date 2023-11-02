@@ -11,7 +11,7 @@
     flex-direction: column;
     align-items: center; 
     overflow-x: hidden;
-    margin-top: 50px;
+    margin: 50px 0;
 }
 
 .form-confirmation {
