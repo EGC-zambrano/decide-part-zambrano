@@ -24,7 +24,7 @@ class LoginPageTestCase(StaticLiveServerTestCase):
 
         self.base.tearDown()
 
-    def test_testselenium(self):
+    def test_sucessful_login(self):
         self.driver.get(f"{self.live_server_url}/signin")
 
         self.assertTrue(len(self.driver.find_elements(By.ID, "id_username")) == 1)
@@ -35,3 +35,19 @@ class LoginPageTestCase(StaticLiveServerTestCase):
         self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
 
         self.assertTrue(self.driver.title == "Decide | Homepage")
+
+    def test_failed_login(self):
+        self.driver.get(f"{self.live_server_url}/signin")
+
+        self.assertTrue(len(self.driver.find_elements(By.ID, "id_username")) == 1)
+        self.assertTrue(len(self.driver.find_elements(By.ID, "id_password")) == 1)
+
+        self.driver.find_element(By.ID, "id_username").send_keys("testuser")
+        self.driver.find_element(By.ID, "id_password").send_keys("wrongpass")
+        self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
+
+        self.assertTrue(self.driver.title == "Decide | Login")
+        self.assertEquals(
+            self.driver.find_element(By.CLASS_NAME, "form-errors").text,
+            "Credenciales incorrectas",
+        )
