@@ -1,7 +1,9 @@
 from django.urls import path
+from . import views
 from .views import BoothView
 
 
 urlpatterns = [
-    path('<int:voting_id>/', BoothView.as_view()),
+    path("", views.index, name="homepage"),
+    path("<int:voting_id>/", BoothView.as_view()),
 ]
