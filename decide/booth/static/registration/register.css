@@ -1,21 +1,28 @@
 /* Import the styles from homepage.css */
-@import "static/homepage/homepage.css";
+@import "homepage.css";
 
-/* Add additional styles for the registration form */
-.registration {
-    background-color: var(--neutral-background); /* Use the background color from homepage.css */
+/* Add additional styles for the registration page */
+body {
+    background-image: url('https://cdn.discordapp.com/attachments/768216338128044042/1169219578153406545/iu.png?ex=65549b96&is=65422696&hm=904cdb4126f66caea56b7457820bee91b5689220fe9e9ef41ccd0bfb4d24c6e6&');
+    background-size: cover;
+    background-attachment: fixed; /* Fixed background image */
+    margin: 0; /* Remove default margin for the body */
+    padding: 0; /* Remove default padding for the body */
+    color: var(--text-color); /* Set text color for the page */
     display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 80vh;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
-.registration-form {
-    background-color: var(--neutral-background); /* Use the background color from homepage.css */
+/* Styles for the registration form */
+.registration {
+    background-color: rgba(255, 255, 255, 0.9); /* Add a semi-transparent white background for the registration form */
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     width: 300px;
+    color: var(--text-color); /* Set text color for the form */
+    margin: 120px auto 50px; /* Adjust margin to avoid overlapping the header */
 }
 
 .registration-form label {
@@ -30,6 +37,7 @@
     margin-top: 5px;
     border: 1px solid #ccc;
     border-radius: 4px;
+    color: var(--text-color); /* Set text color for the form inputs */
 }
 
 .register-button {
@@ -44,4 +52,13 @@
 
 .register-button:hover {
     background-color: #0e74a3;
+}
+
+/* Styles for the footer */
+footer {
+    background-color: var(--text-color); /* Keep the footer background color as in homepage.css */
+    color: var(--neutral-background); /* Set text color for the footer */
+    text-align: center;
+    padding: 20px 0; /* Add padding to the top and bottom of the footer */
+    margin-top: auto; /* Push the footer to the bottom of the page */
 }

@@ -13,17 +13,17 @@
         <form method="post">
             {% csrf_token %}
             <div class="registration-form">
-                <label for="id_first_name">First Name:</label>
+                <label for="id_first_name">Nombre:</label>
                 {{ form.first_name }}
-                <label for="id_last_name">Last Name:</label>
+                <label for="id_last_name">Apellidos:</label>
                 {{ form.last_name }}
                 <label for="id_email">Email:</label>
                 {{ form.email }}
-                <label for="id_username">Username:</label>
+                <label for="id_username">Usuario:</label>
                 {{ form.username }}
-                <label for="id_password1">Password:</label>
+                <label for="id_password1">Contraseña:</label>
                 {{ form.password1 }}
-                <label for="id_password2">Confirm Password:</label>
+                <label for="id_password2">Confirme Contraseña:</label>
                 {{ form.password2 }}
             </div>
             <button type="submit" class="register-button">Register</button>
