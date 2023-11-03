@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}Registration{% endblock %}
+
+{% block extrahead %}
+    <link rel="stylesheet" href="{% static "homepage/homepage.css" %}">
+    <link rel="stylesheet" href="{% static "registration/register.css" %}">
+{% endblock %}
+
+{% block content %}
+    <section class="registration">
+        <form method="post">
+            {% csrf_token %}
+            <div class="registration-form">
+                <label for="id_first_name">First Name:</label>
+                {{ form.first_name }}
+                <label for="id_last_name">Last Name:</label>
+                {{ form.last_name }}
+                <label for="id_email">Email:</label>
+                {{ form.email }}
+                <label for="id_username">Username:</label>
+                {{ form.username }}
+                <label for="id_password1">Password:</label>
+                {{ form.password1 }}
+                <label for="id_password2">Confirm Password:</label>
+                {{ form.password2 }}
+            </div>
+            <button type="submit" class="register-button">Register</button>
+        </form>
+    </section>
+{% endblock %}
