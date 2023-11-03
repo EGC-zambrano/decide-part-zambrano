@@ -36,9 +36,9 @@ class LoginView(TemplateView):
 
                 return redirect("/")
             else:
-                msg = "Invalid credentials"
+                msg = "Credenciales incorrectas"
         else:
-            msg = "Error validating the form"
+            msg = "Error en el formulario"
 
         return render(request, "authentication/login.html", {"form": form, "msg": msg})
 
