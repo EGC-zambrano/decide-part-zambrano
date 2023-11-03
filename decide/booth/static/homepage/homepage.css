@@ -51,10 +51,11 @@ header {
     align-items: center;
 }
 
-header h1 {
+header h1 a {
     color: var(--neutral-background);
     padding: 0 20px;
     font-weight: bold;
+    text-decoration: none;
 }
 
 header div a {
