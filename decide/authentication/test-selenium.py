@@ -13,6 +13,7 @@ class LoginPageTestCase(StaticLiveServerTestCase):
         # Opciones de Chrome
         options = webdriver.ChromeOptions()
         options.headless = True
+        options.add_argument("--no-sandbox")
         self.driver = webdriver.Chrome(options=options)
         self.user = User.objects.create_user(username="testuser", password="testpass")
         super().setUp()
@@ -26,10 +27,11 @@ class LoginPageTestCase(StaticLiveServerTestCase):
     def test_testselenium(self):
         self.driver.get(f"{self.live_server_url}/signin")
 
-        self.driver.find_element(By.ID, "id_username").click()
-        self.driver.find_element(By.ID, "id_username").send_keys(self.user.username)
-        self.driver.find_element(By.ID, "id_password").click()
-        self.driver.find_element(By.ID, "id_password").send_keys(self.user.password)
+        self.assertTrue(len(self.driver.find_elements(By.ID, "id_username")) == 1)
+        self.assertTrue(len(self.driver.find_elements(By.ID, "id_password")) == 1)
+
+        self.driver.find_element(By.ID, "id_username").send_keys("testuser")
+        self.driver.find_element(By.ID, "id_password").send_keys("testpass")
         self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
 
         self.assertTrue(self.driver.title == "Decide | Homepage")
