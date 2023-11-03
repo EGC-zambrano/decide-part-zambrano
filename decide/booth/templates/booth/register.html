@@ -25,8 +25,18 @@
                 {{ form.password1 }}
                 <label for="id_password2">Confirme Contraseña:</label>
                 {{ form.password2 }}
+                {% if form.password2.errors %}
+                    <p class="error">{{ form.password2.errors.0 }}</p>
+                {% endif %}
             </div>
-            <button type="submit" class="register-button">Register</button>
+            <button type="submit" class="register-button">Registrarse</button>
         </form>
+        <!-- JavaScript to set focus on the name field when the page loads -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                document.getElementById('id_first_name').focus();
+            });
+        </script>
     </section>
 {% endblock %}
+
