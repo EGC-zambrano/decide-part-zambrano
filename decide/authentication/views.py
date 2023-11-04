@@ -13,8 +13,12 @@ from rest_framework.status import (
 )
 from rest_framework.views import APIView
 
-from .forms import LoginForm
+from .forms import LoginForm, RegisterForm
 from .serializers import UserSerializer
+
+from django.contrib.auth.models import User
+from django.shortcuts import render, redirect
+from rest_framework import status
 
 
 # Non-api view
@@ -69,21 +73,33 @@ class LogoutView(APIView):
 
 class RegisterView(APIView):
     def post(self, request):
-        key = request.data.get("token", "")
-        tk = get_object_or_404(Token, key=key)
-        if not tk.user.is_superuser:
-            return Response({}, status=HTTP_401_UNAUTHORIZED)
+        form = RegisterForm(request.POST)
 
-        username = request.data.get("username", "")
-        pwd = request.data.get("password", "")
-        if not username or not pwd:
-            return Response({}, status=HTTP_400_BAD_REQUEST)
+        msg = None
 
-        try:
-            user = User(username=username)
-            user.set_password(pwd)
-            user.save()
-            token, _ = Token.objects.get_or_create(user=user)
-        except IntegrityError:
-            return Response({}, status=HTTP_400_BAD_REQUEST)
-        return Response({"user_pk": user.pk, "token": token.key}, HTTP_201_CREATED)
+        if form.is_valid():
+            username = form.cleaned_data.get("username")
+            email = form.cleaned_data.get("email")
+
+            # Check if the user already exists
+            if (
+                User.objects.filter(username=username).exists()
+                or User.objects.filter(email=email).exists()
+            ):
+                msg = "El usuario ya existe."
+            else:
+                form.save()
+                return redirect("/signin")
+        else:
+            msg = "Error en el formulario"
+
+        return render(
+            request, "authentication/register.html", {"form": form, "msg": msg}
+        )
+
+    def get(self, request):
+        form = RegisterForm(None)
+
+        return render(
+            request, "authentication/register.html", {"form": form, "msg": None}
+        )

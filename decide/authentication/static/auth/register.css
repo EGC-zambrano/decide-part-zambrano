@@ -1,5 +1,5 @@
 /* Import the styles from homepage.css */
-@import "homepage.css";
+@import "style.css";
 
 /* Add additional styles for the registration page */
 body {
@@ -12,6 +12,13 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+}
+
+.header h1 a {
+    color: var(--neutral-background);
+    padding: 0 20px;
+    font-weight: bold;
+    text-decoration: none;
 }
 
 /* Styles for the registration form */
