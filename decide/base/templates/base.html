@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% load i18n static %}
 <html lang="es">
     <head>
         <meta charset="utf-8" />
@@ -7,20 +8,31 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500&family=Open+Sans&family=Poppins:wght@500&display=swap" rel="stylesheet">        
+        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+        <link rel="stylesheet" href="{% static "base/style.css" %}">
         {% block extrahead %}{% endblock %}
     </head>
     <body>
         <header class="header">
-            <h1><a href="{% url 'homepage' %}">Decide</a></h1>
-            <div>
-                <a href="http://localhost:8000/booth/register">Registrarse</a>
-                <a href="">Iniciar Sesión</a>
-            </div>
+            <h1>Decide</h1>
+            <!-- show profile icon if user is logged in -->
+            {% if user.is_authenticated %}
+                <div>
+                    <a href="/profile" class="material-icons">account_circle</a>
+                </div>
+            {% else %}
+                <div>
+                    <a href="/signup">Registrarse</a>
+                    <a href="/signin">Iniciar Sesión</a>
+                </div>
+            {% endif %}
         </header>
-        {% block content %}
-        {% endblock %}
+        <section class="content">
+            {% block content %}
+            {% endblock %}
 
-        {% block extrabody %}{% endblock %}
+            {% block extrabody %}{% endblock %}
+        </section>
         <footer>
             <p>&copy; 2023 Decide. Todos los derechos reservados.</p>
             <a href="https://github.com/EGC-zambrano/decide-part-zambrano" target="_blank">GitHub</a>

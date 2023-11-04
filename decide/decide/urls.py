@@ -24,6 +24,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("doc/", schema_view),
     path("gateway/", include("gateway.urls")),
+    path("", include("authentication.urls")),  # Booth routes
     path("", include("booth.urls")),  # Booth routes
 ]
 
