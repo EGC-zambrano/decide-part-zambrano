@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from rest_framework.authtoken.views import obtain_auth_token
 
 from .views import GetUserView, LoginView, LogoutView, RegisterView
@@ -9,4 +9,5 @@ urlpatterns = [
     path("logout/", LogoutView.as_view()),
     path("getuser/", GetUserView.as_view()),
     path("register/", RegisterView.as_view()),
+    path("accounts/", include("allauth.urls")),
 ]
