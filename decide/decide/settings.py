@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     'gateway',
 
     'django.contrib.sites',
+
+    
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -66,13 +68,9 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
-AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
-)
 
-LOGIN_REDIRECT_URL = '/authentication/authenticated'
-LOGOUT_REDIRECT_URL = '/'
+
+LOGIN_REDIRECT_URL = '/'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -82,9 +80,11 @@ REST_FRAMEWORK = {
     'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.QueryParameterVersioning'
 }
 
-AUTHENTICATION_BACKENDS = [
+AUTHENTICATION_BACKENDS = (
     'base.backends.AuthBackend',
-]
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+)
 
 MODULES = [
     'authentication',
@@ -108,6 +108,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'decide.urls'
