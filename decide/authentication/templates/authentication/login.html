@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load i18n static %}
+{% load socialaccount %}
 
 {% block title %}Login{% endblock %}
 
@@ -43,6 +44,11 @@
                 <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
             </section>
         </form>
+        <div class="login-google-button">
+            <a href="{% provider_login_url 'google' %}" class="google-button">
+                Iniciar Sesion con Google
+            </a>
+        </div>
     </section>
 
 {% endblock %}

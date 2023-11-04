@@ -99,3 +99,26 @@ header {
     font-family: var(--fuente2);
     font-size: 0.8em;
 }
+
+.login-google-button {
+    text-align: center;
+    margin: 20px;
+    flex: row;
+}
+
+.google-button {
+    display: inline-block;
+    background-color: #4285f4; 
+    color: #ffffff;
+    text-decoration: none;
+    border: 1px solid #357ae8;
+    border-radius: 4px;
+    padding: 10px 20px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.google-button:hover {
+    background-color: #357ae8; 
+}
+
