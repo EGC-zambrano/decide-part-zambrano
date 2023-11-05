@@ -103,22 +103,30 @@ header {
 .login-google-button {
     text-align: center;
     margin: 20px;
-    flex: row;
 }
 
-.google-button {
+.login-google-button a {
     display: inline-block;
-    background-color: #4285f4; 
-    color: #ffffff;
+    background-color: #fff; 
+    color: #888; 
     text-decoration: none;
-    border: 1px solid #357ae8;
+    border: 1px solid #ccc; 
     border-radius: 4px;
     padding: 10px 20px;
     font-weight: bold;
     transition: background-color 0.3s ease;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
 }
 
-.google-button:hover {
-    background-color: #357ae8; 
+.login-google-button a:hover {
+    background-color: #f7f7f7; 
 }
 
+.login-google-button svg {
+    width: 24px; 
+    height: 24px;
+    margin-right: 10px; 
+    fill: #888; 
+}
