@@ -9,27 +9,54 @@
 {% endblock %}
 
 {% block content %}
-    <section class="registration">
+    <section class="card form-card">
+        <section class="form-title"> </section>
+        <section class="form-msg">
+            <b>
+                Bienvenido a Decide!
+            </b>
+            {% if msg %}
+                <div class="form-errors">
+                    <p>
+                    {{ msg }}
+                    </p>
+                </div>
+            {% endif %}
+        </section>
         <form method="post">
             {% csrf_token %}
-            <div class="registration-form">
-                <label for="id_first_name">Nombre:</label>
-                {{ form.first_name }}
-                <label for="id_last_name">Apellidos:</label>
-                {{ form.last_name }}
-                <label for="id_email">Email:</label>
-                {{ form.email }}
-                <label for="id_username">Usuario:</label>
-                {{ form.username }}
-                <label for="id_password1">Contraseña:</label>
-                {{ form.password1 }}
-                <label for="id_password2">Confirme Contraseña:</label>
-                {{ form.password2 }}
+            <section class="form-content">
+                <div class="input-group">
+                    <label for="id_first_name">Nombre:</label>
+                    {{ form.first_name }}
+                </div>
+                <div class="input-group">
+                    <label for="id_last_name">Apellidos:</label>
+                    {{ form.last_name }}
+                </div>
+                <div class="input-group">
+                    <label for="id_email">Email:</label>
+                    {{ form.email }}
+                </div>
+                <div class="input-group">
+                    <label for="id_username">Usuario:</label>
+                    {{ form.username }}
+                </div>
+                <div class="input-group">
+                    <label for="id_password1">Contraseña:</label>
+                    {{ form.password1 }}
+                </div>
+                <div class="input-group">
+                    <label for="id_password2">Confirme Contraseña:</label>
+                    {{ form.password2 }}
+                </div>
                 {% if form.password2.errors %}
                     <p class="error">{{ form.password2.errors.0 }}</p>
                 {% endif %}
-            </div>
-            <button type="submit" class="register-button">Registrarse</button>
+            </section>
+            <section class="form-confirmation">
+                <button type="submit" class="btn btn-primary">Registrarse</button>
+            </section>
         </form>
         <!-- JavaScript to set focus on the name field when the page loads -->
         <script>

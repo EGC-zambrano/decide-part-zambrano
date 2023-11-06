@@ -87,6 +87,7 @@ header {
     border: 1px solid var(--red-dark-color);
     border-radius: 0.25em;
     padding: 0.5em;
+    justify-content: center;
 }
 
 .remember-me {

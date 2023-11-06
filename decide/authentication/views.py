@@ -18,7 +18,6 @@ from .serializers import UserSerializer
 
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
-from rest_framework import status
 
 
 # Non-api view
@@ -75,8 +74,6 @@ class RegisterView(APIView):
     def post(self, request):
         form = RegisterForm(request.POST)
 
-        msg = None
-
         if form.is_valid():
             username = form.cleaned_data.get("username")
             email = form.cleaned_data.get("email")
@@ -91,7 +88,7 @@ class RegisterView(APIView):
                 form.save()
                 return redirect("/signin")
         else:
-            msg = "Error en el formulario"
+            msg = None
 
         return render(
             request, "authentication/register.html", {"form": form, "msg": msg}
