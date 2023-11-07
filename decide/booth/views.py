@@ -14,7 +14,7 @@ def index(request):
     return render(request, "booth/homepage.html")
 
 
-@login_required
+@login_required(login_url="/signin")
 def voting_list(request):
     votings_ids = Census.objects.filter(voter_id=request.user.id).values_list(
         "voting_id", flat=True
