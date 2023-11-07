@@ -1,4 +1,105 @@
+.page-title {
+    font-size: 2em;
+    font-weight: bold;
+    margin: 0;
+    padding: 0;
+}
+
 .voting {
     margin-top: 20px;
     margin-left: 40px;
+}
+
+.vertical-list {
+    display: flex;
+    flex-direction: column;
+    align-items: left; 
+    overflow-x: hidden;
+    margin: 50px 0;
+    padding: 1.5em;
+    gap: 1em;
+    min-width: 65em;
+    max-width: 65em;
+}
+
+.card {
+    height: fit-content;
+    width: fit-content;
+    padding: 1em;
+    background-color: #efefef;
+    border-radius: 0.5em;
+}
+
+.voting-card {
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: column;
+    width: 100%;
+    gap: 0.5em;
+    transition: all .15s ease-in-out;
+    text-decoration: none;
+    color: inherit;
+}
+
+.voting-card:hover {
+    background-color: #e0e0e0;
+    cursor: pointer;
+    transform: scale(1.01);
+}
+
+.voting-name {
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.voting-description {
+    font-size: 1em;
+    font-weight: normal;
+}
+
+.voting-open {
+    font-weight: bold;
+    font-style: italic;
+    color: var(--green-dark-color);
+}
+
+.voting-closed {
+    font-weight: bold;
+    font-style: italic;
+    color: var(--red-dark-color);
+}
+
+.row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1em;
+}
+
+.row-apart {
+    justify-content: space-between;
+}
+
+.search-bar input {
+    width: 20em;
+    padding: 8px;
+    margin-top: 5px;
+    border-radius: .25em;
+    border: 1px solid #ccc;
+    background-color: #efefef;
+    font-family: var(--fuente2);
+}
+
+.search-bar select {
+    width: 20em;
+    padding: 8px;
+    margin-top: 5px;
+    border-radius: .25em;
+    border: 1px solid #ccc;
+    background-color: #efefef;
+    font-family: var(--fuente2);
+}
+
+.no-votings {
+    width: 100%;
 }

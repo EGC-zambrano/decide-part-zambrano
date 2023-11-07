@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}Votings{% endblock %}
+
+{% block extrahead %}   
+    <link rel="stylesheet" href="{% static "booth/style.css" %}">
+{% endblock %}
+
+{% block content %}
+    <!-- Login form using django form object and msg -->
+    <section class="vertical-list">
+        <h1 class="page-title">My Votings</h1>
+        <div class="">
+            <!-- Search bar using query value search_query passed by the controller -->
+            <form method="get" action="/voting-list" class="search-bar row row-apart">
+                <input type="text" name="q" placeholder="Search votings" value="{{ search_query }}">
+                <!-- filter dropdown -->
+                <select name="filter" type="submit">
+                    <option value="" {% if filter == "" %}selected{% endif %}>All</option>
+                    <option value="open" {% if filter == "open" %}selected{% endif %}>Open</option>
+                    <option value="closed" {% if filter == "closed" %}selected{% endif %}>Closed</option>
+                </select>
+                <!-- submit with carachter return -->
+                <input type="submit" style="display:none"/>
+            </form>
+        </div>
+        {% if user_votings|length == 0 %}
+            <h3 class="no-votings">You have no votings</p>
+        {% else %}
+            {% for voting in user_votings %}
+                <a href="/vote/{{ voting.id }}"  class="card voting-card">
+                    <div class="row row-apart">
+                        <h3 class="voting-name">{{ voting.name }}</h3>
+                        {% if voting.end_date %}
+                            <p class="voting-closed">Voting Closed</p>
+                        {% else %}
+                            <p class="voting-open">Voting Open</p>
+                        {% endif %}
+                    </div>
+                    <p class="voting-description">{{ voting.desc }}</p>
+                </a>
+            {% endfor %}
+        {% endif %}
+    </section>
+
+{% endblock %}
