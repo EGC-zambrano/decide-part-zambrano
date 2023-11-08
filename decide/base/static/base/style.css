@@ -60,6 +60,17 @@ header {
     align-items: center;
 }
 
+header a {
+    text-decoration: none;
+    color: var(--neutral-background);
+    padding: 20px
+}
+
+header a:hover {
+    background-color: var(--neutral-background);
+    color: var(--primary-color)
+}
+
 header h1 {
     color: var(--neutral-background);
     padding: 0 20px;
@@ -123,4 +134,15 @@ section {
 
 .btn-primary:hover {
     background-color: var(--primary-dark-color);
+}
+
+.row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1em;
+}
+
+.row-apart {
+    justify-content: space-between;
 }

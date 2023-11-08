@@ -16,17 +16,20 @@
             <form method="get" action="/voting-list" class="search-bar row row-apart">
                 <input type="text" name="q" placeholder="Search votings" value="{{ search_query }}">
                 <!-- filter dropdown -->
-                <select name="filter" type="submit">
-                    <option value="" {% if filter == "" %}selected{% endif %}>All</option>
-                    <option value="open" {% if filter == "open" %}selected{% endif %}>Open</option>
-                    <option value="closed" {% if filter == "closed" %}selected{% endif %}>Closed</option>
-                </select>
+                <div class="row">
+                    <p class="voting-description">Filter by:</p>
+                    <select name="filter" onchange="this.form.submit()">
+                        <option value="" {% if filter == "" %}selected{% endif %}>All</option>
+                        <option value="open" {% if filter == "open" %}selected{% endif %}>Open</option>
+                        <option value="closed" {% if filter == "closed" %}selected{% endif %}>Closed</option>
+                    </select>
+                </div>
                 <!-- submit with carachter return -->
                 <input type="submit" style="display:none"/>
             </form>
         </div>
         {% if user_votings|length == 0 %}
-            <h3 class="no-votings">You have no votings</p>
+            <h3 class="no-votings">No votings found</p>
         {% else %}
             {% for voting in user_votings %}
                 <a href="/vote/{{ voting.id }}"  class="card voting-card">

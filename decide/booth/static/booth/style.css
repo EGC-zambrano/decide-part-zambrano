@@ -69,17 +69,6 @@
     color: var(--red-dark-color);
 }
 
-.row {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 1em;
-}
-
-.row-apart {
-    justify-content: space-between;
-}
-
 .search-bar input {
     width: 20em;
     padding: 8px;
