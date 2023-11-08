@@ -15,10 +15,17 @@
             <b>
                 Bienvenido a Decide!
             </b>
-            {% if msg %}
+            {% if form.username.errors %}
                 <div class="form-errors">
                     <p>
-                    {{ msg }}
+                    {{ form.username.errors.0 }}
+                    </p>
+                </div>
+            {% endif %}
+            {% if form.password2.errors %}
+                <div class="form-errors">
+                    <p>
+                    {{ form.password2.errors.0 }}
                     </p>
                 </div>
             {% endif %}
@@ -50,9 +57,6 @@
                     <label for="id_password2">Confirme Contraseña:</label>
                     {{ form.password2 }}
                 </div>
-                {% if form.password2.errors %}
-                    <p class="error">{{ form.password2.errors.0 }}</p>
-                {% endif %}
             </section>
             <section class="form-confirmation">
                 <button type="submit" class="btn btn-primary">Registrarse</button>

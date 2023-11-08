@@ -75,24 +75,10 @@ class RegisterView(APIView):
         form = RegisterForm(request.POST)
 
         if form.is_valid():
-            username = form.cleaned_data.get("username")
-            email = form.cleaned_data.get("email")
-
-            # Check if the user already exists
-            if (
-                User.objects.filter(username=username).exists()
-                or User.objects.filter(email=email).exists()
-            ):
-                msg = "El usuario ya existe."
-            else:
-                form.save()
-                return redirect("/signin")
+            form.save()
+            return redirect("/signin")
         else:
-            msg = None
-
-        return render(
-            request, "authentication/register.html", {"form": form, "msg": msg}
-        )
+            return render(request, "authentication/register.html", {"form": form})
 
     def get(self, request):
         form = RegisterForm(None)
