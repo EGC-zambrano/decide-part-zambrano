@@ -61,31 +61,34 @@ header {
 }
 
 header a {
+    position: relative;
     text-decoration: none;
     color: var(--neutral-background);
     padding: 20px
 }
 
-header a:hover {
-    background-color: var(--neutral-background);
-    color: var(--primary-color)
+header a:hover:after {
+    transform: scaleX(1.1);
+    transform-origin: bottom left;
+}
+
+header a:after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    bottom: 1px;
+    left: 0px;
+    transform: scaleX(0);
+    background: var(--neutral-background);
+    transform-origin: bottom left;
+    transition: transform 0.3s ease-out;
 }
 
 header h1 {
     color: var(--neutral-background);
     padding: 0 20px;
     font-weight: bold;
-}
-
-header div a {
-    text-decoration: none;
-    color: var(--neutral-background);
-    padding: 20px
-}
-
-header div a:hover {
-    background-color: var(--neutral-background);
-    color: var(--primary-color)
 }
 
 footer {
