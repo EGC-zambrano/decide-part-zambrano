@@ -21,28 +21,9 @@ def voting_list(request):
     )
     user_votings = Voting.objects.filter(id__in=votings_ids, start_date__isnull=False)
 
-    search_query = request.GET.get("q", "")
-    filter_query = request.GET.get("filter", "")
-
-    if search_query != "":
-        user_votings = user_votings.filter(name__icontains=search_query)
-
-    if filter_query == "open":
-        user_votings = user_votings.filter(end_date__isnull=True)
-    elif filter_query == "closed":
-        user_votings = user_votings.filter(end_date__isnull=False)
-
     user_votings = user_votings.order_by("-end_date")
 
-    return render(
-        request,
-        "booth/voting-list.html",
-        {
-            "user_votings": user_votings,
-            "search_query": search_query,
-            "filter": filter_query,
-        },
-    )
+    return render(request, "booth/voting-list.html", {"user_votings": user_votings})
 
 
 class BoothView(TemplateView):

@@ -13,38 +13,75 @@
         <h1 class="page-title">My Votings</h1>
         <div class="">
             <!-- Search bar using query value search_query passed by the controller -->
-            <form method="get" action="/voting-list" class="search-bar row row-apart">
-                <input type="text" name="q" placeholder="Search votings" value="{{ search_query }}">
+            <div class="search-bar row row-apart">
+                <input id="search-bar" type="text" placeholder="Search votings">
                 <!-- filter dropdown -->
                 <div class="row">
                     <p class="voting-description">Filter by:</p>
-                    <select name="filter" onchange="this.form.submit()">
-                        <option value="" {% if filter == "" %}selected{% endif %}>All</option>
-                        <option value="open" {% if filter == "open" %}selected{% endif %}>Open</option>
-                        <option value="closed" {% if filter == "closed" %}selected{% endif %}>Closed</option>
+                    <select id="filter">
+                        <option value="all">All</option>
+                        <option value="open">Open</option>
+                        <option value"closed">Closed</option>
                     </select>
                 </div>
                 <!-- submit with carachter return -->
                 <input type="submit" style="display:none"/>
-            </form>
+            </div>
         </div>
         {% if user_votings|length == 0 %}
-            <h3 class="no-votings">No votings found</p>
+            <h3 class="no-votings">No votings found</h3>
         {% else %}
+            <section id="voting-list">
+            <h3 class="no-votings" style="display:none">No votings found</h3>
             {% for voting in user_votings %}
                 <a href="/vote/{{ voting.id }}"  class="card voting-card">
                     <div class="row row-apart">
                         <h3 class="voting-name">{{ voting.name }}</h3>
                         {% if voting.end_date %}
-                            <p class="voting-closed">Voting Closed</p>
+                            <p class="voting-status voting-closed">Voting Closed</p>
                         {% else %}
-                            <p class="voting-open">Voting Open</p>
+                            <p class="voting-status voting-open">Voting Open</p>
                         {% endif %}
                     </div>
                     <p class="voting-description">{{ voting.desc }}</p>
                 </a>
             {% endfor %}
+            </section>
         {% endif %}
     </section>
 
+{% endblock %}
+
+{% block extrascripts %}
+    <script>
+        function searchVotings(_) {
+            const searchTerm = document.getElementById('search-bar').value.toLowerCase();
+            const listItems = document.querySelectorAll('#voting-list a');
+            const filterTerm = document.getElementById('filter').value.toLowerCase();
+
+            listItems.forEach(function (item) {
+                const votingStatus = item.querySelector('.voting-status').textContent.toLowerCase();
+                const votingName = item.querySelector('.voting-name').textContent.toLowerCase();
+
+                if (filterTerm == 'all' && votingName.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                } else if (votingStatus.includes(filterTerm) && votingName.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            const noVotings = document.querySelector('.no-votings');
+            const visibleVotings = document.querySelectorAll('#voting-list a[style="display: flex;"]');
+            if (visibleVotings.length == 0) {
+                noVotings.style.display = 'block';
+            } else {
+                noVotings.style.display = 'none';
+            }
+        }
+
+        document.getElementById('search-bar').addEventListener('input', searchVotings);
+        document.getElementById('filter').addEventListener('change', searchVotings);
+    </script>
 {% endblock %}
