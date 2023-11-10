@@ -1,4 +1,25 @@
+#app-visualizer{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+table {
+    width: 200px;
+}
+
 .voting {
     margin-top: 20px;
     margin-left: 40px;
+}
+.bar-chart{
+    display: flex;
+    width: 80%;
+    justify-content: center;
+    align-items: center;
+}
+
+.bar{
+    width: 50%;
 }

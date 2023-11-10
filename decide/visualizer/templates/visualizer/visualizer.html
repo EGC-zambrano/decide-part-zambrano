@@ -9,40 +9,33 @@
 
 {% block content %}
     <div id="app-visualizer">
-        <!-- Navbar -->
-        <nav class="navbar navbar-dark bg-dark">
-            <div class="container-fluid">
-                <h1 class="navbar-brand">Decide</h1>
-            </div>
-        </nav>
-          
+        <h1>[[ voting.id ]] - [[ voting.name ]]</h1>
 
-        <div class="voting container">
-            <h1>[[ voting.id ]] - [[ voting.name ]]</h1>
-
-            <h2 v-if="!voting.start_date">Votación no comenzada</h2>
-            <h2 v-else-if="!voting.end_date">Votación en curso</h2>
-            <div v-else>
-                <h2 class="heading">Resultados:</h2>
-
-                <table class="table table-bordered table-striped">
-                    <thead>
-                        <tr>
-                            <th>Opción</th>
-                            <th>Puntuación</th>
-                            <th>Votos</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="opt in voting.postproc" :key="opt.number">
-                            <th>[[opt.option]]</th>
-                            <td>[[opt.postproc]]</td>
-                            <td class="text-muted">[[opt.votes]]</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
+        <h2 v-if="!voting.start_date">Votación no comenzada</h2>
+        <h2 v-else-if="!voting.end_date">Votación en curso</h2>
+        <div v-else>
+            <h2 class="heading">Resultados:</h2>
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Opción</th>
+                        <th>Puntuación</th>
+                        <th>Votos</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="opt in voting.postproc" :key="opt.number">
+                        <th>[[opt.option]]</th>
+                        <td>[[opt.postproc]]</td>
+                        <td class="text-muted">[[opt.votes]]</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="bar-chart">
+        <div class="bar">
+            <canvas id="bar-chart"></canvas>
         </div>
     </div>
 {% endblock %}
@@ -52,6 +45,9 @@
     <script src="https://unpkg.com/vue"></script>
     <script src="https://unpkg.com/babel-polyfill@latest/dist/polyfill.min.js"></script>
     <script src="https://unpkg.com/bootstrap@5.2.2/dist/js/bootstrap.js"></script>
+
+    <!-- Chartjs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4"></script>
 
     <script>
         var voting = {{voting|safe}};
@@ -64,6 +60,50 @@
                 }
             }
         }).mount('#app-visualizer')
+    </script>
+
+    <script>
+        let labels = voting.postproc.map((opt) => opt.option)
+        let postproc = voting.postproc.map((opt) => opt.postproc)
+        let votes = voting.postproc.map((opt) => opt.votes)
+
+        let ctx = document.getElementById("bar-chart").getContext("2d");
+        let chart = new Chart(ctx, {
+            type: "bar",
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                    label: "Puntuación",
+                    backgroundColor: 'rgba(84, 153, 199, 0.5)',
+                    borderColor: "#417690",
+                    data: postproc
+                    },
+                    {
+                    label: "Votos",
+                    backgroundColor: "rgba(236, 112, 99, 0.5)",
+                    borderColor: "#417690",
+                    data: votes
+                    }
+                ]
+            },
+            options: {
+                title: {
+                    text: voting.name,
+                    display: true
+                },
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true,
+                            stepSize: 1,
+                            max: 10
+                        }
+                    }]
+                }
+                
+            }
+        });
     </script>
 </body>
 {% endblock %}
