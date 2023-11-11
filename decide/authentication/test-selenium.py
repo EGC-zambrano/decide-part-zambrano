@@ -4,6 +4,8 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
+from allauth.socialaccount.models import SocialApp
+from django.contrib.sites.models import Site
 
 class LoginPageTestCase(StaticLiveServerTestCase):
     def setUp(self):
@@ -17,6 +19,15 @@ class LoginPageTestCase(StaticLiveServerTestCase):
         self.driver = webdriver.Chrome(options=options)
         self.user = User.objects.create_user(username="testuser", password="testpass")
         super().setUp()
+
+        app = SocialApp.objects.create(
+            provider='google',
+            name='Google',
+            client_id='test',
+            secret='test',
+        )
+        # Add the current site to the SocialApp's sites
+        app.sites.add(Site.objects.get_current())
 
     def tearDown(self):
         super().tearDown()
