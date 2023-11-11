@@ -1,4 +1,4 @@
-name: black-formatting
+name: Format code with Black
   
 on:
   push:
@@ -15,6 +15,16 @@ jobs:
     name: runner / black formatter
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: psf/black@stable
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.10
+      - name: Install dependencies
+        run: |
+          pip install black
+      - name: Run Black
+        uses: wearerequired/lint-action@v2
+        with:
+          black: true
+          auto_fix: true
 
