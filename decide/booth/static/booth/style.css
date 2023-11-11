@@ -3,7 +3,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    margin-top: 20px;
+    margin: 20px 0px;
     width: 100%;
 }
 .show-charts{
@@ -12,6 +12,7 @@
     align-items: center;
     display: flex;
     flex-direction: column;
+    gap: 30px;
 }
 
 table {
@@ -22,9 +23,9 @@ table {
     margin-top: 20px;
     margin-left: 40px;
 }
-.bar-chart{
+.chart{
     display: flex;
-    width: 80%;
+    width: 40%;
 }
 
 .bar{

@@ -15,8 +15,11 @@
         <h2 v-else-if="!voting.end_date">Votación en curso</h2>
         <div v-else class="show-charts"> 
             <h2 class="heading">Resultados:</h2>
-            <div class="bar-chart">
-                    <canvas id="bar-chart"></canvas>
+            <div class="chart">
+                <canvas id="bar-chart"></canvas>
+            </div>
+            <div class="chart">
+                <canvas id="pie-chart"></canvas>
             </div>
         </div>
     </div>
@@ -50,7 +53,7 @@
         let votes = voting.postproc.map((opt) => opt.votes)
 
         let ctx = document.getElementById("bar-chart").getContext("2d");
-        let chart = new Chart(ctx, {
+        let bar_chart = new Chart(ctx, {
             type: "bar",
             data: {
                 labels: labels,
@@ -86,6 +89,37 @@
                 
             }
         });
+        function getRandomColor() {
+            const r = Math.floor(Math.random() * 256);
+            const g = Math.floor(Math.random() * 256);
+            const b = Math.floor(Math.random() * 256);
+            const alpha = 0.5;  // You can adjust the alpha value if needed
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
+        let backgroundColors = Array.from({ length: votes.length }, () => getRandomColor());
+        ctx = document.getElementById("pie-chart").getContext("2d");
+        let pie_chart = new Chart(ctx, {
+            type: "pie",  
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: "Votos",
+                        backgroundColor: backgroundColors,
+                        borderColor: "#417690",
+                        data: votes
+                    }
+                ]
+            },
+            options: {
+                title: {
+                    text: voting.name,
+                    display: true
+                }
+            }
+        });
+
     </script>
 </body>
 {% endblock %}
