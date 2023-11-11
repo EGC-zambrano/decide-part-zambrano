@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -30,7 +33,7 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
-SITE_ID = 2
+SITE_ID = int(os.getenv('DJANGO_SITE_ID', '2'))
 
 INSTALLED_APPS = [
     'django.contrib.admin',
