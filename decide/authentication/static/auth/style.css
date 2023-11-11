@@ -8,6 +8,13 @@ header {
     background-color: rgba(0, 0, 0, 0);
 }
 
+.header h1 a {
+    color: var(--neutral-background);
+    padding: 0 20px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
 .card {
     height: fit-content;
     width: fit-content;
@@ -80,6 +87,7 @@ header {
     border: 1px solid var(--red-dark-color);
     border-radius: 0.25em;
     padding: 0.5em;
+    justify-content: center;
 }
 
 .remember-me {
