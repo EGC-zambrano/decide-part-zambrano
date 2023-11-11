@@ -1,30 +1,27 @@
 name: Format code with Black
   
 on:
-  push:
-    branches:
-      - develop
-      - master
   pull_request:
     branches:
       - develop
-      - main
+      - master
 
 jobs:
-  lint:
+  format:
     name: runner / black formatter
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v3
+      - name: Check files using Black
+        id: action_black
+        uses: rickstaa/action-black@v1
         with:
-          python-version: '3.10'
-      - name: Install dependencies
-        run: |
-          pip install black
-      - name: Run Black
-        uses: wearerequired/lint-action@v2
+          black_args: "."
+      - name: Submit changes with a commit
+        if: steps.action_black.outputs.is_formatted == 'true'
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          black: true
-          auto_fix: true
+          commit_message: "refactor: Format code with Black"
 
