@@ -33,7 +33,7 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
-SITE_ID = int(os.getenv('DJANGO_SITE_ID', '2'))
+SITE_ID = int(os.getenv("DJANGO_SITE_ID", "2"))
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -48,28 +48,27 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "rest_framework_swagger",
     "gateway",
-    'django.contrib.sites',
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.google'
+    "django.contrib.sites",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
 ]
 
 SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        'SCOPE': [
-            'profile',
-            'email',
+    "google": {
+        "SCOPE": [
+            "profile",
+            "email",
         ],
-        'AUTH_PARAMS': {
-            'access_type': 'online',
-        }
+        "AUTH_PARAMS": {
+            "access_type": "online",
+        },
     }
 }
 
 
-
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = "/"
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -80,9 +79,9 @@ REST_FRAMEWORK = {
 }
 
 AUTHENTICATION_BACKENDS = [
-    'base.backends.AuthBackend',
-    'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
+    "base.backends.AuthBackend",
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
 MODULES = [
@@ -100,14 +99,14 @@ MODULES = [
 BASEURL = "http://localhost:8000"
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'allauth.account.middleware.AccountMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = "decide.urls"
@@ -209,5 +208,3 @@ if os.path.exists("config.jsonnet"):
 
 
 INSTALLED_APPS = INSTALLED_APPS + MODULES
-
-

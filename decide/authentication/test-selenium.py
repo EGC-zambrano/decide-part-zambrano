@@ -64,6 +64,7 @@ class LoginPageTestCase(StaticLiveServerTestCase):
             "Credenciales incorrectas",
         )
 
+
 class LoginGoogleTestCase(StaticLiveServerTestCase):
     def setUp(self):
         self.base = BaseTestCase()
@@ -100,6 +101,7 @@ class LoginGoogleTestCase(StaticLiveServerTestCase):
             self.driver.current_url,
             f"{self.live_server_url}/authentication/accounts/google/login/",
         )
+
 
 class RegisterViewTestCase(StaticLiveServerTestCase):
     def setUp(self):
