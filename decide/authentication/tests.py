@@ -7,6 +7,9 @@ from rest_framework.test import APIClient, APITestCase
 
 from .forms import LoginForm
 
+from allauth.socialaccount.models import SocialApp
+from django.contrib.sites.models import Site
+
 
 class AuthTestCase(APITestCase):
     def setUp(self):
@@ -131,6 +134,14 @@ class LoginViewTestCase(TestCase):
         self.client = Client()
         self.url = reverse("signin")
         self.user = User.objects.create_user(username="testuser", password="testpass")
+        app = SocialApp.objects.create(
+            provider='google',
+            name='Google',
+            client_id='test',
+            secret='test',
+        )
+        # Add the current site to the SocialApp's sites
+        app.sites.add(Site.objects.get_current())
 
     def test_get(self):
         response = self.client.get(self.url)
