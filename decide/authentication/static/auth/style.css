@@ -107,3 +107,33 @@ header {
     font-family: var(--fuente2);
     font-size: 0.8em;
 }
+
+.login-google-button {
+    text-align: center;
+}
+
+.login-google-button a {
+    display: inline-block;
+    background-color: #fff; 
+    color: #888; 
+    text-decoration: none;
+    border: 1px solid #ccc; 
+    border-radius: 4px;
+    padding: 10px 20px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+}
+
+.login-google-button a:hover {
+    background-color: #f7f7f7e5; 
+}
+
+.login-google-button svg {
+    width: 24px; 
+    height: 24px;
+    margin-right: 10px; 
+    fill: #888; 
+}

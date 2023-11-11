@@ -4,6 +4,9 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
+from allauth.socialaccount.models import SocialApp
+from django.contrib.sites.models import Site
+
 
 class LoginPageTestCase(StaticLiveServerTestCase):
     def setUp(self):
@@ -17,6 +20,15 @@ class LoginPageTestCase(StaticLiveServerTestCase):
         self.driver = webdriver.Chrome(options=options)
         self.user = User.objects.create_user(username="testuser", password="testpass")
         super().setUp()
+
+        app = SocialApp.objects.create(
+            provider="google",
+            name="Google",
+            client_id="test",
+            secret="test",
+        )
+        # Add the current site to the SocialApp's sites
+        app.sites.add(Site.objects.get_current())
 
     def tearDown(self):
         super().tearDown()
@@ -52,6 +64,42 @@ class LoginPageTestCase(StaticLiveServerTestCase):
             "Credenciales incorrectas",
         )
 
+class LoginGoogleTestCase(StaticLiveServerTestCase):
+    def setUp(self):
+        self.base = BaseTestCase()
+        self.base.setUp()
+
+        # Opciones de Chrome
+        options = webdriver.ChromeOptions()
+        options.headless = True
+        options.add_argument("--no-sandbox")
+        self.driver = webdriver.Chrome(options=options)
+        self.user = User.objects.create_user(username="testuser", password="testpass")
+        super().setUp()
+
+        app = SocialApp.objects.create(
+            provider="google",
+            name="Google",
+            client_id="test",
+            secret="test",
+        )
+        # Add the current site to the SocialApp's sites
+        app.sites.add(Site.objects.get_current())
+
+    def tearDown(self):
+        super().tearDown()
+        self.driver.quit()
+
+        self.base.tearDown()
+
+    def test_sucessful_login(self):
+        self.driver.get(f"{self.live_server_url}/signin")
+
+        self.driver.find_element(By.CSS_SELECTOR, ".google-button").click()
+        self.assertEqual(
+            self.driver.current_url,
+            f"{self.live_server_url}/authentication/accounts/google/login/",
+        )
 
 class RegisterViewTestCase(StaticLiveServerTestCase):
     def setUp(self):
@@ -65,6 +113,15 @@ class RegisterViewTestCase(StaticLiveServerTestCase):
         self.driver = webdriver.Chrome(options=options)
         self.user = User.objects.create_user(username="testuser", password="testpass")
         super().setUp()
+
+        app = SocialApp.objects.create(
+            provider="google",
+            name="Google",
+            client_id="test",
+            secret="test",
+        )
+        # Add the current site to the SocialApp's sites
+        app.sites.add(Site.objects.get_current())
 
     def tearDown(self):
         super().tearDown()
