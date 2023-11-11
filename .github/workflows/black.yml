@@ -1,0 +1,23 @@
+name: black-action
+  
+on:
+  push:
+    branches:
+      - develop
+      - master
+  pull_request:
+    branches:
+      - develop
+      - main
+
+jobs:
+  linter_name:
+    name: runner / black formatter
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: enpaul/black-action@v1
+        with:
+          commit-message: "refactor: run black formatter"
+          black_args: "."
+
