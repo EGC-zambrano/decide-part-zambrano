@@ -112,6 +112,26 @@ class RegisterViewTestCase(StaticLiveServerTestCase):
 
         self.assertTrue(self.driver.title == "Decide | Registration")
 
+    def test_invalid_password(self):
+        self.driver.get(f"{self.live_server_url}/register")
+
+        self.assertTrue(len(self.driver.find_elements(By.ID, "id_username")) == 1)
+        self.assertTrue(len(self.driver.find_elements(By.ID, "id_first_name")) == 1)
+        self.assertTrue(len(self.driver.find_elements(By.ID, "id_last_name")) == 1)
+        self.assertTrue(len(self.driver.find_elements(By.ID, "id_email")) == 1)
+        self.assertTrue(len(self.driver.find_elements(By.ID, "id_password1")) == 1)
+        self.assertTrue(len(self.driver.find_elements(By.ID, "id_password2")) == 1)
+
+        self.driver.find_element(By.ID, "id_username").send_keys("testuser")
+        self.driver.find_element(By.ID, "id_first_name").send_keys("Jonh")
+        self.driver.find_element(By.ID, "id_last_name").send_keys("Doe")
+        self.driver.find_element(By.ID, "id_email").send_keys("john@doe.com")
+        self.driver.find_element(By.ID, "id_password1").send_keys("2short")
+        self.driver.find_element(By.ID, "id_password2").send_keys("2short")
+        self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
+
+        self.assertTrue(self.driver.title == "Decide | Registration")
+
     def test_user_already_exists(self):
         self.driver.get(f"{self.live_server_url}/register")
 
