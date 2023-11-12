@@ -44,20 +44,19 @@ class VotingAdmin(admin.ModelAdmin):
     list_filter = (StartedFilter,)
     search_fields = ("name",)
 
-    actions = [start, stop, "reopen_selected", tally]
+    actions = [start, stop, tally]
 
     def get_actions(self, request):
         # Customize the list of available actions based on the current status
         actions = super().get_actions(request)
-        for voting in Voting.objects.all():
-            # Reopen option is available if the status is "Stopped"
-            if voting.end_date != None:
-                actions["reopen_selected"] = (
-                    VotingAdmin.reopen_selected,
-                    "reopen_selected",
-                    "Reopen selected votings",
-                )
-            break
+        # Reopen option is available if the status is "Stopped"
+        if Voting.objects.filter(end_date__isnull=False):
+            actions["reopen_selected"] = (
+                VotingAdmin.reopen_selected,
+                "reopen_selected",
+                "Reopen selected votings",
+            )
+
         return actions
 
     @staticmethod
