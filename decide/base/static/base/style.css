@@ -124,3 +124,28 @@ section {
 .btn-primary:hover {
     background-color: var(--primary-dark-color);
 }
+
+.authenticated_icon {
+    text-align: center;
+    margin: 20px;
+}
+
+.authenticated_icon a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-decoration: none;
+    background-color: #be8c76; 
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.authenticated_icon a .material-icons {
+    margin-right: 20px; 
+}
+
+.authenticated_icon a p {
+    margin: 0;
+    color: #ffffff; 
+    font-weight: bold;
+}

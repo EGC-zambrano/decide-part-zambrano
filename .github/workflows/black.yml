@@ -1,0 +1,27 @@
+name: Format code with Black
+  
+on:
+  pull_request:
+    branches:
+      - develop
+      - master
+
+jobs:
+  format:
+    name: runner / black formatter
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+      - name: Check files using Black
+        id: action_black
+        uses: rickstaa/action-black@v1
+        with:
+          black_args: "."
+      - name: Submit changes with a commit
+        if: steps.action_black.outputs.is_formatted == 'true'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "refactor: Format code with Black"
+

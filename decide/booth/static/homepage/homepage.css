@@ -18,6 +18,13 @@ body {
     background-color: rgba(0, 0, 0, 0);
 }
 
+.header h1 a {
+    color: var(--neutral-background);
+    padding: 0 20px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
 .content {
     margin-top: 0px;
 }
