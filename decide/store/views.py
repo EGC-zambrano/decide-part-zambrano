@@ -48,7 +48,6 @@ class StoreView(generics.ListAPIView):
         uid = request.data.get('voter')
         vote = request.data.get('vote')
 
-        print("Vote: ", vote)
         if voting[0]["question"]["question_type"] == 'M' and not isinstance(vote, list):
                 return Response({}, status=status.HTTP_400_BAD_REQUEST)
 

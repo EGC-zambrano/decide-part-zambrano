@@ -70,13 +70,11 @@ class Voting(models.Model):
         votes_format = []
         vote_list = []
         for vote in votes:
-            for info in vote:
-                if info == 'a':
-                    votes_format.append(vote[info])
-                if info == 'b':
-                    votes_format.append(vote[info])
-            vote_list.append(votes_format)
-            votes_format = []
+            for option in vote['options']:
+                votes_format.append(option['a'])
+                votes_format.append(option['b'])
+                vote_list.append(votes_format)
+                votes_format = []
         return vote_list
 
     def tally_votes(self, token=''):
