@@ -13,6 +13,7 @@ class MixnetViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows mixnets to be viewed or edited.
     """
+
     queryset = Mixnet.objects.all()
     serializer_class = MixnetSerializer
 
@@ -35,9 +36,9 @@ class MixnetViewSet(viewsets.ModelViewSet):
         dbauths = []
         for auth in auths:
             isme = auth["url"] == settings.BASEURL
-            a, _ = Auth.objects.get_or_create(name=auth["name"],
-                                              url=auth["url"],
-                                              me=isme)
+            a, _ = Auth.objects.get_or_create(
+                name=auth["name"], url=auth["url"], me=isme
+            )
             dbauths.append(a)
 
         mn = Mixnet(voting_id=voting, auth_position=position)
@@ -48,7 +49,7 @@ class MixnetViewSet(viewsets.ModelViewSet):
 
         mn.gen_key(p, g)
 
-        data = { "key": { "p": mn.key.p, "g": mn.key.g } }
+        data = {"key": {"p": mn.key.p, "g": mn.key.g}}
         # chained call to the next auth to gen the key
         resp = mn.chain_call("/", data)
         if resp:
@@ -61,17 +62,16 @@ class MixnetViewSet(viewsets.ModelViewSet):
         mn.pubkey = pubkey
         mn.save()
 
-        return  Response(KeySerializer(pubkey, many=False).data)
+        return Response(KeySerializer(pubkey, many=False).data)
 
 
 class Shuffle(APIView):
-
     def post(self, request, voting_id):
         """
-         * voting_id: id
-         * msgs: [ [int, int] ]
-         * pk: { "p": int, "g": int, "y": int } / nullable
-         * position: int / nullable
+        * voting_id: id
+        * msgs: [ [int, int] ]
+        * pk: { "p": int, "g": int, "y": int } / nullable
+        * position: int / nullable
         """
 
         position = request.data.get("position", 0)
@@ -88,24 +88,23 @@ class Shuffle(APIView):
 
         data = {
             "msgs": msgs,
-            "pk": { "p": p, "g": g, "y": y },
+            "pk": {"p": p, "g": g, "y": y},
         }
         # chained call to the next auth to gen the key
         resp = mn.chain_call("/shuffle/{}/".format(voting_id), data)
         if resp:
             msgs = resp
 
-        return  Response(msgs)
+        return Response(msgs)
 
 
 class Decrypt(APIView):
-
     def post(self, request, voting_id):
         """
-         * voting_id: id
-         * msgs: [ [int, int] ]
-         * pk: { "p": int, "g": int, "y": int } / nullable
-         * position: int / nullable
+        * voting_id: id
+        * msgs: [ [int, int] ]
+        * pk: { "p": int, "g": int, "y": int } / nullable
+        * position: int / nullable
         """
 
         position = request.data.get("position", 0)
@@ -128,11 +127,11 @@ class Decrypt(APIView):
 
         data = {
             "msgs": msgs,
-            "pk": { "p": p, "g": g, "y": y },
+            "pk": {"p": p, "g": g, "y": y},
         }
         # chained call to the next auth to gen the key
         resp = mn.chain_call("/decrypt/{}/".format(voting_id), data)
         if resp:
             msgs = resp
 
-        return  Response(msgs)
+        return Response(msgs)

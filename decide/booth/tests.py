@@ -1,16 +1,14 @@
-from base.tests import BaseTestCase
-from django.test import TestCase
-from django.urls import reverse
-from django.contrib.auth.models import User
-from census.models import Census
-from voting.models import Voting
-from voting.models import Question
-from base.models import Auth
-from django.conf import settings
-from django.test import Client
-from django.utils import timezone
 import datetime
 
+from base.models import Auth
+from base.tests import BaseTestCase
+from census.models import Census
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.test import Client, TestCase
+from django.urls import reverse
+from django.utils import timezone
+from voting.models import Question, Voting
 
 # Create your tests here.
 
