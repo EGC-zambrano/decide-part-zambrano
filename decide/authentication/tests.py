@@ -5,7 +5,10 @@ from django.urls import reverse
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient, APITestCase
 
-from .forms import LoginForm
+from .forms import LoginForm, RegisterForm
+
+from allauth.socialaccount.models import SocialApp
+from django.contrib.sites.models import Site
 
 
 class AuthTestCase(APITestCase):
@@ -84,53 +87,20 @@ class AuthTestCase(APITestCase):
 
         self.assertEqual(Token.objects.filter(user__username="voter1").count(), 0)
 
-    def test_register_bad_permissions(self):
-        data = {"username": "voter1", "password": "123"}
-        response = self.client.post("/authentication/login/", data, format="json")
-        self.assertEqual(response.status_code, 200)
-        token = response.json()
-
-        token.update({"username": "user1"})
-        response = self.client.post("/authentication/register/", token, format="json")
-        self.assertEqual(response.status_code, 401)
-
-    def test_register_bad_request(self):
-        data = {"username": "admin", "password": "admin"}
-        response = self.client.post("/authentication/login/", data, format="json")
-        self.assertEqual(response.status_code, 200)
-        token = response.json()
-
-        token.update({"username": "user1"})
-        response = self.client.post("/authentication/register/", token, format="json")
-        self.assertEqual(response.status_code, 400)
-
-    def test_register_user_already_exist(self):
-        data = {"username": "admin", "password": "admin"}
-        response = self.client.post("/authentication/login/", data, format="json")
-        self.assertEqual(response.status_code, 200)
-        token = response.json()
-
-        token.update(data)
-        response = self.client.post("/authentication/register/", token, format="json")
-        self.assertEqual(response.status_code, 400)
-
-    def test_register(self):
-        data = {"username": "admin", "password": "admin"}
-        response = self.client.post("/authentication/login/", data, format="json")
-        self.assertEqual(response.status_code, 200)
-        token = response.json()
-
-        token.update({"username": "user1", "password": "pwd1"})
-        response = self.client.post("/authentication/register/", token, format="json")
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(sorted(list(response.json().keys())), ["token", "user_pk"])
-
 
 class LoginViewTestCase(TestCase):
     def setUp(self):
         self.client = Client()
         self.url = reverse("signin")
         self.user = User.objects.create_user(username="testuser", password="testpass")
+        app = SocialApp.objects.create(
+            provider='google',
+            name='Google',
+            client_id='test',
+            secret='test',
+        )
+        # Add the current site to the SocialApp's sites
+        app.sites.add(Site.objects.get_current())
 
     def test_get(self):
         response = self.client.get(self.url)
@@ -159,3 +129,73 @@ class LoginViewTestCase(TestCase):
         self.assertTemplateUsed(response, "authentication/login.html")
         self.assertIsInstance(response.context["form"], LoginForm)
         self.assertEqual(response.context["msg"], "Error en el formulario")
+
+
+class RegisterViewTestCase(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.url = reverse("register")
+        app = SocialApp.objects.create(
+            provider='google',
+            name='Google',
+            client_id='test',
+            secret='test',
+        )
+        # Add the current site to the SocialApp's sites
+        app.sites.add(Site.objects.get_current())
+
+    def test_get(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "authentication/register.html")
+        self.assertIsInstance(response.context["form"], RegisterForm)
+        self.assertIsNone(response.context["msg"])
+
+    def test_post_valid_form(self):
+        data = {
+            "username": "new_user",
+            "first_name": "John",
+            "last_name": "Doe",
+            "email": "john.doe@example.com",
+            "password1": "strong_password123",
+            "password2": "strong_password123",
+        }
+        response = self.client.post(self.url, data, follow=True)
+        self.assertTrue(User.objects.filter(username=data["username"]).exists())
+        self.assertRedirects(response, "/signin/")
+
+    def test_post_invalid_form(self):
+        data = {
+            "username": "bad_user",
+            "first_name": "",
+            "last_name": "",
+            "email": "invalid_email",
+            "password1": "password",
+            "password2": "password_mismatch",
+        }
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "authentication/register.html")
+        self.assertIsInstance(response.context["form"], RegisterForm)
+        self.assertIn("form", response.context)
+        self.assertTrue(response.context["form"].errors)
+
+    def test_post_user_already_exists(self):
+        existing_user = User.objects.create_user(
+            username="existing_user",
+            email="existing_user@example.com",
+            password="existing_password",
+        )
+        data = {
+            "username": "existing_user",
+            "first_name": "John",
+            "last_name": "Doe",
+            "email": "john.doe@example.com",
+            "password1": "strong_password123",
+            "password2": "strong_password123",
+        }
+        response = self.client.post(self.url, data, follow=True)
+        self.assertIn(
+            "A user with that username already exists.",
+            response.context["form"].errors["username"],
+        )
