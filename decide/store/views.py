@@ -10,6 +10,7 @@ from .serializers import VoteSerializer
 from base import mods
 from base.perms import UserIsStaff
 
+from django.db import transaction
 
 class StoreView(generics.ListAPIView):
     queryset = Vote.objects.all()
@@ -71,32 +72,35 @@ class StoreView(generics.ListAPIView):
             # print("por aqui 65")
             return Response({}, status=status.HTTP_401_UNAUTHORIZED)
 
-        if voting[0]["question"]["question_type"] == 'S':
-            v, _ = Vote.objects.get_or_create(voting_id=vid, voter_id=uid)
-            v.save()
+        with transaction.atomic():
+            if voting[0]["question"]["question_type"] == 'S':
+                v, _ = Vote.objects.get_or_create(voting_id=vid, voter_id=uid)
+                # Delete previous options
+                VoteOption.objects.filter(vote=v).delete()
 
-            a = vote.get("a")
-            b = vote.get("b")
-
-            vote_option = VoteOption(vote=v)
-            vote_option.a = a
-            vote_option.b = b
-
-            vote_option.save()
-
-        elif voting[0]["question"]["question_type"] == 'M':
-            v, _ = Vote.objects.get_or_create(voting_id=vid, voter_id=uid)
-            v.save()
-            # Delete previous options
-            VoteOption.objects.filter(vote=v).delete()
-            for option in vote:
-                a = option.get("a")
-                b = option.get("b")
+                a = vote.get("a")
+                b = vote.get("b")
 
                 vote_option = VoteOption(vote=v)
                 vote_option.a = a
                 vote_option.b = b
 
                 vote_option.save()
+                v.save()
+
+            elif voting[0]["question"]["question_type"] == 'M':
+                v, _ = Vote.objects.get_or_create(voting_id=vid, voter_id=uid)
+                # Delete previous options
+                VoteOption.objects.filter(vote=v).delete()
+                for option in vote:
+                    a = option.get("a")
+                    b = option.get("b")
+
+                    vote_option = VoteOption(vote=v)
+                    vote_option.a = a
+                    vote_option.b = b
+
+                    vote_option.save()
+                v.save()
 
         return  Response({})

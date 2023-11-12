@@ -78,7 +78,6 @@ class Shuffle(APIView):
         mn = get_object_or_404(Mixnet, voting_id=voting_id, auth_position=position)
 
         msgs = request.data.get("msgs", [])
-        print(msgs)
         pk = request.data.get("pk", None)
         if pk:
             p, g, y = pk["p"], pk["g"], pk["y"]
