@@ -18,7 +18,11 @@
             <!-- show profile icon if user is logged in -->
             {% if user.is_authenticated %}
                 <div class="authenticated_icon">
-                    <a href="/profile" class="material-icons">account_circle <p> {{user.username}}</p> </a>
+                    <a href="/logout">Cerrar Sesión</a>
+                    <a class="profile">
+                        <span href="/profile" class="material-icons">account_circle</span>
+                        <span>{{ user.username }}</span>
+                    </a>
                 </div>
             {% else %}
                 <div>
