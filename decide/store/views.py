@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework import generics
 
-from .models import Vote
+from .models import Vote, VoteOption
 from .serializers import VoteSerializer
 from base import mods
 from base.perms import UserIsStaff
@@ -26,7 +26,7 @@ class StoreView(generics.ListAPIView):
         """
          * voting: id
          * voter: id
-         * vote: { "a": int, "b": int }
+         * vote: { "a": int, "b": int } or [ { "a": int, "b": int }, ...}]
         """
 
         vid = request.data.get('voting')
@@ -48,6 +48,10 @@ class StoreView(generics.ListAPIView):
         uid = request.data.get('voter')
         vote = request.data.get('vote')
 
+        print("Vote: ", vote)
+        if voting[0]["question"]["question_type"] == 'M' and not isinstance(vote, list):
+                return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
         if not vid or not uid or not vote:
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -68,15 +72,32 @@ class StoreView(generics.ListAPIView):
             # print("por aqui 65")
             return Response({}, status=status.HTTP_401_UNAUTHORIZED)
 
-        a = vote.get("a")
-        b = vote.get("b")
+        if voting[0]["question"]["question_type"] == 'S':
+            v, _ = Vote.objects.get_or_create(voting_id=vid, voter_id=uid)
+            v.save()
 
-        defs = { "a": a, "b": b }
-        v, _ = Vote.objects.get_or_create(voting_id=vid, voter_id=uid,
-                                          defaults=defs)
-        v.a = a
-        v.b = b
+            a = vote.get("a")
+            b = vote.get("b")
 
-        v.save()
+            vote_option = VoteOption(vote=v)
+            vote_option.a = a
+            vote_option.b = b
+
+            vote_option.save()
+
+        elif voting[0]["question"]["question_type"] == 'M':
+            v, _ = Vote.objects.get_or_create(voting_id=vid, voter_id=uid)
+            v.save()
+            # Delete previous options
+            VoteOption.objects.filter(vote=v).delete()
+            for option in vote:
+                a = option.get("a")
+                b = option.get("b")
+
+                vote_option = VoteOption(vote=v)
+                vote_option.a = a
+                vote_option.b = b
+
+                vote_option.save()
 
         return  Response({})

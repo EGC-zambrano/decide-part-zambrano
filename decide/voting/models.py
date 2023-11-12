@@ -8,6 +8,12 @@ from base.models import Auth, Key
 
 
 class Question(models.Model):
+    QUESTION_TYPES = (
+        ('S', 'Single'),
+        ('M', 'Multiple'),
+    )
+        
+    question_type = models.CharField(max_length=1, choices=QUESTION_TYPES, default='S')
     desc = models.TextField()
 
     def __str__(self):
