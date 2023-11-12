@@ -1,16 +1,18 @@
+import datetime
+import time
+
+from allauth.socialaccount.models import SocialApp
+from base.models import Auth
 from base.tests import BaseTestCase
+from census.models import Census
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.contrib.sites.models import Site
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from django.utils import timezone
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-import time
-from voting.models import Voting
-from census.models import Census
-from voting.models import Question
-from base.models import Auth
-from django.contrib.auth.models import User
-from django.conf import settings
-from django.utils import timezone
-import datetime
+from voting.models import Question, Voting
 
 
 class HomepageTestCase(StaticLiveServerTestCase):
@@ -79,6 +81,15 @@ class VotingListViewTestCase(StaticLiveServerTestCase):
         )[0]
         voting2.auths.add(auth)
         Census.objects.create(voter_id=user.id, voting_id=voting2.id)
+
+        app = SocialApp.objects.create(
+            provider="google",
+            name="Google",
+            client_id="test",
+            secret="test",
+        )
+        # Add the current site to the SocialApp's sites
+        app.sites.add(Site.objects.get_current())
 
         # Opciones de Chrome
         options = webdriver.ChromeOptions()

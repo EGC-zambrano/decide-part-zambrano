@@ -1,10 +1,12 @@
 import datetime
 
+from allauth.socialaccount.models import SocialApp
 from base.models import Auth
 from base.tests import BaseTestCase
 from census.models import Census
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.contrib.sites.models import Site
 from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -49,6 +51,15 @@ class BoothVotingListTestCase(TestCase):
             url=settings.BASEURL, defaults={"me": True, "name": "test auth"}
         )[0]
         voting.auths.add(auth)
+
+        app = SocialApp.objects.create(
+            provider="google",
+            name="Google",
+            client_id="test",
+            secret="test",
+        )
+        # Add the current site to the SocialApp's sites
+        app.sites.add(Site.objects.get_current())
 
     def tearDown(self):
         self.client = None
