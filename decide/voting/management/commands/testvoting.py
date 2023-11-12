@@ -14,9 +14,8 @@ from mixnet.mixcrypt import ElGamal
 from voting.models import Voting, Question, QuestionOption
 
 
-
 class Command(BaseCommand):
-    help = 'Test the full voting process with one auth (self)'
+    help = "Test the full voting process with one auth (self)"
 
     def encrypt_msg(self, msg, v, bits=settings.KEYBITS):
         pk = v.pub_key
@@ -26,16 +25,17 @@ class Command(BaseCommand):
         return k.encrypt(msg)
 
     def create_voting(self):
-        q = Question(desc='test question')
+        q = Question(desc="test question")
         q.save()
         for i in range(5):
-            opt = QuestionOption(question=q, option='option {}'.format(i+1))
+            opt = QuestionOption(question=q, option="option {}".format(i + 1))
             opt.save()
-        v = Voting(name='test voting', question=q)
+        v = Voting(name="test voting", question=q)
         v.save()
 
-        a, _ = Auth.objects.get_or_create(url=settings.BASEURL,
-                                          defaults={'me': True, 'name': 'test auth'})
+        a, _ = Auth.objects.get_or_create(
+            url=settings.BASEURL, defaults={"me": True, "name": "test auth"}
+        )
         a.save()
         v.auths.add(a)
 
@@ -43,7 +43,7 @@ class Command(BaseCommand):
 
     def create_voters(self, v):
         for i in range(100):
-            u, _ = User.objects.get_or_create(username='testvoter{}'.format(i))
+            u, _ = User.objects.get_or_create(username="testvoter{}".format(i))
             u.is_active = True
             u.save()
             c = Census(voter_id=u.id, voting_id=v.id)
@@ -58,13 +58,13 @@ class Command(BaseCommand):
             for i in range(random.randint(0, 5)):
                 a, b = self.encrypt_msg(opt.number, v)
                 data = {
-                    'voting': v.id,
-                    'voter': voter.voter_id,
-                    'vote': { 'a': a, 'b': b },
+                    "voting": v.id,
+                    "voter": voter.voter_id,
+                    "vote": {"a": a, "b": b},
                 }
                 clear[opt.number] += 1
                 voter = voters.pop()
-                mods.post('store', json=data)
+                mods.post("store", json=data)
         return clear
 
     def handle(self, *args, **options):
@@ -88,9 +88,17 @@ class Command(BaseCommand):
 
         print("Result:")
         for q in v.question.options.all():
-            print(" * {}: {} tally votes / {} emitted votes".format(q, tally.get(q.number, 0), clear.get(q.number, 0)))
+            print(
+                " * {}: {} tally votes / {} emitted votes".format(
+                    q, tally.get(q.number, 0), clear.get(q.number, 0)
+                )
+            )
 
         print("")
         print("Postproc Result:")
         for q in v.postproc:
-            print(" * {}: {} postproc / {} votes".format(q["option"], q["postproc"], q["votes"]))
+            print(
+                " * {}: {} postproc / {} votes".format(
+                    q["option"], q["postproc"], q["votes"]
+                )
+            )

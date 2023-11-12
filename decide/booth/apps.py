@@ -2,5 +2,5 @@ from django.apps import AppConfig
 
 
 class BoothConfig(AppConfig):
-    default_auto_field = 'django.db.models.AutoField'
-    name = 'booth'
+    default_auto_field = "django.db.models.AutoField"
+    name = "booth"

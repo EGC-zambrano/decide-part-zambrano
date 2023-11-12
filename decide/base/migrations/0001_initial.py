@@ -4,30 +4,44 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Auth',
+            name="Auth",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=200)),
-                ('url', models.URLField()),
-                ('me', models.BooleanField(default=False)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=200)),
+                ("url", models.URLField()),
+                ("me", models.BooleanField(default=False)),
             ],
         ),
         migrations.CreateModel(
-            name='Key',
+            name="Key",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('p', models.IntegerField()),
-                ('g', models.IntegerField()),
-                ('y', models.IntegerField()),
-                ('x', models.IntegerField(blank=True, null=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("p", models.IntegerField()),
+                ("g", models.IntegerField()),
+                ("y", models.IntegerField()),
+                ("x", models.IntegerField(blank=True, null=True)),
             ],
         ),
     ]
