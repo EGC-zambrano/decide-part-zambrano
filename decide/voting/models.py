@@ -10,6 +10,13 @@ from base.models import Auth, Key
 class Question(models.Model):
     desc = models.TextField()
 
+    def save(self):
+        super().save()
+        enBlanco = QuestionOption(question=self, number =self.options.count() + 1, option="En blanco")
+        enBlanco.save()
+        self.options.add(enBlanco)
+        return super().save()
+    
     def __str__(self):
         return self.desc
 
@@ -23,7 +30,7 @@ class QuestionOption(models.Model):
 
     def save(self):
         if not self.number:
-            self.number = self.question.options.count() + 2
+            self.number = self.question.options.count() + 1
         return super().save()
 
     def __str__(self):
