@@ -14,7 +14,13 @@
     flex-direction: column;
     gap: 30px;
 }
-
+.charts {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    width: 100%;
+}
 table {
     width: 200px;
 }

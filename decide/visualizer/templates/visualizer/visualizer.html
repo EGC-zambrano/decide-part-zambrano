@@ -15,11 +15,13 @@
         <h2 v-else-if="!voting.end_date">Votación en curso</h2>
         <div v-else class="show-charts"> 
             <h2 class="heading">Resultados:</h2>
-            <div class="chart">
-                <canvas id="bar-chart"></canvas>
-            </div>
-            <div class="chart">
-                <canvas id="pie-chart"></canvas>
+            <div class="charts">
+                <div class="chart">
+                    <canvas id="bar-chart"></canvas>
+                </div>
+                <div class="chart">
+                    <canvas id="pie-chart"></canvas>
+                </div>
             </div>
         </div>
     </div>
@@ -93,7 +95,7 @@
             const r = Math.floor(Math.random() * 256);
             const g = Math.floor(Math.random() * 256);
             const b = Math.floor(Math.random() * 256);
-            const alpha = 0.5;  // You can adjust the alpha value if needed
+            const alpha = 0.5;  
             return `rgba(${r}, ${g}, ${b}, ${alpha})`;
         }
 
