@@ -16,7 +16,7 @@ from rest_framework.views import APIView
 from .forms import LoginForm, RegisterForm
 from .serializers import UserSerializer
 
-from django.contrib.auth.models import User
+from django.contrib.auth import logout
 from django.shortcuts import render, redirect
 
 
@@ -59,15 +59,15 @@ class GetUserView(APIView):
 
 
 class LogoutView(APIView):
-    def post(self, request):
-        key = request.data.get("token", "")
-        try:
-            tk = Token.objects.get(key=key)
-            tk.delete()
-        except ObjectDoesNotExist:
-            pass
-
-        return Response({})
+    def get(self, request):
+        if request.user.is_authenticated:
+            try:
+                token = Token.objects.get(user=request.user)
+                token.delete()
+            except Token.DoesNotExist:
+                pass
+        logout(request)
+        return redirect("/")
 
 
 class RegisterView(APIView):
