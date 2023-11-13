@@ -385,18 +385,35 @@ class VotingReopenTestCase(TestCase):
     def tearDown(self):
         self.client = None
         
-    def reopenClosedVotingSucess(self):
-        self.cleaner.get(self.live_server_url+"/admin/login/?next=/admin/")
-        self.cleaner.set_window_size(1280, 720)
+    def test_reopen_voting(self):
+        voting = self.create_voting()
 
-        self.cleaner.find_element(By.ID, "id_username").click()
-        self.cleaner.find_element(By.ID, "id_username").send_keys("decide")
+        self.login()
 
-        self.cleaner.find_element(By.ID, "id_password").click()
-        self.cleaner.find_element(By.ID, "id_password").send_keys("decide")
+        #Not started yet
+        data = {'action': 'reopen'}
+        response = self.client.put('/voting/{}/'.format(voting.pk), data, format='json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), 'Voting is not started')
 
-        self.cleaner.find_element(By.ID, "id_password").send_keys("Keys.ENTER")
+        data = {'action': 'start'}
+        response = self.client.put('/voting/{}/'.format(voting.pk), data, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), 'Voting started')
 
-        self.cleaner.get(self.live_server_url+"/admin/voting/voting/")
-      
-        self.assertTrue(self.cleaner.current_url != self.live_server_url+"/admin/voting/voting")       
+        #Not stopped yet
+        data = {'action': 'reopen'}
+        response = self.client.put('/voting/{}/'.format(voting.pk), data, format='json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), 'Voting is already open')
+
+        data = {'action': 'stop'}
+        response = self.client.put('/voting/{}/'.format(voting.pk), data, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), 'Voting stopped')
+
+        #Correct reopen
+        data = {'action': 'reopen'}
+        response = self.client.put('/voting/{}/'.format(voting.pk), data, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), 'Voting reopened')

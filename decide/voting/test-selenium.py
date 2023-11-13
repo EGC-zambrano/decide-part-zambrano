@@ -31,10 +31,10 @@ class ReopenTestCase(StaticLiveServerTestCase):
     self.driver.quit()
   
   def test_untitled(self):
-    self.driver.get("http://localhost:8000/admin/login/?next=/admin/")
+    self.driver.get(self.live_server_url+"/admin/login/?next=/admin/")
     self.driver.set_window_size(1210, 736)
-    self.driver.find_element(By.ID, "id_username").send_keys("felixo")
-    self.driver.find_element(By.ID, "id_password").send_keys("felixo")
+    self.driver.find_element(By.ID, "id_username").send_keys("decide")
+    self.driver.find_element(By.ID, "id_password").send_keys("decide")
     self.driver.find_element(By.ID, "content").click()
     self.driver.find_element(By.CSS_SELECTOR, ".login").click()
     self.driver.find_element(By.CSS_SELECTOR, ".submit-row > input").click()
@@ -56,7 +56,7 @@ class ReopenTestCase(StaticLiveServerTestCase):
     actions = ActionChains(self.driver)
     actions.move_to_element(element).release().perform()
     dropdown = self.driver.find_element(By.ID, "id_auths")
-    dropdown.find_element(By.XPATH, "//option[. = 'http://localhost:8000']").click()
+    dropdown.find_element(By.XPATH, "//option[. = '" + self.live_server_url + "']").click()
     self.driver.find_element(By.NAME, "_save").click()
     self.driver.find_element(By.NAME, "_selected_action").click()
     dropdown = self.driver.find_element(By.NAME, "action")
