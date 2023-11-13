@@ -7,6 +7,7 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.test import TestCase
 from rest_framework.test import APIClient
 from rest_framework.test import APITestCase
+from django.utils import timezone
 
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
@@ -361,3 +362,41 @@ class QuestionsTests(StaticLiveServerTestCase):
 
         self.assertTrue(self.cleaner.find_element_by_xpath('/html/body/div/div[3]/div/div[1]/div/form/div/p').text == 'Please correct the errors below.')
         self.assertTrue(self.cleaner.current_url == self.live_server_url+"/admin/voting/question/add/")
+class VotingReopenTestCase(TestCase):
+    def setUp(self):
+        #Load base test functionality for decide
+        self.base = BaseTestCase()
+        self.base.setUp()
+
+        options = webdriver.ChromeOptions()
+        options.headless = True
+        self.driver = webdriver.Chrome(options=options)
+
+        super().setUp()
+
+        question = Question.objects.create(desc="Test question")
+        voting = Voting.objects.create(
+            name="Test",
+            desc="Test",
+            start_date=timezone.make_aware(datetime.datetime(2023,11,11)),
+            end_date=timezone.make_aware(datetime.datetime(2023,11,12)),
+            question_id=question.id
+        )
+    def tearDown(self):
+        self.client = None
+        
+    def reopenClosedVotingSucess(self):
+        self.cleaner.get(self.live_server_url+"/admin/login/?next=/admin/")
+        self.cleaner.set_window_size(1280, 720)
+
+        self.cleaner.find_element(By.ID, "id_username").click()
+        self.cleaner.find_element(By.ID, "id_username").send_keys("decide")
+
+        self.cleaner.find_element(By.ID, "id_password").click()
+        self.cleaner.find_element(By.ID, "id_password").send_keys("decide")
+
+        self.cleaner.find_element(By.ID, "id_password").send_keys("Keys.ENTER")
+
+        self.cleaner.get(self.live_server_url+"/admin/voting/voting/")
+      
+        self.assertTrue(self.cleaner.current_url != self.live_server_url+"/admin/voting/voting")       
