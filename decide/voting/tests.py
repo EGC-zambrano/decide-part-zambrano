@@ -357,6 +357,49 @@ class QuestionsTests(StaticLiveServerTestCase):
             self.cleaner.current_url == self.live_server_url + "/admin/voting/question/"
         )
 
+    def createQuestionWithBlankVote(self):
+        # Log in as an admin user
+        self.cleaner.get(self.live_server_url + "/admin/login/?next=/admin/")
+        self.cleaner.set_window_size(1280, 720)
+        self.cleaner.find_element(By.ID, "id_username").click()
+        self.cleaner.find_element(By.ID, "id_username").send_keys("decide")
+        self.cleaner.find_element(By.ID, "id_password").click()
+        self.cleaner.find_element(By.ID, "id_password").send_keys("decide")
+        self.cleaner.find_element(By.ID, "id_password").send_keys("Keys.ENTER")
+
+        # Go to the page to add a new question
+        self.cleaner.get(self.live_server_url + "/admin/voting/question/add/")
+
+        # Enter question details without adding options
+        self.cleaner.find_element(By.ID, "id_desc").click()
+        self.cleaner.find_element(By.ID, "id_desc").send_keys("Test Question")
+        self.cleaner.find_element(By.NAME, "_save").click()
+
+        # Check if the 'Blank Vote' option is created
+        options = self.cleaner.find_elements(
+            By.CSS_SELECTOR, ".tabular .field-number input"
+        )
+        option_texts = self.cleaner.find_elements(
+            By.CSS_SELECTOR, ".tabular .field-option input"
+        )
+
+        # Extract option numbers and texts
+        option_data = [
+            (opt.get_attribute("value"), text.get_attribute("value"))
+            for opt, text in zip(options, option_texts)
+        ]
+
+        # Check if 'Blank Vote' option is present
+        self.assertIn(("1", "En blanco"), option_data)
+
+        # Check if there are no other options
+        self.assertEqual(len(option_data), 1)
+
+        # Check the current URL
+        self.assertTrue(
+            self.cleaner.current_url == self.live_server_url + "/admin/voting/question/"
+        )
+
     def createCensusEmptyError(self):
         self.cleaner.get(self.live_server_url + "/admin/login/?next=/admin/")
         self.cleaner.set_window_size(1280, 720)
