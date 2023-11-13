@@ -12,9 +12,11 @@ class Question(models.Model):
 
     def save(self):
         super().save()
-        enBlanco = QuestionOption(question=self, number =self.options.count() + 1, option="En blanco")
-        enBlanco.save()
-        self.options.add(enBlanco)
+        enBlancoFilled = False
+        if QuestionOption.objects.filter(question__id=self.id, option__startswith="En blanco").count() ==0:
+            enBlanco = QuestionOption(question=self, number =self.options.count() + 1, option="En blanco")
+            enBlanco.save()
+            self.options.add(enBlanco)
         return super().save()
     
     def __str__(self):
