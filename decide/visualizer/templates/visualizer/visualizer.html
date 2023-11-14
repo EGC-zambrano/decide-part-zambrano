@@ -15,7 +15,6 @@
         <h2 v-if="!voting.start_date">Votación no comenzada</h2>
         <h2 v-else-if="!voting.end_date">Votación en curso</h2>
         <div v-else class="show-charts"> 
-            <h2 class="heading">Resultados:</h2>
             <div class="charts">
                 <div class="chart">
                     <canvas id="bar-chart"></canvas>
