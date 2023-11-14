@@ -1,9 +1,10 @@
 {% extends "base.html" %}
 {% load i18n static %}
 
+{% block title %}Visualizer{% endblock %}
+
+
 {% block extrahead %}
-    <link type="text/css" rel="stylesheet"
-         href="https://unpkg.com/bootstrap/dist/css/bootstrap.min.css" />
     <link type="text/css" rel="stylesheet" href="{% static "booth/style.css" %}" />
 {% endblock %}
 
@@ -27,7 +28,7 @@
     </div>
 {% endblock %}
 
-{% block extrabody %}
+{% block extrascripts %}
     <!-- Vuejs -->
     <script src="https://unpkg.com/vue"></script>
     <script src="https://unpkg.com/babel-polyfill@latest/dist/polyfill.min.js"></script>
@@ -123,5 +124,4 @@
         });
 
     </script>
-</body>
 {% endblock %}
