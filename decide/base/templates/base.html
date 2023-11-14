@@ -14,7 +14,10 @@
     </head>
     <body>
         <header class="header">
-            <h1><a href="/">Decide</a></h1>
+            <section class="row">
+                <h1>Decide</h1>
+                <a href="/voting-list">Votaciones</a>
+            </section>
             <!-- show profile icon if user is logged in -->
             {% if user.is_authenticated %}
                 <div class="dropdown">
@@ -38,6 +41,8 @@
 
             {% block extrabody %}{% endblock %}
         </section>
+        {% block extrascripts %}
+        {% endblock %}
         <footer>
             <p>&copy; 2023 Decide. Todos los derechos reservados.</p>
             <a href="https://github.com/EGC-zambrano/decide-part-zambrano" target="_blank">GitHub</a>

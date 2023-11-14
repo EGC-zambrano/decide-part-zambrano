@@ -30,6 +30,9 @@ class LoginView(TemplateView):
                 if not remember_me:
                     request.session.set_expiry(0)
 
+                next = request.GET.get("next", None)
+                if next:
+                    return redirect(next)
                 return redirect("/")
             else:
                 msg = "Credenciales incorrectas"
