@@ -1,13 +1,18 @@
+from base import mods
+from base.models import Auth, Key
 from django.db import models
 from django.db.models import JSONField
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from base import mods
-from base.models import Auth, Key
-
 
 class Question(models.Model):
+    QUESTION_TYPES = (
+        ("S", "Single"),
+        ("M", "Multiple"),
+    )
+
+    question_type = models.CharField(max_length=1, choices=QUESTION_TYPES, default="S")
     desc = models.TextField()
 
     def save(self):
@@ -81,13 +86,11 @@ class Voting(models.Model):
         votes_format = []
         vote_list = []
         for vote in votes:
-            for info in vote:
-                if info == "a":
-                    votes_format.append(vote[info])
-                if info == "b":
-                    votes_format.append(vote[info])
-            vote_list.append(votes_format)
-            votes_format = []
+            for option in vote["options"]:
+                votes_format.append(option["a"])
+                votes_format.append(option["b"])
+                vote_list.append(votes_format)
+                votes_format = []
         return vote_list
 
     def tally_votes(self, token=""):

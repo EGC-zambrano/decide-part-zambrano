@@ -256,14 +256,14 @@
                     this.signup = true;
                     this.successVote = false;
                 },
-                decideEncrypt() {
-                    var bigmsg = BigInt.fromJSONObject(this.selected.toString());
+                decideEncrypt(s) {
+                    var bigmsg = BigInt.fromJSONObject(s);
                     var cipher = ElGamal.encrypt(this.bigpk, bigmsg);
                     return cipher;
                 },
                 decideSend(evt) {
                     evt.preventDefault();
-                    var v = this.decideEncrypt();
+                    var v = this.decideEncrypt(this.selected.toString());
                     var data = {
                         vote: {a: v.alpha.toString(), b: v.beta.toString()},
                         voting: this.voting.id,
