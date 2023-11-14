@@ -220,38 +220,38 @@ class VotingTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json(), "Voting already tallied")
 
-
     def test_reopen_voting(self):
         voting = self.create_voting()
         self.login()
 
-        #Not started yet
-        data = {'action': 'reopen'}
-        response = self.client.put('/voting/{}/'.format(voting.pk), data, format='json')
+        # Not started yet
+        data = {"action": "reopen"}
+        response = self.client.put("/voting/{}/".format(voting.pk), data, format="json")
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json(), 'Voting is not started')
+        self.assertEqual(response.json(), "Voting is not started")
 
-        data = {'action': 'start'}
-        response = self.client.put('/voting/{}/'.format(voting.pk), data, format='json')
+        data = {"action": "start"}
+        response = self.client.put("/voting/{}/".format(voting.pk), data, format="json")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), 'Voting started')
+        self.assertEqual(response.json(), "Voting started")
 
-        #Not stopped yet
-        data = {'action': 'reopen'}
-        response = self.client.put('/voting/{}/'.format(voting.pk), data, format='json')
+        # Not stopped yet
+        data = {"action": "reopen"}
+        response = self.client.put("/voting/{}/".format(voting.pk), data, format="json")
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json(), 'Voting is already open')
+        self.assertEqual(response.json(), "Voting is already open")
 
-        data = {'action': 'stop'}
-        response = self.client.put('/voting/{}/'.format(voting.pk), data, format='json')
+        data = {"action": "stop"}
+        response = self.client.put("/voting/{}/".format(voting.pk), data, format="json")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), 'Voting stopped')
+        self.assertEqual(response.json(), "Voting stopped")
 
-        #Correct reopen
-        data = {'action': 'reopen'}
-        response = self.client.put('/voting/{}/'.format(voting.pk), data, format='json')
+        # Correct reopen
+        data = {"action": "reopen"}
+        response = self.client.put("/voting/{}/".format(voting.pk), data, format="json")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), 'Voting reopened')
+        self.assertEqual(response.json(), "Voting reopened")
+
 
 class LogInSuccessTests(StaticLiveServerTestCase):
     def setUp(self):

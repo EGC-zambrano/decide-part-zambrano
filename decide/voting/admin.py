@@ -46,7 +46,6 @@ class VotingAdmin(admin.ModelAdmin):
 
     actions = [start, stop, tally]
 
-
     def get_actions(self, request):
         # Customize the list of available actions based on the current status
         actions = super().get_actions(request)
@@ -66,7 +65,6 @@ class VotingAdmin(admin.ModelAdmin):
             v.end_date = None  # Reset end_date to None
             v.status = "Started"  # Set the status to indicate the voting is reopened
             v.save()
-
 
 
 admin.site.register(Voting, VotingAdmin)
