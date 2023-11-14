@@ -23,7 +23,7 @@
 }
 table {
     width: 200px;
-
+}
 .page-title {
     font-size: 2em;
     font-weight: bold;
@@ -42,7 +42,7 @@ table {
 
 .bar{
     width: 50%;
-
+}
 .vertical-list {
     display: flex;
     flex-direction: column;
