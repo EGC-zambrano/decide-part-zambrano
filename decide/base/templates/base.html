@@ -17,8 +17,13 @@
             <h1><a href="/">Decide</a></h1>
             <!-- show profile icon if user is logged in -->
             {% if user.is_authenticated %}
-                <div class="authenticated_icon">
-                    <a href="/profile" class="material-icons">account_circle <p> {{user.username}}</p> </a>
+                <div class="dropdown">
+                    <div class="authenticated_icon">
+                        <a href="/profile" class="material-icons">account_circle<p>{{user.username}}</p></a></button>
+                    </div>
+                    <div class="dropdown-content">
+                        <a href="/change-password">Cambiar Contraseña</a>
+                    </div>
                 </div>
             {% else %}
                 <div>
