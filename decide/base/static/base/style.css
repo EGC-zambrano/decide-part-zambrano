@@ -60,21 +60,35 @@ header {
     align-items: center;
 }
 
-header h1 {
-    color: var(--neutral-background);
-    padding: 0 20px;
-    font-weight: bold;
-}
-
-header div a {
+header a {
+    position: relative;
     text-decoration: none;
     color: var(--neutral-background);
     padding: 20px
 }
 
-header div a:hover {
-    background-color: var(--neutral-background);
-    color: var(--primary-color)
+header a:hover:after {
+    transform: scaleX(1.1);
+    transform-origin: bottom left;
+}
+
+header a:after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    bottom: 1px;
+    left: 0px;
+    transform: scaleX(0);
+    background: var(--neutral-background);
+    transform-origin: bottom left;
+    transition: transform 0.3s ease-out;
+}
+
+header h1 {
+    color: var(--neutral-background);
+    padding: 0 20px;
+    font-weight: bold;
 }
 
 footer {
@@ -125,6 +139,17 @@ section {
     background-color: var(--primary-dark-color);
 }
 
+.row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1em;
+}
+
+.row-apart {
+    justify-content: space-between;
+}
+
 .authenticated_icon {
     text-align: center;
     display: flex;
@@ -137,7 +162,6 @@ section {
     justify-content: space-between;
     align-items: center;
     text-decoration: none;
-    background-color: #be8c76; 
 }
 
 .material-icons {
@@ -145,6 +169,11 @@ section {
     margin-right: 10px;
 }
 
-.authenticated_icon a p {
+.authenticated_icon a span {
     font-weight: bold;
+}
+
+#trapdoor:after {
+    width: 0%;
+    transition: none;
 }

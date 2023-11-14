@@ -3,5 +3,5 @@ from . import views
 
 
 urlpatterns = [
-    path('', views.PostProcView.as_view(), name='postproc'),
+    path("", views.PostProcView.as_view(), name="postproc"),
 ]
