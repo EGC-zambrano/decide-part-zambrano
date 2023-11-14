@@ -367,10 +367,8 @@ class QuestionsTests(StaticLiveServerTestCase):
         self.cleaner.find_element(By.ID, "id_password").send_keys("decide")
         self.cleaner.find_element(By.ID, "id_password").send_keys("Keys.ENTER")
 
-        # Go to the page to add a new question
         self.cleaner.get(self.live_server_url + "/admin/voting/question/add/")
 
-        # Enter question details without adding options
         self.cleaner.find_element(By.ID, "id_desc").click()
         self.cleaner.find_element(By.ID, "id_desc").send_keys("Test Question")
         self.cleaner.find_element(By.NAME, "_save").click()
@@ -383,7 +381,6 @@ class QuestionsTests(StaticLiveServerTestCase):
             By.CSS_SELECTOR, ".tabular .field-option input"
         )
 
-        # Extract option numbers and texts
         option_data = [
             (opt.get_attribute("value"), text.get_attribute("value"))
             for opt, text in zip(options, option_texts)
@@ -392,13 +389,42 @@ class QuestionsTests(StaticLiveServerTestCase):
         # Check if 'Blank Vote' option is present
         self.assertIn(("1", "En blanco"), option_data)
 
-        # Check if there are no other options
         self.assertEqual(len(option_data), 1)
 
-        # Check the current URL
         self.assertTrue(
             self.cleaner.current_url == self.live_server_url + "/admin/voting/question/"
         )
+
+    def vote_with_blank_vote_option(self):
+        self.cleaner.get(self.live_server_url + "/admin/login/?next=/admin/")
+        self.cleaner.set_window_size(1280, 720)
+        self.cleaner.find_element(By.ID, "id_username").click()
+        self.cleaner.find_element(By.ID, "id_username").send_keys("decide")
+        self.cleaner.find_element(By.ID, "id_password").click()
+        self.cleaner.find_element(By.ID, "id_password").send_keys("decide")
+        self.cleaner.find_element(By.ID, "id_password").send_keys("Keys.ENTER")
+        self.cleaner.get(self.live_server_url + "/voting/")
+
+        # Assuming the 'Blank Vote' option is the first option
+        blank_vote_option = self.cleaner.find_element(
+            By.CSS_SELECTOR, ".voting-option:first-child"
+        )
+
+        # Click on the 'Blank Vote' option
+        blank_vote_option.click()
+
+        # Submit the vote
+        submit_button = self.cleaner.find_element(
+            By.ID, "submit-vote-button"
+        )  # Adjust the ID as needed
+        submit_button.click()
+
+        confirmation_message = self.cleaner.find_element(
+            By.CSS_SELECTOR, ".confirmation-message"
+        )
+
+        # Check if the confirmation message indicates a successful vote
+        self.assertIn("Vote submitted successfully", confirmation_message.text)
 
     def createCensusEmptyError(self):
         self.cleaner.get(self.live_server_url + "/admin/login/?next=/admin/")
