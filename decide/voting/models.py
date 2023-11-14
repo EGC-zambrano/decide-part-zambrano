@@ -7,10 +7,7 @@ from django.dispatch import receiver
 
 
 class Question(models.Model):
-    QUESTION_TYPES = (
-        ("S", "Single"),
-        ("M", "Multiple"),
-    )
+    QUESTION_TYPES = (("S", "Single"), ("M", "Multiple"), ("B", "Boolean"))
 
     question_type = models.CharField(max_length=1, choices=QUESTION_TYPES, default="S")
     desc = models.TextField()
@@ -26,10 +23,12 @@ class QuestionOption(models.Model):
     number = models.PositiveIntegerField(blank=True, null=True)
     option = models.TextField()
 
-    def save(self):
+    def save(self, *args, **kwargs):
+        if self.question.question_type == "B" and self.question.options.count() > 1:
+            raise ValueError("Boolean questions can only have two options.")
         if not self.number:
             self.number = self.question.options.count() + 2
-        return super().save()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return "{} ({})".format(self.option, self.number)
