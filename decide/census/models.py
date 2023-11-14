@@ -6,4 +6,4 @@ class Census(models.Model):
     voter_id = models.PositiveIntegerField()
 
     class Meta:
-        unique_together = (('voting_id', 'voter_id'),)
+        unique_together = (("voting_id", "voter_id"),)

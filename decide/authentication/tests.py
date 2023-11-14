@@ -94,10 +94,10 @@ class LoginViewTestCase(TestCase):
         self.url = reverse("signin")
         self.user = User.objects.create_user(username="testuser", password="testpass")
         app = SocialApp.objects.create(
-            provider='google',
-            name='Google',
-            client_id='test',
-            secret='test',
+            provider="google",
+            name="Google",
+            client_id="test",
+            secret="test",
         )
         # Add the current site to the SocialApp's sites
         app.sites.add(Site.objects.get_current())
@@ -136,10 +136,10 @@ class RegisterViewTestCase(TestCase):
         self.client = Client()
         self.url = reverse("register")
         app = SocialApp.objects.create(
-            provider='google',
-            name='Google',
-            client_id='test',
-            secret='test',
+            provider="google",
+            name="Google",
+            client_id="test",
+            secret="test",
         )
         # Add the current site to the SocialApp's sites
         app.sites.add(Site.objects.get_current())
