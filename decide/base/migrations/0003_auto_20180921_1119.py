@@ -5,30 +5,29 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('base', '0002_auto_20180921_1056'),
+        ("base", "0002_auto_20180921_1056"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='key',
-            name='g',
+            model_name="key",
+            name="g",
             field=base.models.BigBigField(),
         ),
         migrations.AlterField(
-            model_name='key',
-            name='p',
+            model_name="key",
+            name="p",
             field=base.models.BigBigField(),
         ),
         migrations.AlterField(
-            model_name='key',
-            name='x',
+            model_name="key",
+            name="x",
             field=base.models.BigBigField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='key',
-            name='y',
+            model_name="key",
+            name="y",
             field=base.models.BigBigField(),
         ),
     ]
