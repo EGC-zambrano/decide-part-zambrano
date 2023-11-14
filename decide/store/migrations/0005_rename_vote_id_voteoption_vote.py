@@ -4,15 +4,14 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('store', '0004_remove_vote_a_remove_vote_b_voteoption'),
+        ("store", "0004_remove_vote_a_remove_vote_b_voteoption"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='voteoption',
-            old_name='vote_id',
-            new_name='vote',
+            model_name="voteoption",
+            old_name="vote_id",
+            new_name="vote",
         ),
     ]
