@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}Votings{% endblock %}
+
+{% block extrahead %}   
+    <link rel="stylesheet" href="{% static "booth/style.css" %}">
+{% endblock %}
+
+{% block content %}
+    <!-- Login form using django form object and msg -->
+    <section class="vertical-list">
+        <h1 class="page-title">My Votings</h1>
+        <div class="">
+            <!-- Search bar using query value search_query passed by the controller -->
+            <div class="search-bar row row-apart">
+                <input id="search-bar" type="text" placeholder="Search votings">
+                <!-- filter dropdown -->
+                <div class="row">
+                    <p class="voting-description">Filter by:</p>
+                    <select id="filter">
+                        <option value="all">All</option>
+                        <option value="open">Open</option>
+                        <option value="closed">Closed</option>
+                    </select>
+                </div>
+                <!-- submit with carachter return -->
+                <input type="submit" style="display:none"/>
+            </div>
+        </div>
+        {% if user_votings|length == 0 %}
+            <h3 class="no-votings">No votings found</h3>
+        {% else %}
+            <section id="voting-list">
+            <h3 class="no-votings" style="display:none">No votings found</h3>
+            {% for voting in user_votings %}
+                <a href="/vote/{{ voting.id }}"  class="card voting-card">
+                    <div class="row row-apart">
+                        <h3 class="voting-name">{{ voting.name }}</h3>
+                        {% if voting.end_date %}
+                            <p class="voting-status voting-closed">Voting Closed</p>
+                        {% else %}
+                            <p class="voting-status voting-open">Voting Open</p>
+                        {% endif %}
+                    </div>
+                    <p class="voting-description">{{ voting.desc }}</p>
+                </a>
+            {% endfor %}
+            </section>
+        {% endif %}
+    </section>
+
+{% endblock %}
+
+{% block extrascripts %}
+    <script>
+        function searchVotings(_) {
+            const searchTerm = document.getElementById('search-bar').value.toLowerCase();
+            const listItems = document.querySelectorAll('#voting-list a');
+            const filterTerm = document.getElementById('filter').value.toLowerCase();
+
+            listItems.forEach(function (item) {
+                const votingStatus = item.querySelector('.voting-status').textContent.toLowerCase();
+                const votingName = item.querySelector('.voting-name').textContent.toLowerCase();
+
+                if (filterTerm == 'all' && votingName.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                } else if (votingStatus.includes(filterTerm) && votingName.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            const noVotings = document.querySelector('.no-votings');
+            const visibleVotings = document.querySelectorAll('#voting-list a[style="display: flex;"]');
+            if (visibleVotings.length == 0) {
+                noVotings.style.display = 'block';
+            } else {
+                noVotings.style.display = 'none';
+            }
+        }
+
+        document.getElementById('search-bar').addEventListener('input', searchVotings);
+        document.getElementById('filter').addEventListener('change', searchVotings);
+    </script>
+{% endblock %}

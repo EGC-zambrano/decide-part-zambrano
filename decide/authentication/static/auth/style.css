@@ -8,6 +8,13 @@ header {
     background-color: rgba(0, 0, 0, 0);
 }
 
+.header h1 a {
+    color: var(--neutral-background);
+    padding: 0 20px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
 .card {
     height: fit-content;
     width: fit-content;
@@ -80,6 +87,7 @@ header {
     border: 1px solid var(--red-dark-color);
     border-radius: 0.25em;
     padding: 0.5em;
+    justify-content: center;
 }
 
 .remember-me {
@@ -98,4 +106,34 @@ header {
 .remember-me p {
     font-family: var(--fuente2);
     font-size: 0.8em;
+}
+
+.login-google-button {
+    text-align: center;
+}
+
+.login-google-button a {
+    display: inline-block;
+    background-color: #fff; 
+    color: #888; 
+    text-decoration: none;
+    border: 1px solid #ccc; 
+    border-radius: 4px;
+    padding: 10px 20px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+}
+
+.login-google-button a:hover {
+    background-color: #f7f7f7e5; 
+}
+
+.login-google-button svg {
+    width: 24px; 
+    height: 24px;
+    margin-right: 10px; 
+    fill: #888; 
 }
