@@ -14,15 +14,18 @@
     </head>
     <body>
         <header class="header">
-            <h1>Decide</h1>
+            <section class="row">
+                <h1>Decide</h1>
+                <a href="/voting-list">Votaciones</a>
+            </section>
             <!-- show profile icon if user is logged in -->
             {% if user.is_authenticated %}
-                <div>
-                    <a href="/profile" class="material-icons">account_circle</a>
+                <div class="authenticated_icon">
+                    <a href="/profile" class="material-icons">account_circle <p> {{user.username}}</p> </a>
                 </div>
             {% else %}
                 <div>
-                    <a href="/signup">Registrarse</a>
+                    <a href="/register">Registrarse</a>
                     <a href="/signin">Iniciar Sesión</a>
                 </div>
             {% endif %}
@@ -33,6 +36,8 @@
 
             {% block extrabody %}{% endblock %}
         </section>
+        {% block extrascripts %}
+        {% endblock %}
         <footer>
             <p>&copy; 2023 Decide. Todos los derechos reservados.</p>
             <a href="https://github.com/EGC-zambrano/decide-part-zambrano" target="_blank">GitHub</a>

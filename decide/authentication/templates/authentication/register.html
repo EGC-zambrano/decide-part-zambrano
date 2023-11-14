@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}Registration{% endblock %}
+
+{% block extrahead %}
+    <!-- <link rel="stylesheet" href="{% static "homepage/homepage.css" %}"> -->
+    <link rel="stylesheet" href="{% static "auth/register.css" %}">
+{% endblock %}
+
+{% block content %}
+    <section class="card form-card">
+        <section class="form-title"> </section>
+        <section class="form-msg">
+            <b>
+                Bienvenido a Decide!
+            </b>
+            {% if form.username.errors %}
+                <div class="form-errors">
+                    <p>
+                    {{ form.username.errors.0 }}
+                    </p>
+                </div>
+            {% endif %}
+            {% if form.password2.errors %}
+                <div class="form-errors">
+                    <p>
+                    {{ form.password2.errors.0 }}
+                    </p>
+                </div>
+            {% endif %}
+        </section>
+        <form method="post">
+            {% csrf_token %}
+            <section class="form-content">
+                <div class="input-group">
+                    <label for="id_first_name">Nombre:</label>
+                    {{ form.first_name }}
+                </div>
+                <div class="input-group">
+                    <label for="id_last_name">Apellidos:</label>
+                    {{ form.last_name }}
+                </div>
+                <div class="input-group">
+                    <label for="id_email">Email:</label>
+                    {{ form.email }}
+                </div>
+                <div class="input-group">
+                    <label for="id_username">Usuario:</label>
+                    {{ form.username }}
+                </div>
+                <div class="input-group">
+                    <label for="id_password1">Contraseña:</label>
+                    {{ form.password1 }}
+                </div>
+                <div class="input-group">
+                    <label for="id_password2">Confirme Contraseña:</label>
+                    {{ form.password2 }}
+                </div>
+            </section>
+            <section class="form-confirmation">
+                <button type="submit" class="btn btn-primary">Registrarse</button>
+            </section>
+        </form>
+        <!-- JavaScript to set focus on the name field when the page loads -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                document.getElementById('id_first_name').focus();
+            });
+        </script>
+    </section>
+{% endblock %}
+

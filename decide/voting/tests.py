@@ -1,27 +1,24 @@
-import random
 import itertools
-from django.utils import timezone
-from django.conf import settings
-from django.contrib.auth.models import User
-from django.contrib.staticfiles.testing import StaticLiveServerTestCase
-from django.test import TestCase
-from rest_framework.test import APIClient
-from rest_framework.test import APITestCase
-
-from selenium import webdriver
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.keys import Keys
+import random
+from datetime import datetime
 
 from base import mods
 from base.tests import BaseTestCase
 from census.models import Census
-from mixnet.mixcrypt import ElGamal
-from mixnet.mixcrypt import MixCrypt
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from django.test import TestCase
+from django.utils import timezone
+from mixnet.mixcrypt import ElGamal, MixCrypt
 from mixnet.models import Auth
-from voting.models import Voting, Question, QuestionOption
-from datetime import datetime
+from rest_framework.test import APIClient, APITestCase
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from voting.models import Question, QuestionOption, Voting
 
 
 class VotingTestCase(BaseTestCase):
@@ -292,9 +289,6 @@ class VotingTestCase(BaseTestCase):
             self.login(user=user.username)
             voter = voters.pop()
             mods.post("store", json=data)
-
-            # Debugging print statements
-            print(f"Vote: {data}, Voter: {voter.voter_id}")
 
         return clear
 

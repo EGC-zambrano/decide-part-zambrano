@@ -4,30 +4,29 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('base', '0001_initial'),
+        ("base", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='key',
-            name='g',
+            model_name="key",
+            name="g",
             field=models.BigIntegerField(),
         ),
         migrations.AlterField(
-            model_name='key',
-            name='p',
+            model_name="key",
+            name="p",
             field=models.BigIntegerField(),
         ),
         migrations.AlterField(
-            model_name='key',
-            name='x',
+            model_name="key",
+            name="x",
             field=models.BigIntegerField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='key',
-            name='y',
+            model_name="key",
+            name="y",
             field=models.BigIntegerField(),
         ),
     ]
