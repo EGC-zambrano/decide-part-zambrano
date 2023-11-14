@@ -270,20 +270,32 @@ class VotingTestCase(BaseTestCase):
         voter = voters.pop()
 
         clear = {}
-        for opt in v.question.options.all():
-            clear[opt.number] = 0
-            for i in range(random.randint(0, 5)):
-                a, b = self.encrypt_msg(opt.number, v)
-                data = {
-                    "voting": v.id,
-                    "voter": voter.voter_id,
-                    "vote": {"a": a, "b": b},
-                }
-                clear[opt.number] += 1
-                user = self.get_or_create_user(voter.voter_id)
-                self.login(user=user.username)
-                voter = voters.pop()
-                mods.post("store", json=data)
+        for i in range(5):
+            selected_options = []
+            for opt in v.question.options.all():
+                if random.choice([True, False]):
+                    selected_options.append(opt.number)
+                    clear[opt.number] = clear.get(opt.number, 0) + 1
+
+            encrypted_options = []
+            for option_number in selected_options:
+                a, b = self.encrypt_msg(option_number, v)
+                encrypted_options.append({"a": a, "b": b})
+
+            data = {
+                "voting": v.id,
+                "voter": voter.voter_id,
+                "vote": encrypted_options,
+            }
+
+            user = self.get_or_create_user(voter.voter_id)
+            self.login(user=user.username)
+            voter = voters.pop()
+            mods.post("store", json=data)
+
+            # Debugging print statements
+            print(f"Vote: {data}, Voter: {voter.voter_id}")
+
         return clear
 
 
