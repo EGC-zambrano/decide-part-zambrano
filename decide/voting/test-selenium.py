@@ -17,6 +17,7 @@ class ReopenTestCase(StaticLiveServerTestCase):
   def setUp(self):
         # Crea un usuario admin y otro no admin
         self.base = BaseTestCase()
+        self.vars = {}
         self.base.setUp()
 
         # Opciones de Chrome
@@ -25,25 +26,20 @@ class ReopenTestCase(StaticLiveServerTestCase):
         self.driver = webdriver.Chrome(options=options)
 
         super().setUp()
-
-  
   def teardown_method(self, method):
     self.driver.quit()
   
-  def test_untitled(self):
-    self.driver.get(self.live_server_url+"/admin/login/?next=/admin/")
+  def test_reopenVotings(self):
+    self.driver.get("http://localhost:8000/admin/login/?next=/admin/")
     self.driver.set_window_size(1210, 736)
     self.driver.find_element(By.ID, "id_username").send_keys("decide")
     self.driver.find_element(By.ID, "id_password").send_keys("decide")
-    self.driver.find_element(By.ID, "content").click()
-    self.driver.find_element(By.CSS_SELECTOR, ".login").click()
     self.driver.find_element(By.CSS_SELECTOR, ".submit-row > input").click()
     self.driver.find_element(By.LINK_TEXT, "Votings").click()
     self.driver.find_element(By.CSS_SELECTOR, "li > .addlink").click()
-    self.driver.find_element(By.ID, "id_name").click()
-    self.driver.find_element(By.ID, "id_name").send_keys("prueba selenium")
+    self.driver.find_element(By.ID, "id_name").send_keys("test selenium")
     self.driver.find_element(By.ID, "id_desc").click()
-    self.driver.find_element(By.ID, "id_desc").send_keys("prueba selenium")
+    self.driver.find_element(By.ID, "id_desc").send_keys("test selenium")
     dropdown = self.driver.find_element(By.ID, "id_question")
     dropdown.find_element(By.XPATH, "//option[. = '1']").click()
     element = self.driver.find_element(By.ID, "id_question")
@@ -56,7 +52,7 @@ class ReopenTestCase(StaticLiveServerTestCase):
     actions = ActionChains(self.driver)
     actions.move_to_element(element).release().perform()
     dropdown = self.driver.find_element(By.ID, "id_auths")
-    dropdown.find_element(By.XPATH, "//option[. = '" + self.live_server_url + "']").click()
+    dropdown.find_element(By.XPATH, "//option[. = 'http://localhost:8000']").click()
     self.driver.find_element(By.NAME, "_save").click()
     self.driver.find_element(By.NAME, "_selected_action").click()
     dropdown = self.driver.find_element(By.NAME, "action")
@@ -97,4 +93,4 @@ class ReopenTestCase(StaticLiveServerTestCase):
     actions = ActionChains(self.driver)
     actions.move_to_element(element).release().perform()
     self.driver.find_element(By.NAME, "index").click()
-  
+    self.driver.find_element(By.CSS_SELECTOR, "button:nth-child(2)").click()
