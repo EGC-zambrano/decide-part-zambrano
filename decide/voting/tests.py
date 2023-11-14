@@ -218,6 +218,38 @@ class VotingTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json(), 'Voting already tallied')
 
+    def test_reopen_voting(self):
+        voting = self.create_voting()
+        self.login()
+
+        #Not started yet
+        data = {'action': 'reopen'}
+        response = self.client.put('/voting/{}/'.format(voting.pk), data, format='json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), 'Voting is not started')
+
+        data = {'action': 'start'}
+        response = self.client.put('/voting/{}/'.format(voting.pk), data, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), 'Voting started')
+
+        #Not stopped yet
+        data = {'action': 'reopen'}
+        response = self.client.put('/voting/{}/'.format(voting.pk), data, format='json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), 'Voting is already open')
+
+        data = {'action': 'stop'}
+        response = self.client.put('/voting/{}/'.format(voting.pk), data, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), 'Voting stopped')
+
+        #Correct reopen
+        data = {'action': 'reopen'}
+        response = self.client.put('/voting/{}/'.format(voting.pk), data, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), 'Voting reopened')
+
 class LogInSuccessTests(StaticLiveServerTestCase):
 
     def setUp(self):
@@ -362,58 +394,3 @@ class QuestionsTests(StaticLiveServerTestCase):
 
         self.assertTrue(self.cleaner.find_element_by_xpath('/html/body/div/div[3]/div/div[1]/div/form/div/p').text == 'Please correct the errors below.')
         self.assertTrue(self.cleaner.current_url == self.live_server_url+"/admin/voting/question/add/")
-class VotingReopenTestCase(TestCase):
-    def setUp(self):
-        #Load base test functionality for decide
-        self.base = BaseTestCase()
-        self.base.setUp()
-
-        options = webdriver.ChromeOptions()
-        options.headless = True
-        self.driver = webdriver.Chrome(options=options)
-
-        super().setUp()
-
-        question = Question.objects.create(desc="Test question")
-        voting = Voting.objects.create(
-            name="Test",
-            desc="Test",
-            start_date=timezone.make_aware(datetime.datetime(2023,11,11)),
-            end_date=timezone.make_aware(datetime.datetime(2023,11,12)),
-            question_id=question.id
-        )
-    def tearDown(self):
-        self.client = None
-        
-    def test_reopen_voting(self):
-        voting = self.create_voting()
-
-        self.login()
-
-        #Not started yet
-        data = {'action': 'reopen'}
-        response = self.client.put('/voting/{}/'.format(voting.pk), data, format='json')
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json(), 'Voting is not started')
-
-        data = {'action': 'start'}
-        response = self.client.put('/voting/{}/'.format(voting.pk), data, format='json')
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), 'Voting started')
-
-        #Not stopped yet
-        data = {'action': 'reopen'}
-        response = self.client.put('/voting/{}/'.format(voting.pk), data, format='json')
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json(), 'Voting is already open')
-
-        data = {'action': 'stop'}
-        response = self.client.put('/voting/{}/'.format(voting.pk), data, format='json')
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), 'Voting stopped')
-
-        #Correct reopen
-        data = {'action': 'reopen'}
-        response = self.client.put('/voting/{}/'.format(voting.pk), data, format='json')
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), 'Voting reopened')
