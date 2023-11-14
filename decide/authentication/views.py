@@ -58,15 +58,10 @@ class GetUserView(APIView):
         return Response(UserSerializer(tk.user, many=False).data)
 
 
-class LogoutView(APIView):
+class LogoutView(TemplateView):
     def get(self, request):
         if request.user.is_authenticated:
-            try:
-                token = Token.objects.get(user=request.user)
-                token.delete()
-            except Token.DoesNotExist:
-                pass
-        logout(request)
+            logout(request)
         return redirect("/")
 
 
