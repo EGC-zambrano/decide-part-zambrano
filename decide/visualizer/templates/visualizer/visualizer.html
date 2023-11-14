@@ -12,8 +12,8 @@
     <div id="app-visualizer">
         <h1>[[ voting.id ]] - [[ voting.name ]]</h1>
 
-        <h2 v-if="!voting.start_date">Votación no comenzada</h2>
-        <h2 v-else-if="!voting.end_date">Votación en curso</h2>
+        <h2 id="voting-not-started" v-if="!voting.start_date">Votación no comenzada</h2>
+        <h2 id="voting-open" v-else-if="!voting.end_date">Votación en curso</h2>
         <div v-else class="show-charts"> 
             <div class="charts">
                 <div class="chart">
