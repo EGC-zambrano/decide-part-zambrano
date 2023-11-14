@@ -216,7 +216,6 @@ class VotingTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json(), "Voting already tallied")
 
-
     def test_reopen_voting(self):
         voting = self.create_voting()
         self.login()
@@ -324,7 +323,6 @@ class VotingTestCase(BaseTestCase):
             mods.post("store", json=data)
 
         return clear
-
 
 
 class LogInSuccessTests(StaticLiveServerTestCase):
