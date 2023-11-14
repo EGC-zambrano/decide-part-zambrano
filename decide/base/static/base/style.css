@@ -162,7 +162,6 @@ section {
     justify-content: space-between;
     align-items: center;
     text-decoration: none;
-    background-color: #be8c76; 
 }
 
 .material-icons {
@@ -170,6 +169,11 @@ section {
     margin-right: 10px;
 }
 
-.authenticated_icon a p {
+.authenticated_icon a span {
     font-weight: bold;
+}
+
+#trapdoor:after {
+    width: 0%;
+    transition: none;
 }

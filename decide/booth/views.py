@@ -29,6 +29,7 @@ def voting_list(request):
 class BoothView(TemplateView):
     template_name = "booth/booth.html"
 
+    @login_required(login_url="/signin")
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         vid = kwargs.get("voting_id", 0)
