@@ -1,3 +1,30 @@
+#app-visualizer{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 40px 0px;
+    width: 100%;
+    gap: 40px;
+}
+.show-charts{
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+.charts {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    width: 100%;
+}
+table {
+    width: 200px;
+}
 .page-title {
     font-size: 2em;
     font-weight: bold;
@@ -9,7 +36,14 @@
     margin-top: 20px;
     margin-left: 40px;
 }
+.chart{
+    display: flex;
+    width: 40%;
+}
 
+.bar{
+    width: 50%;
+}
 .vertical-list {
     display: flex;
     flex-direction: column;
