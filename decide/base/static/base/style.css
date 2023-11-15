@@ -152,7 +152,9 @@ section {
 
 .authenticated_icon {
     text-align: center;
-    margin: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .authenticated_icon a {
@@ -160,17 +162,18 @@ section {
     justify-content: space-between;
     align-items: center;
     text-decoration: none;
-    background-color: #be8c76; 
-    padding: 10px;
-    border-radius: 4px;
 }
 
-.authenticated_icon a .material-icons {
-    margin-right: 20px; 
+.material-icons {
+    font-size: 20px;
+    margin-right: 10px;
 }
 
-.authenticated_icon a p {
-    margin: 0;
-    color: #ffffff; 
+.authenticated_icon a span {
     font-weight: bold;
+}
+
+#trapdoor:after {
+    width: 0%;
+    transition: none;
 }
