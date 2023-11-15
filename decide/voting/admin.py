@@ -66,7 +66,7 @@ class VotingAdmin(admin.ModelAdmin):
     def reopen_selected(modeladmin, request, queryset):
         for v in queryset.all():
             v.end_date = None  # Reset end_date to None
-            votesToDelete =Vote.objects.filter(voting_id=v.id)
+            votesToDelete = Vote.objects.filter(voting_id=v.id)
             votesToDelete.delete()
             v.status = "Started"  # Set the status to indicate the voting is reopened
             v.save()
