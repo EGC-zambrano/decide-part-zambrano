@@ -196,6 +196,6 @@ class RegisterViewTestCase(TestCase):
         }
         response = self.client.post(self.url, data, follow=True)
         self.assertIn(
-            "A user with that username already exists.",
-            response.context["form"].errors["username"],
+            'Ya existe un usuario con este nombre.',
+            response.context['form'].errors['username']
         )
