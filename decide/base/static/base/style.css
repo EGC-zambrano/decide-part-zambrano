@@ -189,7 +189,7 @@ section {
 .dropdown-content {
     display: none;
     position: absolute;
-    background-color: #be8c76;
+    background-color: var(--primary-color);
     min-width: 160px;
     border: solid 1px var(--neutral-background);
     border-radius: 10px;
