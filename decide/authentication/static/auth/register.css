@@ -1,0 +1,29 @@
+/* Import the styles from homepage.css */
+@import 'style.css';
+
+/* Add additional styles for the registration page */
+body {
+  background-image: url('https://cdn.discordapp.com/attachments/768216338128044042/1169219578153406545/iu.png?ex=65549b96&is=65422696&hm=904cdb4126f66caea56b7457820bee91b5689220fe9e9ef41ccd0bfb4d24c6e6&');
+  background-size: cover;
+  background-attachment: fixed;
+  margin: 0;
+  padding: 0;
+  color: var(--text-color);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.header h1 a {
+  color: var(--neutral-background);
+  padding: 0 20px;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.form-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5em;
+}

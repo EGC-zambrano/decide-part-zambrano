@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}Homepage{% endblock %}
+
+{% block extrahead %}   
+    <link rel="stylesheet" href="{% static "homepage/homepage.css" %}">
+{% endblock %}
+
+{% block content %}
+    <section class="hero">
+        <div id="hero-text">
+            <h1 id="text1">Tu plataforma de</h1>
+            <h1 id="text2">votos online de confianza</h1>
+        </div>
+    </section> 
+{% endblock %}

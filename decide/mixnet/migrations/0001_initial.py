@@ -5,40 +5,83 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Auth',
+            name="Auth",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=200)),
-                ('url', models.URLField()),
-                ('me', models.BooleanField(default=False)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=200)),
+                ("url", models.URLField()),
+                ("me", models.BooleanField(default=False)),
             ],
         ),
         migrations.CreateModel(
-            name='Key',
+            name="Key",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('p', models.IntegerField()),
-                ('g', models.IntegerField()),
-                ('y', models.IntegerField()),
-                ('x', models.IntegerField(blank=True, null=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("p", models.IntegerField()),
+                ("g", models.IntegerField()),
+                ("y", models.IntegerField()),
+                ("x", models.IntegerField(blank=True, null=True)),
             ],
         ),
         migrations.CreateModel(
-            name='Mixnet',
+            name="Mixnet",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('vote_id', models.PositiveIntegerField()),
-                ('auths', models.ManyToManyField(related_name='mixnets', to='mixnet.Auth')),
-                ('key', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='mixnets', to='mixnet.Key')),
-                ('pubkey', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='mixnets_pub', to='mixnet.Key')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("vote_id", models.PositiveIntegerField()),
+                (
+                    "auths",
+                    models.ManyToManyField(related_name="mixnets", to="mixnet.Auth"),
+                ),
+                (
+                    "key",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="mixnets",
+                        to="mixnet.Key",
+                    ),
+                ),
+                (
+                    "pubkey",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="mixnets_pub",
+                        to="mixnet.Key",
+                    ),
+                ),
             ],
         ),
     ]

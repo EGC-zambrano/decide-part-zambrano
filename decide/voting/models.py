@@ -1,13 +1,18 @@
+from base import mods
+from base.models import Auth, Key
 from django.db import models
 from django.db.models import JSONField
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from base import mods
-from base.models import Auth, Key
-
 
 class Question(models.Model):
+    QUESTION_TYPES = (
+        ("S", "Single"),
+        ("M", "Multiple"),
+    )
+
+    question_type = models.CharField(max_length=1, choices=QUESTION_TYPES, default="S")
     desc = models.TextField()
 
     def __str__(self):
@@ -15,7 +20,9 @@ class Question(models.Model):
 
 
 class QuestionOption(models.Model):
-    question = models.ForeignKey(Question, related_name='options', on_delete=models.CASCADE)
+    question = models.ForeignKey(
+        Question, related_name="options", on_delete=models.CASCADE
+    )
     number = models.PositiveIntegerField(blank=True, null=True)
     option = models.TextField()
 
@@ -25,19 +32,23 @@ class QuestionOption(models.Model):
         return super().save()
 
     def __str__(self):
-        return '{} ({})'.format(self.option, self.number)
+        return "{} ({})".format(self.option, self.number)
 
 
 class Voting(models.Model):
     name = models.CharField(max_length=200)
     desc = models.TextField(blank=True, null=True)
-    question = models.ForeignKey(Question, related_name='voting', on_delete=models.CASCADE)
+    question = models.ForeignKey(
+        Question, related_name="voting", on_delete=models.CASCADE
+    )
 
     start_date = models.DateTimeField(blank=True, null=True)
     end_date = models.DateTimeField(blank=True, null=True)
 
-    pub_key = models.OneToOneField(Key, related_name='voting', blank=True, null=True, on_delete=models.SET_NULL)
-    auths = models.ManyToManyField(Auth, related_name='votings')
+    pub_key = models.OneToOneField(
+        Key, related_name="voting", blank=True, null=True, on_delete=models.SET_NULL
+    )
+    auths = models.ManyToManyField(Auth, related_name="votings")
 
     tally = JSONField(blank=True, null=True)
     postproc = JSONField(blank=True, null=True)
@@ -49,34 +60,34 @@ class Voting(models.Model):
         auth = self.auths.first()
         data = {
             "voting": self.id,
-            "auths": [ {"name": a.name, "url": a.url} for a in self.auths.all() ],
+            "auths": [{"name": a.name, "url": a.url} for a in self.auths.all()],
         }
-        key = mods.post('mixnet', baseurl=auth.url, json=data)
+        key = mods.post("mixnet", baseurl=auth.url, json=data)
         pk = Key(p=key["p"], g=key["g"], y=key["y"])
         pk.save()
         self.pub_key = pk
         self.save()
 
-    def get_votes(self, token=''):
+    def get_votes(self, token=""):
         # gettings votes from store
-        votes = mods.get('store', params={'voting_id': self.id}, HTTP_AUTHORIZATION='Token ' + token)
+        votes = mods.get(
+            "store", params={"voting_id": self.id}, HTTP_AUTHORIZATION="Token " + token
+        )
         # anon votes
         votes_format = []
         vote_list = []
         for vote in votes:
-            for info in vote:
-                if info == 'a':
-                    votes_format.append(vote[info])
-                if info == 'b':
-                    votes_format.append(vote[info])
-            vote_list.append(votes_format)
-            votes_format = []
+            for option in vote["options"]:
+                votes_format.append(option["a"])
+                votes_format.append(option["b"])
+                vote_list.append(votes_format)
+                votes_format = []
         return vote_list
 
-    def tally_votes(self, token=''):
-        '''
+    def tally_votes(self, token=""):
+        """
         The tally is a shuffle and then a decrypt
-        '''
+        """
 
         votes = self.get_votes(token)
 
@@ -86,17 +97,27 @@ class Voting(models.Model):
         auths = [{"name": a.name, "url": a.url} for a in self.auths.all()]
 
         # first, we do the shuffle
-        data = { "msgs": votes }
-        response = mods.post('mixnet', entry_point=shuffle_url, baseurl=auth.url, json=data,
-                response=True)
+        data = {"msgs": votes}
+        response = mods.post(
+            "mixnet",
+            entry_point=shuffle_url,
+            baseurl=auth.url,
+            json=data,
+            response=True,
+        )
         if response.status_code != 200:
             # TODO: manage error
             pass
 
         # then, we can decrypt that
         data = {"msgs": response.json()}
-        response = mods.post('mixnet', entry_point=decrypt_url, baseurl=auth.url, json=data,
-                response=True)
+        response = mods.post(
+            "mixnet",
+            entry_point=decrypt_url,
+            baseurl=auth.url,
+            json=data,
+            response=True,
+        )
 
         if response.status_code != 200:
             # TODO: manage error
@@ -117,14 +138,10 @@ class Voting(models.Model):
                 votes = tally.count(opt.number)
             else:
                 votes = 0
-            opts.append({
-                'option': opt.option,
-                'number': opt.number,
-                'votes': votes
-            })
+            opts.append({"option": opt.option, "number": opt.number, "votes": votes})
 
-        data = { 'type': 'IDENTITY', 'options': opts }
-        postp = mods.post('postproc', json=data)
+        data = {"type": "IDENTITY", "options": opts}
+        postp = mods.post("postproc", json=data)
 
         self.postproc = postp
         self.save()

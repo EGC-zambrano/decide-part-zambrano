@@ -1,0 +1,223 @@
+:root {
+    --primary-color: #3498db;
+    --primary-dark-color: #2980b9;
+    --green-dark-color: #2ecc71;
+    --green-color: #69dd9a;
+    --red-dark-color: #e74c3c;
+    --red-color: #ef8b80;
+    --neutral-background: #f5f5f5;
+    --card-background: #ffffff;
+    --card-semi-transparent: rgba(255, 255, 255, 0.9);
+    --text-color: #333333 ;
+
+    --fuente1: 'Poppins', sans-serif;
+    --fuente3: 'Montserrat', sans-serif;
+    
+    --h1: 36px;
+}
+
+*, ::after, ::before {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+h1 { 
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500; 
+    font-size: var(--h1);
+}
+
+p {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 400; 
+}
+
+body {
+    color: var(--text-color);
+    font-size: var(--body-text);
+    font-family: var(--fuente3);
+    background-color: var(--neutral-background);
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    overflow-x: hidden;
+    min-height: 100vh;
+}
+
+header {
+    width: 100%;
+    height: 60px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: var(--primary-color);
+    box-shadow: hsla(0 0% 0% / 0.1) 0 0.5rem 1rem;  
+    display: flex;
+    flex-direction: row; 
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-link {
+    position: relative;
+    text-decoration: none;
+    color: var(--neutral-background);
+    padding: 20px;
+}
+
+.header-link:hover:after {
+    transform: scaleX(1.1);
+    transform-origin: bottom left;
+}
+
+.header-link:after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    bottom: 1px;
+    left: 0px;
+    transform: scaleX(0);
+    background: var(--neutral-background);
+    transform-origin: bottom left;
+    transition: transform 0.3s ease-out;
+}
+
+header h1 {
+    color: var(--neutral-background);
+    padding: 0 20px;
+    font-weight: bold;
+}
+
+header a {
+    position: relative;
+    text-decoration: none;
+    color: var(--neutral-background);
+    padding: 20px;
+}
+
+footer {
+    width: 100%;
+    height: 100px;
+    background-color: var(--text-color);
+    color: var(--neutral-background);
+    display: flex;
+    margin-top: auto;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+footer a{
+    color: var(--neutral-background);
+    cursor: pointer;
+}
+
+section {
+    display: flex;
+    flex-direction: column;
+    gap:20px
+}
+
+.content {
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    margin-top: 60px;
+}
+
+.btn {
+    color: var(--neutral-background);
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    font-family: var(--fuente3);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark-color);
+}
+
+.row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1em;
+}
+
+.row-apart {
+    justify-content: space-between;
+}
+
+.authenticated_icon {
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.authenticated_icon a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-decoration: none;
+}
+
+.material-icons {
+    font-size: 20px;
+    margin-right: 10px;
+}
+
+.authenticated_icon a span {
+    font-weight: bold;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+    margin-right: 5px;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: var(--primary-color);
+    min-width: 160px;
+    border: solid 1px var(--neutral-background);
+    border-radius: 10px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    right: 0.5em;
+}
+
+.dropdown-content a {
+    position: relative;
+    color: var(--neutral-background);
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    font-family: var(--fuente3);
+    border-radius: 10px;
+}
+
+.dropdown-content a:hover {
+    background-color: var(--neutral-background);
+    color: var(--black);
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+#trapdoor:after {
+    width: 0%;
+    transition: none;
+}

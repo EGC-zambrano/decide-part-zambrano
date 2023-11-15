@@ -1,0 +1,139 @@
+body {
+    background-image: url('https://cdn.discordapp.com/attachments/768216338128044042/1169219578153406545/iu.png?ex=65549b96&is=65422696&hm=904cdb4126f66caea56b7457820bee91b5689220fe9e9ef41ccd0bfb4d24c6e6&');
+    background-size: cover;
+    background-attachment: fixed;
+}
+
+header {
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.header h1 a {
+    color: var(--neutral-background);
+    padding: 0 20px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.card {
+    height: fit-content;
+    width: fit-content;
+    padding: 1.5em;
+    background-color: var(--card-background);
+    border-radius: 0.5em;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+.form-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    overflow-x: hidden;
+    margin: 50px 0;
+    background-color: var(--card-semi-transparent);
+}
+
+.form-confirmation {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+}
+
+.form-confirmation button {
+    font-size: 0.8em;
+}
+
+.form-msg p {
+    font-family: var(--fuente2);
+}
+
+.form-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: .5em;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5em;
+}
+
+.input-group input {
+    width: 20em;
+    padding: 8px;
+    margin-top: 5px;
+    border-radius: .25em;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+    color: var(--input-text);
+    font-family: var(--fuente2);
+}
+
+.input-group i{
+    text-size: 1.5em;
+}
+
+.form-confirmation {
+    display: flex;
+    margin: 1em auto 0 auto;
+    max-width: 50%;
+    justify-content: center;
+}
+
+.form-errors {
+    background-color: var(--red-color);
+    border: 1px solid var(--red-dark-color);
+    border-radius: 0.25em;
+    padding: 0.5em;
+    justify-content: center;
+}
+
+.remember-me {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: left;
+    margin: 0.5em;
+}
+
+.remember-me input {
+    border-radius: 0.25em;
+    box-shadow: 0 0 1px rgba(0, 0, 0, 0.5);
+}
+
+.remember-me p {
+    font-family: var(--fuente2);
+    font-size: 0.8em;
+}
+
+.login-google-button {
+    text-align: center;
+}
+
+.login-google-button a {
+    display: inline-block;
+    background-color: #fff; 
+    color: #888; 
+    text-decoration: none;
+    border: 1px solid #ccc; 
+    border-radius: 4px;
+    padding: 10px 20px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+}
+
+.login-google-button a:hover {
+    background-color: #f7f7f7e5; 
+}
+
+.login-google-button svg {
+    width: 24px; 
+    height: 24px;
+    margin-right: 10px; 
+    fill: #888; 
+}

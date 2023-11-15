@@ -1,57 +1,40 @@
 {% extends "base.html" %}
 {% load i18n static %}
 
+{% block title %}Visualizer{% endblock %}
+
+
 {% block extrahead %}
-    <link type="text/css" rel="stylesheet"
-         href="https://unpkg.com/bootstrap/dist/css/bootstrap.min.css" />
     <link type="text/css" rel="stylesheet" href="{% static "booth/style.css" %}" />
 {% endblock %}
 
 {% block content %}
     <div id="app-visualizer">
-        <!-- Navbar -->
-        <nav class="navbar navbar-dark bg-dark">
-            <div class="container-fluid">
-                <h1 class="navbar-brand">Decide</h1>
+        <h1>[[ voting.id ]] - [[ voting.name ]]</h1>
+
+        <h2 id="voting-not-started" v-if="!voting.start_date">Votación no comenzada</h2>
+        <h2 id="voting-open" v-else-if="!voting.end_date">Votación en curso</h2>
+        <div v-else class="show-charts"> 
+            <div class="charts">
+                <div class="chart">
+                    <canvas id="bar-chart"></canvas>
+                </div>
+                <div class="chart">
+                    <canvas id="pie-chart"></canvas>
+                </div>
             </div>
-        </nav>
-          
-
-        <div class="voting container">
-            <h1>[[ voting.id ]] - [[ voting.name ]]</h1>
-
-            <h2 v-if="!voting.start_date">Votación no comenzada</h2>
-            <h2 v-else-if="!voting.end_date">Votación en curso</h2>
-            <div v-else>
-                <h2 class="heading">Resultados:</h2>
-
-                <table class="table table-bordered table-striped">
-                    <thead>
-                        <tr>
-                            <th>Opción</th>
-                            <th>Puntuación</th>
-                            <th>Votos</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="opt in voting.postproc" :key="opt.number">
-                            <th>[[opt.option]]</th>
-                            <td>[[opt.postproc]]</td>
-                            <td class="text-muted">[[opt.votes]]</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
         </div>
     </div>
 {% endblock %}
 
-{% block extrabody %}
+{% block extrascripts %}
     <!-- Vuejs -->
     <script src="https://unpkg.com/vue"></script>
     <script src="https://unpkg.com/babel-polyfill@latest/dist/polyfill.min.js"></script>
     <script src="https://unpkg.com/bootstrap@5.2.2/dist/js/bootstrap.js"></script>
+
+    <!-- Chartjs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4"></script>
 
     <script>
         var voting = {{voting|safe}};
@@ -65,5 +48,79 @@
             }
         }).mount('#app-visualizer')
     </script>
-</body>
+
+    <script>
+        let labels = voting.postproc.map((opt) => opt.option)
+        let postproc = voting.postproc.map((opt) => opt.postproc)
+        let votes = voting.postproc.map((opt) => opt.votes)
+
+        let ctx = document.getElementById("bar-chart").getContext("2d");
+        let bar_chart = new Chart(ctx, {
+            type: "bar",
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                    label: "Puntuación",
+                    backgroundColor: 'rgba(84, 153, 199, 0.5)',
+                    borderColor: "#417690",
+                    data: postproc
+                    },
+                    {
+                    label: "Votos",
+                    backgroundColor: "rgba(19, 70, 103, 0.5)",
+                    borderColor: "#417690",
+                    data: votes
+                    }
+                ]
+            },
+            options: {
+                title: {
+                    text: voting.name,
+                    display: true
+                },
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true,
+                            stepSize: 1,
+                            max: 10
+                        }
+                    }]
+                }
+                
+            }
+        });
+        function getRandomColor() {
+            const r = Math.floor(Math.random() * 256);
+            const g = Math.floor(Math.random() * 256);
+            const b = Math.floor(Math.random() * 256);
+            const alpha = 0.5;  
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
+        let backgroundColors = Array.from({ length: votes.length }, () => getRandomColor());
+        ctx = document.getElementById("pie-chart").getContext("2d");
+        let pie_chart = new Chart(ctx, {
+            type: "pie",  
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: "Votos",
+                        backgroundColor: backgroundColors,
+                        borderColor: "#417690",
+                        data: votes
+                    }
+                ]
+            },
+            options: {
+                title: {
+                    text: voting.name,
+                    display: true
+                }
+            }
+        });
+
+    </script>
 {% endblock %}
