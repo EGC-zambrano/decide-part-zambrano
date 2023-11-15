@@ -179,7 +179,7 @@ class RegisterViewTestCase(TestCase):
         self.assertTrue(response.context["form"].errors)
 
     def test_post_user_already_exists(self):
-        existing_user = User.objects.create_user(
+        User.objects.create_user(
             username="existing_user",
             email="existing_user@example.com",
             password="existing_password",

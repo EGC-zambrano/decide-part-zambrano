@@ -1,6 +1,5 @@
 import itertools
 import random
-from datetime import datetime
 
 from base import mods
 from base.tests import BaseTestCase
@@ -8,16 +7,11 @@ from census.models import Census
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
-from django.test import TestCase
 from django.utils import timezone
 from mixnet.mixcrypt import ElGamal, MixCrypt
 from mixnet.models import Auth
-from rest_framework.test import APIClient, APITestCase
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
 from voting.models import Question, QuestionOption, Voting
 
 
@@ -299,7 +293,7 @@ class VotingTestCase(BaseTestCase):
         voter = voters.pop()
 
         clear = {}
-        for i in range(5):
+        for _ in range(5):
             selected_options = []
             for opt in v.question.options.all():
                 if random.choice([True, False]):
