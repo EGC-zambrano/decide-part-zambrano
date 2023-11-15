@@ -1,27 +1,24 @@
-import random
 import itertools
-from django.utils import timezone
-from django.conf import settings
-from django.contrib.auth.models import User
-from django.contrib.staticfiles.testing import StaticLiveServerTestCase
-from django.test import TestCase
-from rest_framework.test import APIClient
-from rest_framework.test import APITestCase
-
-from selenium import webdriver
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.keys import Keys
+import random
+from datetime import datetime
 
 from base import mods
 from base.tests import BaseTestCase
 from census.models import Census
-from mixnet.mixcrypt import ElGamal
-from mixnet.mixcrypt import MixCrypt
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from django.test import TestCase
+from django.utils import timezone
+from mixnet.mixcrypt import ElGamal, MixCrypt
 from mixnet.models import Auth
-from voting.models import Voting, Question, QuestionOption
-from datetime import datetime
+from rest_framework.test import APIClient, APITestCase
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from voting.models import Question, QuestionOption, Voting
 
 
 class VotingTestCase(BaseTestCase):
@@ -250,6 +247,82 @@ class VotingTestCase(BaseTestCase):
         response = self.client.put("/voting/{}/".format(voting.pk), data, format="json")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), "Voting reopened")
+
+    def test_multiple_option_voting(self):
+        v = (
+            self.create_voting_multiple_options()
+        )  # Add a new method to create a multiple option voting
+        self.create_voters(v)
+
+        v.create_pubkey()
+        v.start_date = timezone.now()
+        v.save()
+
+        clear = self.store_votes_multiple_options(v)
+
+        self.login()  # set token
+        v.tally_votes(self.token)
+
+        tally = v.tally
+        tally.sort()
+        tally = {k: len(list(x)) for k, x in itertools.groupby(tally)}
+
+        for q in v.question.options.all():
+            self.assertEqual(tally.get(q.number, 0), clear.get(q.number, 0))
+
+        for q in v.postproc:
+            self.assertEqual(tally.get(q["number"], 0), q["votes"])
+
+    def create_voting_multiple_options(self):
+        q = Question(
+            desc="test question multiple options", question_type="M"
+        )  # Specify question_type as 'M'
+        q.save()
+        for i in range(5):
+            opt = QuestionOption(
+                question=q, option="option {}".format(i + 1), number=i + 1
+            )
+            opt.save()
+        v = Voting(name="test voting multiple options", question=q)
+        v.save()
+
+        a, _ = Auth.objects.get_or_create(
+            url=settings.BASEURL, defaults={"me": True, "name": "test auth"}
+        )
+        a.save()
+        v.auths.add(a)
+
+        return v
+
+    def store_votes_multiple_options(self, v):
+        voters = list(Census.objects.filter(voting_id=v.id))
+        voter = voters.pop()
+
+        clear = {}
+        for i in range(5):
+            selected_options = []
+            for opt in v.question.options.all():
+                if random.choice([True, False]):
+                    selected_options.append(opt.number)
+                    clear[opt.number] = clear.get(opt.number, 0) + 1
+
+            encrypted_options = []
+            for option_number in selected_options:
+                a, b = self.encrypt_msg(option_number, v)
+                encrypted_options.append({"a": a, "b": b})
+
+            data = {
+                "voting": v.id,
+                "voter": voter.voter_id,
+                "vote": encrypted_options,
+            }
+
+            user = self.get_or_create_user(voter.voter_id)
+            self.login(user=user.username)
+            voter = voters.pop()
+            mods.post("store", json=data)
+
+        return clear
 
 
 class LogInSuccessTests(StaticLiveServerTestCase):
