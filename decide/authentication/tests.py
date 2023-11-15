@@ -199,3 +199,33 @@ class RegisterViewTestCase(TestCase):
             'Ya existe un usuario con este nombre.',
             response.context['form'].errors['username']
         )
+
+
+class ChangePasswordViewTestCase(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='passuser', password='testpass')
+        self.client.force_login(self.user)
+        self.url = reverse('change-password')
+
+    def test_change_password_view_success(self):
+        response = self.client.post(self.url, {
+            'old_password': 'testpass',
+            'new_password1': 'newtestpass',
+            'new_password2': 'newtestpass',
+        })
+        self.assertRedirects(response, expected_url='/')
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password('newtestpass'))
+
+    def test_change_password_view_failure(self):
+        response = self.client.post(self.url, {
+            'old_password': 'wrongpass',
+            'new_password1': 'newtestpass',
+            'new_password2': 'newtestpass',
+        })
+        self.assertIn(
+            'Su contraseña antigua es incorrecta. Por favor, vuelva a introducirla. ',
+            response.context['form'].errors['old_password']
+        )
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password('testpass'))
