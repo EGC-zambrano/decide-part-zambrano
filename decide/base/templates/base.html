@@ -15,13 +15,17 @@
     <body>
         <header class="header">
             <section class="row">
-                <h1>Decide</h1>
+                <h1><a id="trapdoor" href="/">Decide</a></h1>
                 <a href="/voting-list">Votaciones</a>
             </section>
             <!-- show profile icon if user is logged in -->
             {% if user.is_authenticated %}
                 <div class="authenticated_icon">
-                    <a href="/profile" class="material-icons">account_circle <p> {{user.username}}</p> </a>
+                    <a href="/logout">Cerrar Sesión</a>
+                    <a class="profile">
+                        <span href="/profile" class="material-icons">account_circle</span>
+                        <span>{{ user.username }}</span>
+                    </a>
                 </div>
             {% else %}
                 <div>
