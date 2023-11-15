@@ -210,3 +210,60 @@ class RegisterViewTestCase(StaticLiveServerTestCase):
         self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
 
         self.assertTrue(self.driver.title == "Decide | Registration")
+
+class ChangePasswordViewTestCase(StaticLiveServerTestCase):
+    def setUp(self):
+        self.base = BaseTestCase()
+        self.base.setUp()
+
+        # Opciones de Chrome
+        options = webdriver.ChromeOptions()
+        options.headless = True
+        options.add_argument("--no-sandbox")
+        self.driver = webdriver.Chrome(options=options)
+        self.user = User.objects.create_user(username="passuser", password="testpass")
+        super().setUp()
+
+        app = SocialApp.objects.create(
+            provider="google",
+            name="Google",
+            client_id="test",
+            secret="test",
+        )
+        # Add the current site to the SocialApp's sites
+        app.sites.add(Site.objects.get_current())
+
+    def tearDown(self):
+        super().tearDown()
+        self.driver.quit()
+
+        self.base.tearDown()
+
+    def test_change_password_view(self):
+        self.driver.get(f"{self.live_server_url}/signin")
+
+        self.assertTrue(len(self.driver.find_elements(By.ID, "id_username")) == 1)
+        self.assertTrue(len(self.driver.find_elements(By.ID, "id_password")) == 1)
+
+        self.driver.find_element(By.ID, "id_username").send_keys("passuser")
+        self.driver.find_element(By.ID, "id_password").send_keys("testpass")
+        self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
+
+
+        self.driver.get(f"{self.live_server_url}/change-password")
+
+
+        self.assertTrue(len(self.driver.find_elements(By.ID, "id_old_password")) == 1)
+        self.assertTrue(len(self.driver.find_elements(By.ID, "id_new_password1")) == 1)
+        self.assertTrue(len(self.driver.find_elements(By.ID, "id_new_password2")) == 1)
+
+        self.driver.find_element(By.ID, "id_old_password").send_keys("testpass")
+        self.driver.find_element(By.ID, "id_new_password1").send_keys("newtestpass")
+        self.driver.find_element(By.ID, "id_new_password2").send_keys("newtestpass")
+        self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
+
+        self.assertTrue(self.driver.title == "Decide | Homepage")
+
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password('newtestpass'))
+        
