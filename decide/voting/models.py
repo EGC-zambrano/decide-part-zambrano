@@ -15,7 +15,7 @@ class Question(models.Model):
     question_type = models.CharField(max_length=1, choices=QUESTION_TYPES, default="S")
     desc = models.TextField()
 
-    def save(self):
+    def save(self, **kwargs):
         super().save()
         enBlancoFilled = False
         if (
