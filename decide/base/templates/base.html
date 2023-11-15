@@ -16,7 +16,7 @@
     <header class="header">
         <section class="row">
             <h1><a id="trapdoor" href="/">Decide</a></h1>
-            <a href="/voting-list">Votaciones</a>
+            <a href="/voting-list" class="header-link">Votaciones</a>
         </section>
         <!-- show profile icon if user is logged in -->
         {% if user.is_authenticated %}
@@ -31,8 +31,8 @@
         </div>
         {% else %}
         <div>
-            <a href="/register">Registrarse</a>
-            <a href="/signin">Iniciar Sesión</a>
+            <a href="/register" class="header-link">Registrarse</a>
+            <a href="/signin" class="header-link">Iniciar Sesión</a>
         </div>
         {% endif %}
     </header>

@@ -60,19 +60,19 @@ header {
     align-items: center;
 }
 
-header a {
+.header-link {
     position: relative;
     text-decoration: none;
     color: var(--neutral-background);
-    padding: 20px
+    padding: 20px;
 }
 
-header a:hover:after {
+.header-link:hover:after {
     transform: scaleX(1.1);
     transform-origin: bottom left;
 }
 
-header a:after {
+.header-link:after {
     content: '';
     position: absolute;
     width: 100%;
@@ -89,6 +89,13 @@ header h1 {
     color: var(--neutral-background);
     padding: 0 20px;
     font-weight: bold;
+}
+
+header a {
+    position: relative;
+    text-decoration: none;
+    color: var(--neutral-background);
+    padding: 20px;
 }
 
 footer {
@@ -188,9 +195,11 @@ section {
     border-radius: 10px;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     z-index: 1;
+    right: 0.5em;
 }
 
 .dropdown-content a {
+    position: relative;
     color: var(--neutral-background);
     padding: 12px 16px;
     text-decoration: none;
