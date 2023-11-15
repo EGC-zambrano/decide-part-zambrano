@@ -1,6 +1,5 @@
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.views import PasswordChangeView
-from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import TemplateView
 from rest_framework.authtoken.models import Token
@@ -9,8 +8,6 @@ from rest_framework.views import APIView
 
 from .forms import LoginForm, RegisterForm
 from .serializers import UserSerializer
-
-from django.shortcuts import render, redirect
 
 
 # Non-api view
@@ -54,16 +51,11 @@ class GetUserView(APIView):
         return Response(UserSerializer(tk.user, many=False).data)
 
 
-class LogoutView(APIView):
-    def post(self, request):
-        key = request.data.get("token", "")
-        try:
-            tk = Token.objects.get(key=key)
-            tk.delete()
-        except ObjectDoesNotExist:
-            pass
-
-        return Response({})
+class LogoutView(TemplateView):
+    def get(self, request):
+        if request.user.is_authenticated:
+            logout(request)
+        return redirect("/")
 
 
 class RegisterView(APIView):

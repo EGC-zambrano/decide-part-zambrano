@@ -1,14 +1,12 @@
+from allauth.socialaccount.models import SocialApp
 from base import mods
 from django.contrib.auth.models import User
+from django.contrib.sites.models import Site
 from django.test import Client, TestCase
 from django.urls import reverse
-from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient, APITestCase
 
 from .forms import LoginForm, RegisterForm
-
-from allauth.socialaccount.models import SocialApp
-from django.contrib.sites.models import Site
 
 
 class AuthTestCase(APITestCase):
@@ -58,34 +56,34 @@ class AuthTestCase(APITestCase):
         response = self.client.post("/authentication/getuser/", token, format="json")
         self.assertEqual(response.status_code, 404)
 
-    def test_getuser_invalid_token(self):
-        data = {"username": "voter1", "password": "123"}
-        response = self.client.post("/authentication/login/", data, format="json")
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(Token.objects.filter(user__username="voter1").count(), 1)
 
-        token = response.json()
-        self.assertTrue(token.get("token"))
-
-        response = self.client.post("/authentication/logout/", token, format="json")
-        self.assertEqual(response.status_code, 200)
-
-        response = self.client.post("/authentication/getuser/", token, format="json")
-        self.assertEqual(response.status_code, 404)
+class LogoutViewTestCase(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.url = reverse("signin")
+        self.user = User.objects.create_user(username="testuser", password="testpass")
+        app = SocialApp.objects.create(
+            provider="google",
+            name="Google",
+            client_id="test",
+            secret="test",
+        )
+        # Add the current site to the SocialApp's sites
+        app.sites.add(Site.objects.get_current())
 
     def test_logout(self):
-        data = {"username": "voter1", "password": "123"}
-        response = self.client.post("/authentication/login/", data, format="json")
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(Token.objects.filter(user__username="voter1").count(), 1)
+        data = {"username": "testuser", "password": "testpass", "remember_me": False}
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
 
-        token = response.json()
-        self.assertTrue(token.get("token"))
+        response = self.client.get("/authentication/logout/")
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, "/")
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
 
-        response = self.client.post("/authentication/logout/", token, format="json")
-        self.assertEqual(response.status_code, 200)
-
-        self.assertEqual(Token.objects.filter(user__username="voter1").count(), 0)
+        response = self.client.get("/authentication/logout/")
+        self.assertEqual(response.status_code, 302)
 
 
 class LoginViewTestCase(TestCase):
@@ -196,36 +194,42 @@ class RegisterViewTestCase(TestCase):
         }
         response = self.client.post(self.url, data, follow=True)
         self.assertIn(
-            'Ya existe un usuario con este nombre.',
-            response.context['form'].errors['username']
+            "Ya existe un usuario con este nombre.",
+            response.context["form"].errors["username"],
         )
 
 
 class ChangePasswordViewTestCase(TestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username='passuser', password='testpass')
+        self.user = User.objects.create_user(username="passuser", password="testpass")
         self.client.force_login(self.user)
-        self.url = reverse('change-password')
+        self.url = reverse("change-password")
 
     def test_change_password_view_success(self):
-        response = self.client.post(self.url, {
-            'old_password': 'testpass',
-            'new_password1': 'newtestpass',
-            'new_password2': 'newtestpass',
-        })
-        self.assertRedirects(response, expected_url='/')
+        response = self.client.post(
+            self.url,
+            {
+                "old_password": "testpass",
+                "new_password1": "newtestpass",
+                "new_password2": "newtestpass",
+            },
+        )
+        self.assertRedirects(response, expected_url="/")
         self.user.refresh_from_db()
-        self.assertTrue(self.user.check_password('newtestpass'))
+        self.assertTrue(self.user.check_password("newtestpass"))
 
     def test_change_password_view_failure(self):
-        response = self.client.post(self.url, {
-            'old_password': 'wrongpass',
-            'new_password1': 'newtestpass',
-            'new_password2': 'newtestpass',
-        })
+        response = self.client.post(
+            self.url,
+            {
+                "old_password": "wrongpass",
+                "new_password1": "newtestpass",
+                "new_password2": "newtestpass",
+            },
+        )
         self.assertIn(
-            'Su contraseña antigua es incorrecta. Por favor, vuelva a introducirla. ',
-            response.context['form'].errors['old_password']
+            "Su contraseña antigua es incorrecta. Por favor, vuelva a introducirla. ",
+            response.context["form"].errors["old_password"],
         )
         self.user.refresh_from_db()
-        self.assertTrue(self.user.check_password('testpass'))
+        self.assertTrue(self.user.check_password("testpass"))
