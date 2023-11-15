@@ -1,18 +1,9 @@
-import datetime
-import time
-import random
-from allauth.socialaccount.models import SocialApp
-from base import mods
 from base.models import Auth
 from base.tests import BaseTestCase
-from census.models import Census
 from django.conf import settings
-from django.contrib.auth.models import User
-from django.contrib.sites.models import Site
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.utils import timezone
-from mixnet.mixcrypt import MixCrypt
-from mixnet.mixcrypt import ElGamal
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from voting.models import Question, Voting, QuestionOption
