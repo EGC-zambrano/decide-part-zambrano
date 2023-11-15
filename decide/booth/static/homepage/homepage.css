@@ -28,3 +28,7 @@ body {
 .content {
     margin-top: 0px;
 }
+
+.dropdown-content {
+    background-color: #be8c76;
+}

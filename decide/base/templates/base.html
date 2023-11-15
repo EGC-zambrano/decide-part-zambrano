@@ -1,50 +1,52 @@
 <!DOCTYPE html>
 {% load i18n static %}
 <html lang="es">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Decide | {% block title %}{% endblock %}</title>
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500&family=Open+Sans&family=Poppins:wght@500&display=swap" rel="stylesheet">        
-        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-        <link rel="stylesheet" href="{% static "base/style.css" %}">
-        {% block extrahead %}{% endblock %}
-    </head>
-    <body>
-        <header class="header">
-            <section class="row">
-                <h1><a id="trapdoor" href="/">Decide</a></h1>
-                <a href="/voting-list">Votaciones</a>
-            </section>
-            <!-- show profile icon if user is logged in -->
-            {% if user.is_authenticated %}
-                <div class="authenticated_icon">
-                    <a href="/logout">Cerrar Sesión</a>
-                    <a class="profile">
-                        <span href="/profile" class="material-icons">account_circle</span>
-                        <span>{{ user.username }}</span>
-                    </a>
-                </div>
-            {% else %}
-                <div>
-                    <a href="/register">Registrarse</a>
-                    <a href="/signin">Iniciar Sesión</a>
-                </div>
-            {% endif %}
-        </header>
-        <section class="content">
-            {% block content %}
-            {% endblock %}
-
-            {% block extrabody %}{% endblock %}
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Decide | {% block title %}{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500&family=Open+Sans&family=Poppins:wght@500&display=swap" rel="stylesheet">        
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="{% static "base/style.css" %}">
+    {% block extrahead %}{% endblock %}
+</head>
+<body>
+    <header class="header">
+        <section class="row">
+            <h1><a id="trapdoor" href="/">Decide</a></h1>
+            <a href="/voting-list" class="header-link">Votaciones</a>
         </section>
-        {% block extrascripts %}
+        <!-- show profile icon if user is logged in -->
+        {% if user.is_authenticated %}
+        <div class="dropdown">
+            <div class="authenticated_icon">
+                <a href="/profile" class="material-icons">account_circle<p>{{user.username}}</p></a></button>
+            </div>
+            <div class="dropdown-content">
+                <a href="/change-password">Cambiar Contraseña</a>
+                <a href="/logout">Cerrar Sesión</a>  
+            </div>
+        </div>
+        {% else %}
+        <div>
+            <a href="/register" class="header-link">Registrarse</a>
+            <a href="/signin" class="header-link">Iniciar Sesión</a>
+        </div>
+        {% endif %}
+    </header>
+    <section class="content">
+        {% block content %}
         {% endblock %}
-        <footer>
-            <p>&copy; 2023 Decide. Todos los derechos reservados.</p>
-            <a href="https://github.com/EGC-zambrano/decide-part-zambrano" target="_blank">GitHub</a>
-        </footer>
-    </body>
+        
+        {% block extrabody %}{% endblock %}
+    </section>
+    {% block extrascripts %}
+    {% endblock %}
+    <footer>
+        <p>&copy; 2023 Decide. Todos los derechos reservados.</p>
+        <a href="https://github.com/EGC-zambrano/decide-part-zambrano" target="_blank">GitHub</a>
+    </footer>
+</body>
 </html>

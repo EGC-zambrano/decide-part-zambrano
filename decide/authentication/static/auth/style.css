@@ -50,7 +50,7 @@ header {
 .form-content {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-end;
     gap: .5em;
 }
 
