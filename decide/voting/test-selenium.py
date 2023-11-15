@@ -79,7 +79,9 @@ class ReopenTestCase(StaticLiveServerTestCase):
         self.driver.find_element(By.NAME, "index").click()
         self.driver.find_element(By.NAME, "_selected_action").click()
         dropdown = self.driver.find_element(By.NAME, "action")
-        dropdown.find_element(By.XPATH, "//option[. = 'Reopen selected votings']").click()
+        dropdown.find_element(
+            By.XPATH, "//option[. = 'Reopen selected votings']"
+        ).click()
         element = self.driver.find_element(By.NAME, "action")
         actions = ActionChains(self.driver)
         actions.move_to_element(element).click_and_hold().perform()
@@ -91,4 +93,3 @@ class ReopenTestCase(StaticLiveServerTestCase):
         actions.move_to_element(element).release().perform()
         self.driver.find_element(By.NAME, "index").click()
         self.driver.find_element(By.CSS_SELECTOR, "button:nth-child(2)").click()
-    
