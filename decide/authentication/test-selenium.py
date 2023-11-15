@@ -251,7 +251,8 @@ class LogoutTestCase(StaticLiveServerTestCase):
 
         self.assertTrue(self.driver.title == "Decide | Homepage")
 
-        self.driver.find_element(By.LINK_TEXT, "Cerrar Sesión").click()
+        self.driver.get(f"{self.live_server_url}/logout")
+
         self.assertTrue(self.driver.title == "Decide | Homepage")
         self.assertTrue(
             len(self.driver.find_elements(By.LINK_TEXT, "Registrarse")) == 1
