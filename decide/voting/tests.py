@@ -19,6 +19,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from voting.models import Question, QuestionOption, Voting
+from selenium.webdriver.chrome.webdriver import WebDriver
 
 
 class VotingTestCase(BaseTestCase):
@@ -51,6 +52,34 @@ class VotingTestCase(BaseTestCase):
         v.auths.add(a)
 
         return v
+
+    def create_empty_voting(self):
+        q = Question(desc="test question")
+        q.save()
+        opt = QuestionOption(question=q, option="")
+        opt.save()
+        empty_v = Voting(name="test voting", question=q)
+        empty_v.save()
+
+        a, _ = Auth.objects.get_or_create(
+            url=settings.BASEURL, defaults={"me": True, "name": "test auth"}
+        )
+        a.save()
+        empty_v.auths.add(a)
+
+        return empty_v
+
+    def test_en_blanco_is_first_option(self):
+        v = self.create_voting()
+
+        # Retrieve the options for the voting's question
+        options = QuestionOption.objects.filter(question=v.question)
+
+        # Check if the first option is 'En blanco'
+        first_option = options.first()
+        self.assertEqual(
+            first_option.option, "En blanco", "En blanco is not the first option"
+        )
 
     def create_voters(self, v):
         for i in range(100):
@@ -110,6 +139,37 @@ class VotingTestCase(BaseTestCase):
 
         for q in v.postproc:
             self.assertEqual(tally.get(q["number"], 0), q["votes"])
+
+    def test_complete_empty_voting(self):
+        v = self.create_empty_voting()
+        self.create_voters(v)
+
+        v.create_pubkey()
+        v.start_date = timezone.now()
+        v.save()
+
+        clear = self.store_votes(v)
+
+        self.login()  # set token
+        v.tally_votes(self.token)
+
+        tally = v.tally
+        tally.sort()
+        tally = {k: len(list(x)) for k, x in itertools.groupby(tally)}
+
+        for q in v.question.options.all():
+            self.assertEqual(tally.get(q.number, 0), clear.get(q.number, 0))
+
+        for q in v.postproc:
+            self.assertEqual(tally.get(q["number"], 0), q["votes"])
+
+    def test_has_whitevote_option(self):
+        v = self.create_empty_voting()
+
+        blank_option = QuestionOption.objects.filter(
+            question=v.question, option="En blanco"
+        ).first()
+        self.assertIsNotNone(blank_option, "Empty option 'En blanco' not created")
 
     def test_create_voting_from_api(self):
         data = {"name": "Example"}
@@ -391,6 +451,7 @@ class QuestionsTests(StaticLiveServerTestCase):
         options = webdriver.ChromeOptions()
         options.headless = True
         self.driver = webdriver.Chrome(options=options)
+        self.cleaner: WebDriver = self.driver
 
         super().setUp()
 
@@ -429,75 +490,6 @@ class QuestionsTests(StaticLiveServerTestCase):
         self.assertTrue(
             self.cleaner.current_url == self.live_server_url + "/admin/voting/question/"
         )
-
-    def createQuestionWithBlankVote(self):
-        # Log in as an admin user
-        self.cleaner.get(self.live_server_url + "/admin/login/?next=/admin/")
-        self.cleaner.set_window_size(1280, 720)
-        self.cleaner.find_element(By.ID, "id_username").click()
-        self.cleaner.find_element(By.ID, "id_username").send_keys("decide")
-        self.cleaner.find_element(By.ID, "id_password").click()
-        self.cleaner.find_element(By.ID, "id_password").send_keys("decide")
-        self.cleaner.find_element(By.ID, "id_password").send_keys("Keys.ENTER")
-
-        self.cleaner.get(self.live_server_url + "/admin/voting/question/add/")
-
-        self.cleaner.find_element(By.ID, "id_desc").click()
-        self.cleaner.find_element(By.ID, "id_desc").send_keys("Test Question")
-        self.cleaner.find_element(By.NAME, "_save").click()
-
-        # Check if the 'Blank Vote' option is created
-        options = self.cleaner.find_elements(
-            By.CSS_SELECTOR, ".tabular .field-number input"
-        )
-        option_texts = self.cleaner.find_elements(
-            By.CSS_SELECTOR, ".tabular .field-option input"
-        )
-
-        option_data = [
-            (opt.get_attribute("value"), text.get_attribute("value"))
-            for opt, text in zip(options, option_texts)
-        ]
-
-        # Check if 'Blank Vote' option is present
-        self.assertIn(("1", "En blanco"), option_data)
-
-        self.assertEqual(len(option_data), 1)
-
-        self.assertTrue(
-            self.cleaner.current_url == self.live_server_url + "/admin/voting/question/"
-        )
-
-    def vote_with_blank_vote_option(self):
-        self.cleaner.get(self.live_server_url + "/admin/login/?next=/admin/")
-        self.cleaner.set_window_size(1280, 720)
-        self.cleaner.find_element(By.ID, "id_username").click()
-        self.cleaner.find_element(By.ID, "id_username").send_keys("decide")
-        self.cleaner.find_element(By.ID, "id_password").click()
-        self.cleaner.find_element(By.ID, "id_password").send_keys("decide")
-        self.cleaner.find_element(By.ID, "id_password").send_keys("Keys.ENTER")
-        self.cleaner.get(self.live_server_url + "/voting/")
-
-        # Assuming the 'Blank Vote' option is the first option
-        blank_vote_option = self.cleaner.find_element(
-            By.CSS_SELECTOR, ".voting-option:first-child"
-        )
-
-        # Click on the 'Blank Vote' option
-        blank_vote_option.click()
-
-        # Submit the vote
-        submit_button = self.cleaner.find_element(
-            By.ID, "submit-vote-button"
-        )  # Adjust the ID as needed
-        submit_button.click()
-
-        confirmation_message = self.cleaner.find_element(
-            By.CSS_SELECTOR, ".confirmation-message"
-        )
-
-        # Check if the confirmation message indicates a successful vote
-        self.assertIn("Vote submitted successfully", confirmation_message.text)
 
     def createCensusEmptyError(self):
         self.cleaner.get(self.live_server_url + "/admin/login/?next=/admin/")
