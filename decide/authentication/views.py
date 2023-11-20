@@ -12,6 +12,9 @@ from rest_framework.status import (
     HTTP_401_UNAUTHORIZED,
 )
 from rest_framework.views import APIView
+import os
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 
 from .forms import LoginForm, RegisterForm
 from .serializers import UserSerializer
@@ -75,6 +78,21 @@ class RegisterView(APIView):
         form = RegisterForm(request.POST)
 
         if form.is_valid():
+            print(form.cleaned_data.get("email"))
+            mailMessage = Mail(
+                from_email='decidezambrano@gmail.com',
+                to_emails=form.cleaned_data.get("email"),
+                )
+            mailMessage.dynamic_template_data = {}
+            mailMessage.template_id = "d-e468c8fe83504fa981029f794ae02c4e"
+            try:
+                sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+                response = sg.send(mailMessage)
+                print(response.status_code)
+                print(response.body)
+                print(response.headers)
+            except Exception as e:
+                print(e)
             form.save()
             return redirect("/signin")
         else:
