@@ -1,16 +1,9 @@
-from django.contrib.auth import authenticate, login
-from django.contrib.auth.models import User
-from django.core.exceptions import ObjectDoesNotExist
-from django.db import IntegrityError
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.views import PasswordChangeView
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import TemplateView
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
-from rest_framework.status import (
-    HTTP_201_CREATED,
-    HTTP_400_BAD_REQUEST,
-    HTTP_401_UNAUTHORIZED,
-)
 from rest_framework.views import APIView
 import base64
 import os
@@ -20,7 +13,7 @@ from .models import EmailCheck
 from .forms import LoginForm, RegisterForm
 from .serializers import UserSerializer
 from django.shortcuts import render, redirect
-
+from django.contrib.auth.models import User
 
 # Non-api view
 class LoginView(TemplateView):
@@ -39,6 +32,9 @@ class LoginView(TemplateView):
                 if not remember_me:
                     request.session.set_expiry(0)
 
+                next_url = request.GET.get("next", None)
+                if next_url:
+                    return redirect(next_url)
                 return redirect("/")
             else:
                 msg = "Credenciales incorrectas"
@@ -60,16 +56,11 @@ class GetUserView(APIView):
         return Response(UserSerializer(tk.user, many=False).data)
 
 
-class LogoutView(APIView):
-    def post(self, request):
-        key = request.data.get("token", "")
-        try:
-            tk = Token.objects.get(key=key)
-            tk.delete()
-        except ObjectDoesNotExist:
-            pass
-
-        return Response({})
+class LogoutView(TemplateView):
+    def get(self, request):
+        if request.user.is_authenticated:
+            logout(request)
+        return redirect("/")
 
 
 class RegisterView(APIView):
@@ -116,3 +107,8 @@ class EmailView(TemplateView):
             checkToAdd.emailChecked=True
             checkToAdd.save()
         return redirect("/")
+
+
+class ChangePasswordView(PasswordChangeView):
+    template_name = "authentication/change_password.html"
+    success_url = "/"
