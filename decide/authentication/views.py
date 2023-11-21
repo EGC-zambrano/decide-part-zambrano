@@ -12,14 +12,13 @@ from rest_framework.status import (
     HTTP_401_UNAUTHORIZED,
 )
 from rest_framework.views import APIView
+import base64
 import os
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
-
+from .models import EmailCheck
 from .forms import LoginForm, RegisterForm
 from .serializers import UserSerializer
-
-from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 
 
@@ -78,29 +77,42 @@ class RegisterView(APIView):
         form = RegisterForm(request.POST)
 
         if form.is_valid():
-            print(form.cleaned_data.get("email"))
+            
             mailMessage = Mail(
                 from_email='decidezambrano@gmail.com',
                 to_emails=form.cleaned_data.get("email"),
                 )
-            mailMessage.dynamic_template_data = {}
+            usernameToEncode = f'{form.cleaned_data.get("username")}'
+            encoded = base64.b64encode(bytes(usernameToEncode, encoding='utf-8')).decode('utf-8')
+            urlVerificar =f"{request.build_absolute_uri()}verificar/{encoded}"
+            mailMessage.dynamic_template_data = {"urlVerificar":urlVerificar}
             mailMessage.template_id = "d-e468c8fe83504fa981029f794ae02c4e"
             try:
                 sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
-                response = sg.send(mailMessage)
-                print(response.status_code)
-                print(response.body)
-                print(response.headers)
+                sg.send(mailMessage)
             except Exception as e:
                 print(e)
             form.save()
+            userToCheck = User.objects.get(username=usernameToEncode)
+            emailCheck = EmailCheck(user=userToCheck, emailChecked=False)
+            emailCheck.save()
             return redirect("/signin")
         else:
             return render(request, "authentication/register.html", {"form": form})
-
     def get(self, request):
         form = RegisterForm(None)
 
         return render(
             request, "authentication/register.html", {"form": form, "msg": None}
         )
+class EmailView(TemplateView):
+    def emailCheck(self, **kwargs):
+        encoded = kwargs.get("user_encode", 0)
+        print(self.user.username)
+        print(base64.b64decode(str(encoded)).decode('utf-8'))
+        if self.user.username == base64.b64decode(str(encoded)).decode('utf-8'):
+            checkToAdd =EmailCheck.objects.get(user=self.user)
+            print(checkToAdd.user.username)
+            checkToAdd.emailChecked=True
+            checkToAdd.save()
+        return redirect("/")
