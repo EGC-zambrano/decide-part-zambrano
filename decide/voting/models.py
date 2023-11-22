@@ -14,18 +14,22 @@ class Question(models.Model):
 
     question_type = models.CharField(max_length=1, choices=QUESTION_TYPES, default="S")
     desc = models.TextField()
+    voteBlank = models.BooleanField(default=False)
 
     def save(self, **kwargs):
         super().save()
-        enBlancoFilled = False
+
         if (
-            QuestionOption.objects.filter(
-                question__id=self.id, option__startswith="En blanco"
+            self.question_type == "S"
+            or self.question_type == "M"
+            and self.voteBlank
+            and QuestionOption.objects.filter(
+                question__id=self.id, option__startswith="Voto en blanco"
             ).count()
             == 0
         ):
             enBlanco = QuestionOption(
-                question=self, number=self.options.count() + 1, option="En blanco"
+                question=self, number=self.options.count() + 1, option="Voto En blanco"
             )
             enBlanco.save()
             self.options.add(enBlanco)
@@ -41,6 +45,7 @@ class QuestionOption(models.Model):
     )
     number = models.PositiveIntegerField(blank=True, null=True)
     option = models.TextField()
+    hidden = models.BooleanField(default=False)
 
     def save(self):
         if not self.number:
