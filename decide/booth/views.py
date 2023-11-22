@@ -18,7 +18,7 @@ def email_is_checked(request):
 @login_required(login_url="/signin")
 def voting_list(request):
     if not email_is_checked(request):
-        message = "Please, check you email and verify your account before trying to vote"
+        message = "Por favor, entra en tu email y verifica tu cuenta antes de votar."
         return index(request, message)
     votings_ids = Census.objects.filter(voter_id=request.user.id).values_list(
         "voting_id", flat=True

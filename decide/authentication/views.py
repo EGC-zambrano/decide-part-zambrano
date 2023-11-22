@@ -89,7 +89,7 @@ class RegisterView(APIView):
             userToCheck = User.objects.get(username=usernameToEncode)
             emailCheck = EmailCheck(user=userToCheck, emailChecked=False)
             emailCheck.save()
-            message = "One last step: Log in now and check your email."
+            message = "Un último paso: entra en tu cuenta y entra en tu email. Comprueba la carpeta \"Spam\"."
             return index(request, message)
         else:
             return render(request, "authentication/register.html", {"form": form})
@@ -109,9 +109,9 @@ class EmailView(TemplateView):
             print(checkToAdd.user.username)
             checkToAdd.emailChecked=True
             checkToAdd.save()
-            message = "Thank you for your time! Your account has been verified. Happy voting!"
+            message = "¡Muchas gracias! Tu cuenta ha sido verificada. ¡A votar!"
         else: 
-            message = "This is not your link to activate account!"
+            message = "¡Este no es tu link para activar tu cuenta!"
         return index(request, message)
 
 
