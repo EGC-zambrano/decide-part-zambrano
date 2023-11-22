@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('voting', '0006_remove_questionoption_question_type_and_more'),
+        ("voting", "0006_remove_questionoption_question_type_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='questionoption',
-            name='hidden',
+            model_name="questionoption",
+            name="hidden",
             field=models.BooleanField(default=False),
         ),
     ]

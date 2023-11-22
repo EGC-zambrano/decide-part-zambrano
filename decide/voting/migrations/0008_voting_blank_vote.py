@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('voting', '0007_questionoption_hidden'),
+        ("voting", "0007_questionoption_hidden"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='voting',
-            name='blank_vote',
-            field=models.BooleanField(default=False, verbose_name='Blank Vote'),
+            model_name="voting",
+            name="blank_vote",
+            field=models.BooleanField(default=False, verbose_name="Blank Vote"),
         ),
     ]
