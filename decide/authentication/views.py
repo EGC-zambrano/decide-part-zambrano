@@ -14,6 +14,8 @@ from .forms import LoginForm, RegisterForm
 from .serializers import UserSerializer
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
+from booth.views import index
+from django.contrib.sites.models import Site
 
 # Non-api view
 class LoginView(TemplateView):
@@ -75,8 +77,8 @@ class RegisterView(APIView):
                 )
             usernameToEncode = f'{form.cleaned_data.get("username")}'
             encoded = base64.b64encode(bytes(usernameToEncode, encoding='utf-8')).decode('utf-8')
-            urlVerificar =f"{request.build_absolute_uri()}verificar/{encoded}"
-            mailMessage.dynamic_template_data = {"urlVerificar":urlVerificar}
+            urlVerificar =f"{Site.objects.get_current().domain}/verificar/{encoded}"
+            mailMessage.dynamic_template_data = {"urlVerificar":urlVerificar, "username":f'{form.cleaned_data.get("username")}'}
             mailMessage.template_id = "d-e468c8fe83504fa981029f794ae02c4e"
             try:
                 sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
@@ -87,7 +89,8 @@ class RegisterView(APIView):
             userToCheck = User.objects.get(username=usernameToEncode)
             emailCheck = EmailCheck(user=userToCheck, emailChecked=False)
             emailCheck.save()
-            return redirect("/signin")
+            message = "One last step: Log in now and check your email."
+            return index(request, message)
         else:
             return render(request, "authentication/register.html", {"form": form})
     def get(self, request):
@@ -97,16 +100,19 @@ class RegisterView(APIView):
             request, "authentication/register.html", {"form": form, "msg": None}
         )
 class EmailView(TemplateView):
-    def emailCheck(self, **kwargs):
+    def emailCheck(request, **kwargs):
         encoded = kwargs.get("user_encode", 0)
-        print(self.user.username)
+        print(request.user.username)
         print(base64.b64decode(str(encoded)).decode('utf-8'))
-        if self.user.username == base64.b64decode(str(encoded)).decode('utf-8'):
-            checkToAdd =EmailCheck.objects.get(user=self.user)
+        if request.user.username == base64.b64decode(str(encoded)).decode('utf-8'):
+            checkToAdd =EmailCheck.objects.get(user=request.user)
             print(checkToAdd.user.username)
             checkToAdd.emailChecked=True
             checkToAdd.save()
-        return redirect("/")
+            message = "Thank you for your time! Your account has been verified. Happy voting!"
+        else: 
+            message = "This is not your link to activate account!"
+        return index(request, message)
 
 
 class ChangePasswordView(PasswordChangeView):

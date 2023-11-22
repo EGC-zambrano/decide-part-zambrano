@@ -10,6 +10,6 @@ urlpatterns = [
     path("getuser/", GetUserView.as_view()),
     path("accounts/", include("allauth.urls")),
     path("register/", RegisterView.as_view(), name="register"),
-    path("register/verificar/<str:user_encode>/", EmailView.emailCheck),
+    path("verificar/<str:user_encode>/", EmailView.emailCheck),
     path("change-password/", ChangePasswordView.as_view(), name="change-password"),
 ]

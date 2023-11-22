@@ -2,20 +2,24 @@ import json
 
 from base import mods
 from census.models import Census
+from authentication.models import EmailCheck
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.views.generic import TemplateView
 from voting.models import Voting
+def index(request, message=None):
+    return render(request, "booth/homepage.html", {"message":message})
 
-
-def index(request):
-    return render(request, "booth/homepage.html")
-
+def email_is_checked(request):
+    return EmailCheck.objects.get(user=request.user).emailChecked
 
 @login_required(login_url="/signin")
 def voting_list(request):
+    if not email_is_checked(request):
+        message = "Please, check you email and verify your account before trying to vote"
+        return index(request, message)
     votings_ids = Census.objects.filter(voter_id=request.user.id).values_list(
         "voting_id", flat=True
     )
