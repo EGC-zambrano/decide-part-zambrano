@@ -124,27 +124,63 @@ class Voting(models.Model):
             pass
 
         self.tally = response.json()
+        print("********response**********")
+        print(response.json())
         self.save()
 
         self.do_postproc()
 
     def do_postproc(self):
         tally = self.tally
+        print("******tally*******")
+        print(tally)
         options = self.question.options.all()
 
-        opts = []
-        for opt in options:
-            if isinstance(tally, list):
-                votes = tally.count(opt.number)
-            else:
-                votes = 0
-            opts.append({"option": opt.option, "number": opt.number, "votes": votes})
+        if self.question.question_type == "S":
+            opts = []
+            for opt in options:
+                if isinstance(tally, list):
+                    votes = tally.count(opt.number)
+                else:
+                    votes = 0
+                opts.append(
+                    {"option": opt.option, "number": opt.number, "votes": votes}
+                )
 
-        data = {"type": "IDENTITY", "options": opts}
-        postp = mods.post("postproc", json=data)
+            data = {"type": "IDENTITY", "options": opts}
+            postp = mods.post("postproc", json=data)
 
-        self.postproc = postp
-        self.save()
+            self.postproc = postp
+            self.save()
+
+        elif self.question.question_type == "P":
+            opts = []
+            vote_priority = {}
+            votes = {}
+            n_options = len(options)
+            for opt in options:
+                if isinstance(tally, list):
+                    for vote in tally:
+                        if vote[0] == opt.number:
+                            if vote[0] in vote_priority:
+                                vote_priority[vote[0]] += n_options - vote[1] + 1
+                                votes[vote[0]] += 1
+                            else:
+                                vote_priority[vote[0]] = n_options - vote[1] + 1
+                                votes[vote[0]] = 1
+                opts.append(
+                    {
+                        "option": opt.option,
+                        "number": opt.number,
+                        "votes": votes[opt.number],
+                        "points": vote_priority[opt.number],
+                    }
+                )
+            data = {"type": "IDENTITY", "options": opts}
+            postp = mods.post("postproc", json=data)
+
+            self.postproc = postp
+            self.save()
 
     def __str__(self):
         return self.name
