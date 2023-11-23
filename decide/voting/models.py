@@ -10,6 +10,7 @@ class Question(models.Model):
     QUESTION_TYPES = (
         ("S", "Single"),
         ("M", "Multiple"),
+        ("P", "Priority"),
     )
 
     question_type = models.CharField(max_length=1, choices=QUESTION_TYPES, default="S")
@@ -73,23 +74,43 @@ class Voting(models.Model):
         votes = mods.get(
             "store", params={"voting_id": self.id}, HTTP_AUTHORIZATION="Token " + token
         )
+        vote_list_p = []
         # anon votes
-        votes_format = []
-        vote_list = []
-        for vote in votes:
-            for option in vote["options"]:
-                votes_format.append(option["a"])
-                votes_format.append(option["b"])
-                vote_list.append(votes_format)
-                votes_format = []
-        return vote_list
+        if self.question.question_type == "S":
+            votes_format = []
+            vote_list = []
+            for vote in votes:
+                for option in vote["options"]:
+                    votes_format.append(option["a"])
+                    votes_format.append(option["b"])
+                    vote_list.append(votes_format)
+                    votes_format = []
+
+        elif self.question.question_type == "P":
+            votes_format = []
+            votes_format_p = []
+            vote_list = []
+            for vote in votes:
+                for option in vote["options"]:
+                    votes_format.append(option["a"])
+                    votes_format.append(option["b"])
+
+                    if option["p"]:
+                        votes_format_p.append(option["a"])
+                        votes_format_p.append(option["b"])
+                        votes_format_p.append(option["p"])
+                    vote_list.append(votes_format)
+                    vote_list_p.append(votes_format_p)
+                    votes_format = []
+                    votes_format_p = []
+        return vote_list, vote_list_p
 
     def tally_votes(self, token=""):
         """
         The tally is a shuffle and then a decrypt
         """
 
-        votes = self.get_votes(token)
+        votes, votes_p = self.get_votes(token)
 
         auth = self.auths.first()
         shuffle_url = "/shuffle/{}/".format(self.id)
@@ -97,7 +118,7 @@ class Voting(models.Model):
         auths = [{"name": a.name, "url": a.url} for a in self.auths.all()]
 
         # first, we do the shuffle
-        data = {"msgs": votes}
+        data = {"msgs": votes_p}
         response = mods.post(
             "mixnet",
             entry_point=shuffle_url,
@@ -124,16 +145,12 @@ class Voting(models.Model):
             pass
 
         self.tally = response.json()
-        print("********response**********")
-        print(response.json())
         self.save()
 
         self.do_postproc()
 
     def do_postproc(self):
         tally = self.tally
-        print("******tally*******")
-        print(tally)
         options = self.question.options.all()
 
         if self.question.question_type == "S":

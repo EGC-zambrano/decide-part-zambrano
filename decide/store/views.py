@@ -48,7 +48,11 @@ class StoreView(generics.ListAPIView):
         uid = request.data.get("voter")
         vote = request.data.get("vote")
 
-        if voting[0]["question"]["question_type"] == "M" and not isinstance(vote, list):
+        if (
+            voting[0]["question"]["question_type"] == "M"
+            or voting[0]["question"]["question_type"] == "P"
+            and not isinstance(vote, list)
+        ):
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
         if not vid or not uid or not vote:
@@ -102,6 +106,22 @@ class StoreView(generics.ListAPIView):
                     vote_option = VoteOption(vote=v)
                     vote_option.a = a
                     vote_option.b = b
+
+                    vote_option.save()
+                v.save()
+            elif voting[0]["question"]["question_type"] == "P":
+                v, _ = Vote.objects.get_or_create(voting_id=vid, voter_id=uid)
+                # Delete previous options
+                VoteOption.objects.filter(vote=v).delete()
+                for option in vote:
+                    a = option.get("a")
+                    b = option.get("b")
+                    p = option.get("p")
+
+                    vote_option = VoteOption(vote=v)
+                    vote_option.a = a
+                    vote_option.b = b
+                    vote_option.p = p
 
                     vote_option.save()
                 v.save()
