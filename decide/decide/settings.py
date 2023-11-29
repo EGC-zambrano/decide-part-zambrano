@@ -70,6 +70,8 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
+SOCIAL_AUTH_GITHUB_SCOPE = ["user:email"]
+
 
 LOGIN_REDIRECT_URL = "/"
 
