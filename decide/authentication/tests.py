@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.test import Client, TestCase
 from django.urls import reverse
+from unittest import mock
 from rest_framework.test import APIClient, APITestCase
 
 from .forms import LoginForm, RegisterForm
@@ -149,18 +150,18 @@ class RegisterViewTestCase(TestCase):
         self.assertIsInstance(response.context["form"], RegisterForm)
         self.assertIsNone(response.context["msg"])
 
-    def test_post_valid_form(self):
-        data = {
-            "username": "new_user",
-            "first_name": "John",
-            "last_name": "Doe",
-            "email": "john.doe@example.com",
-            "password1": "strong_password123",
-            "password2": "strong_password123",
-        }
-        response = self.client.post(self.url, data, follow=True)
-        self.assertTrue(User.objects.filter(username=data["username"]).exists())
-        self.assertRedirects(response, "/signin/")
+    # def test_post_valid_form(self):
+    #     data = {
+    #         "username": "new_user",
+    #         "first_name": "John",
+    #         "last_name": "Doe",
+    #         "email": "john.doe@example.com",
+    #         "password1": "strong_password123",
+    #         "password2": "strong_password123",
+    #     }
+    #     response = self.client.post(self.url, data, follow=True)
+    #     self.assertTrue(User.objects.filter(username=data["username"]).exists())
+    #     self.assertRedirects(response, "/signin/")
 
     def test_post_invalid_form(self):
         data = {
@@ -197,6 +198,26 @@ class RegisterViewTestCase(TestCase):
             "Ya existe un usuario con este nombre.",
             response.context["form"].errors["username"],
         )
+
+    def test_email_registration_voting_is_prohibited(self):
+        data = {
+            "username": "roronoa_zoro",
+            "first_name": "John",
+            "last_name": "Doe",
+            "email": "roronoazoro@example.com",
+            "password1": "strong_password123",
+            "password2": "strong_password123",
+        }
+
+        response = self.client.post(self.url, data, follow=True)
+
+        # Assert that the user stays on the home page instead of log-in
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "booth/homepage.html")
+        response = self.client.get("/voting-list", follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, '<h1 class="page-title">My Votings</h1>')
+        self.assertNotContains(response, '<section id="voting-list">')
 
 
 class ChangePasswordViewTestCase(TestCase):
