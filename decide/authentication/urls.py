@@ -11,4 +11,5 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     path("register/", RegisterView.as_view(), name="register"),
     path("change-password/", ChangePasswordView.as_view(), name="change-password"),
+    path("social-auth/", include("social_django.urls", namespace="social")),
 ]
