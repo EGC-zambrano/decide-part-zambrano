@@ -5,7 +5,6 @@ from django.contrib.sites.models import Site
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-import time
 
 
 class LoginPageTestCase(StaticLiveServerTestCase):
