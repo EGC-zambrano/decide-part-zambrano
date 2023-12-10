@@ -1,13 +1,13 @@
 from django.urls import path, include
 from rest_framework.authtoken.views import obtain_auth_token
 from django.contrib.auth.views import (
-    PasswordResetView,
     PasswordResetDoneView,
     PasswordResetConfirmView,
     PasswordResetCompleteView,
 )
 
 from .views import (
+    PasswordResetRequestView,
     GetUserView,
     LoginView,
     LogoutView,
@@ -23,30 +23,21 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     path("register/", RegisterView.as_view(), name="register"),
     path("change-password/", ChangePasswordView.as_view(), name="change-password"),
+    path("password_reset/", PasswordResetRequestView.as_view(), name="password_reset"),
     path(
-        "restore-password/",
-        PasswordResetView.as_view(template_name="authentication/password_reset.html"),
-        name="password_reset",
-    ),
-    path(
-        "restore-password/done/",
-        PasswordResetDoneView.as_view(
-            template_name="authentication/password_reset_done.html"
-        ),
+        "password_reset/done/",
+        PasswordResetDoneView.as_view(),
         name="password_reset_done",
     ),
     path(
         "reset/<uidb64>/<token>/",
-        PasswordResetConfirmView.as_view(
-            template_name="authentication/password_reset_confirm.html"
-        ),
+        PasswordResetConfirmView.as_view(),
         name="password_reset_confirm",
     ),
     path(
         "reset/done/",
-        PasswordResetCompleteView.as_view(
-            template_name="authentication/password_reset_complete.html"
-        ),
+        PasswordResetCompleteView.as_view(),
         name="password_reset_complete",
     ),
+    path("social-auth/", include("social_django.urls", namespace="social_auth")),
 ]
