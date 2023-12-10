@@ -1,10 +1,36 @@
 from allauth.socialaccount.models import SocialApp
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from base.tests import BaseTestCase
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+
+import os, time
+
+
+def click_captcha(driver):
+    # Wait for element with id recaptcha-anchor to be appear
+    WebDriverWait(driver, 10).until(
+        EC.frame_to_be_available_and_switch_to_it(
+            (
+                By.CSS_SELECTOR,
+                "iframe[name^='a-'][src^='https://www.google.com/recaptcha/api2/anchor?']",
+            )
+        )
+    )
+    WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.XPATH, "//span[@id='recaptcha-anchor']"))
+    ).click()  # Wait for element with id recaptcha-anchor to be present
+
+    # Wait, we use time.sleep because the element with id recaptcha-accessible-status is only present if we are running the tests in non-headless mode
+    # If we were running the tests in headless mode, we could wait for the element with id recaptcha-anchor to have text "verficado"
+    time.sleep(2)
+
+    # Return to default content
+    driver.switch_to.default_content()
 
 
 class LoginPageTestCase(StaticLiveServerTestCase):
@@ -29,6 +55,9 @@ class LoginPageTestCase(StaticLiveServerTestCase):
         # Add the current site to the SocialApp's sites
         app.sites.add(Site.objects.get_current())
 
+        # Enable recaptcha
+        os.environ["DISABLE_RECAPTCHA"] = "0"
+
     def tearDown(self):
         super().tearDown()
         self.driver.quit()
@@ -43,6 +72,7 @@ class LoginPageTestCase(StaticLiveServerTestCase):
 
         self.driver.find_element(By.ID, "id_username").send_keys("testuser")
         self.driver.find_element(By.ID, "id_password").send_keys("testpass")
+        click_captcha(self.driver)
         self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
 
         self.assertTrue(self.driver.title == "Decide | Homepage")
@@ -55,6 +85,7 @@ class LoginPageTestCase(StaticLiveServerTestCase):
 
         self.driver.find_element(By.ID, "id_username").send_keys("testuser")
         self.driver.find_element(By.ID, "id_password").send_keys("wrongpass")
+        click_captcha(self.driver)
         self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
 
         self.assertTrue(self.driver.title == "Decide | Login")
@@ -85,6 +116,9 @@ class LoginGoogleTestCase(StaticLiveServerTestCase):
         )
         # Add the current site to the SocialApp's sites
         app.sites.add(Site.objects.get_current())
+
+        # Disable recaptcha
+        os.environ["DISABLE_RECAPTCHA"] = "1"
 
     def tearDown(self):
         super().tearDown()
@@ -123,6 +157,9 @@ class LoginGithubTestCase(StaticLiveServerTestCase):
         # Add the current site to the SocialApp's sites
         app.sites.add(Site.objects.get_current())
 
+        # Disable recaptcha
+        os.environ["DISABLE_RECAPTCHA"] = "1"
+
     def tearDown(self):
         super().tearDown()
         self.driver.quit()
@@ -158,6 +195,9 @@ class RegisterViewTestCase(StaticLiveServerTestCase):
         # Add the current site to the SocialApp's sites
         app.sites.add(Site.objects.get_current())
 
+        # Enable recaptcha
+        os.environ["DISABLE_RECAPTCHA"] = "0"
+
     def tearDown(self):
         super().tearDown()
         self.driver.quit()
@@ -180,6 +220,7 @@ class RegisterViewTestCase(StaticLiveServerTestCase):
         self.driver.find_element(By.ID, "id_email").send_keys("john.doe@example.com")
         self.driver.find_element(By.ID, "id_password1").send_keys("strong_password123")
         self.driver.find_element(By.ID, "id_password2").send_keys("strong_password123")
+        click_captcha(self.driver)
         self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
 
         self.assertTrue(self.driver.title == "Decide | Login")
@@ -200,6 +241,7 @@ class RegisterViewTestCase(StaticLiveServerTestCase):
         self.driver.find_element(By.ID, "id_email").send_keys("john")
         self.driver.find_element(By.ID, "id_password1").send_keys("strong_password")
         self.driver.find_element(By.ID, "id_password2").send_keys("strong_password123")
+        click_captcha(self.driver)
         self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
 
         self.assertTrue(self.driver.title == "Decide | Registration")
@@ -220,6 +262,7 @@ class RegisterViewTestCase(StaticLiveServerTestCase):
         self.driver.find_element(By.ID, "id_email").send_keys("john@doe.com")
         self.driver.find_element(By.ID, "id_password1").send_keys("2short")
         self.driver.find_element(By.ID, "id_password2").send_keys("2short")
+        click_captcha(self.driver)
         self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
 
         self.assertTrue(self.driver.title == "Decide | Registration")
@@ -240,6 +283,7 @@ class RegisterViewTestCase(StaticLiveServerTestCase):
         self.driver.find_element(By.ID, "id_email").send_keys("john@doe.com")
         self.driver.find_element(By.ID, "id_password1").send_keys("strong_password123")
         self.driver.find_element(By.ID, "id_password2").send_keys("strong_password123")
+        click_captcha(self.driver)
         self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
 
         self.assertTrue(self.driver.title == "Decide | Registration")
@@ -266,6 +310,9 @@ class LogoutTestCase(StaticLiveServerTestCase):
         )
         # Add the current site to the SocialApp's sites
         app.sites.add(Site.objects.get_current())
+
+        # Disable recaptcha
+        os.environ["DISABLE_RECAPTCHA"] = "1"
 
     def tearDown(self):
         super().tearDown()
@@ -317,6 +364,9 @@ class ChangePasswordViewTestCase(StaticLiveServerTestCase):
         )
         # Add the current site to the SocialApp's sites
         app.sites.add(Site.objects.get_current())
+
+        # Disable recaptcha
+        os.environ["DISABLE_RECAPTCHA"] = "1"
 
     def tearDown(self):
         super().tearDown()

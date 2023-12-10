@@ -1,4 +1,4 @@
-import datetime
+import datetime, os
 
 from allauth.socialaccount.models import SocialApp
 from base.models import Auth
@@ -94,6 +94,9 @@ class VotingListViewTestCase(StaticLiveServerTestCase):
         options = webdriver.ChromeOptions()
         options.headless = True
         self.driver = webdriver.Chrome(options=options)
+
+        # Disable recaptcha
+        os.environ["DISABLE_RECAPTCHA"] = "1"
 
         super().setUp()
 

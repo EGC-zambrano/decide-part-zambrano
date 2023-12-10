@@ -6,14 +6,19 @@ from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .forms import LoginForm, RegisterForm
+from .forms import LoginForm, RegisterForm, TestLoginForm, TestRegisterForm
 from .serializers import UserSerializer
+
+import os
 
 
 # Non-api view
 class LoginView(TemplateView):
     def post(self, request):
-        form = LoginForm(request.POST)
+        if int(os.environ.get("DISABLE_RECAPTCHA", "0")):
+            form = TestLoginForm(request.POST)
+        else:
+            form = LoginForm(request.POST)
 
         msg = None
 
@@ -39,7 +44,10 @@ class LoginView(TemplateView):
         return render(request, "authentication/login.html", {"form": form, "msg": msg})
 
     def get(self, request):
-        form = LoginForm(None)
+        if int(os.environ.get("DISABLE_RECAPTCHA", "0")):
+            form = TestLoginForm(None)
+        else:
+            form = LoginForm(None)
 
         return render(request, "authentication/login.html", {"form": form, "msg": None})
 
@@ -60,7 +68,10 @@ class LogoutView(TemplateView):
 
 class RegisterView(APIView):
     def post(self, request):
-        form = RegisterForm(request.POST)
+        if int(os.environ.get("DISABLE_RECAPTCHA", "0")):
+            form = TestRegisterForm(request.POST)
+        else:
+            form = RegisterForm(request.POST)
 
         if form.is_valid():
             form.save()
@@ -69,7 +80,10 @@ class RegisterView(APIView):
             return render(request, "authentication/register.html", {"form": form})
 
     def get(self, request):
-        form = RegisterForm(None)
+        if int(os.environ.get("DISABLE_RECAPTCHA", "0")):
+            form = TestRegisterForm()
+        else:
+            form = RegisterForm()
 
         return render(
             request, "authentication/register.html", {"form": form, "msg": None}
