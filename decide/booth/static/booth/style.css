@@ -60,8 +60,20 @@ table {
     height: fit-content;
     width: fit-content;
     padding: 1em;
-    background-color: #efefef;
+    background-color: #ead4ca;
     border-radius: 0.5em;
+}
+
+.card-voting {
+    height: 25em;
+    width:50em;
+    align-self: center;
+    background-color: #ead4ca;
+    padding: 1em;
+    margin: 50px;
+    border-radius: 0.5em;
+    gap: 20px;
+    position: relative;
 }
 
 .voting-card {
@@ -76,7 +88,7 @@ table {
 }
 
 .voting-card:hover {
-    background-color: #e0e0e0;
+    background-color: #e5cfc6;
     cursor: pointer;
     transform: scale(1.01);
 }
@@ -125,4 +137,36 @@ table {
 
 .no-votings {
     width: 100%;
+}
+
+.btn-vote {
+    background-color: var(--primary-color);
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    margin-bottom: 20px;
+    margin-right: 20px;
+}
+
+.btn-vote:hover {
+    background-color: var(--primary-dark-color);
+}
+
+.voting-title {
+    font-weight: bold;
+    margin-left: 20px;
+}
+
+.voting-desc {
+    margin-left: 20px;
+    margin-top: 10px;
+}
+
+.voting-options {
+    margin-left: 20px;
+    margin-top: 20px;
+}
+
+.form-options {
+    margin-bottom: 15px;
 }

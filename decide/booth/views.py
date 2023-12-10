@@ -4,10 +4,11 @@ from base import mods
 from census.models import Census
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, get_list_or_404
 from django.views.generic import TemplateView
-from voting.models import Voting
+from voting.models import Voting, QuestionOption, Question
 
 
 def index(request):
@@ -26,7 +27,8 @@ def voting_list(request):
     return render(request, "booth/voting-list.html", {"user_votings": user_votings})
 
 
-class BoothView(TemplateView):
+class BoothView(LoginRequiredMixin, TemplateView):
+    login_url = '/signin'
     template_name = "booth/booth.html"
 
     def get_context_data(self, **kwargs):
@@ -47,3 +49,14 @@ class BoothView(TemplateView):
         context["KEYBITS"] = settings.KEYBITS
 
         return context
+    
+    def get(self, request, voting_id, **kwargs):
+        user = request.user
+        voting = get_object_or_404(Voting, pk=voting_id)
+        question_type = voting.question.question_type
+        options = voting.question.options.all()
+        try:
+            Census.objects.get(voting_id=voting_id, voter_id=user.id)
+        except Census.DoesNotExist:
+            raise Http404
+        return render(request, "booth/booth.html", {"voting": voting, "options": options, "question_type": question_type})
