@@ -8,7 +8,6 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.test import Client, TestCase
-from django.urls import reverse
 from django.utils import timezone
 from voting.models import Question, Voting
 

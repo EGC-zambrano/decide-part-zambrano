@@ -4,7 +4,6 @@ from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.test import Client, TestCase
 from django.urls import reverse
-from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient, APITestCase
 
 from .forms import LoginForm, RegisterForm
@@ -180,7 +179,7 @@ class RegisterViewTestCase(TestCase):
         self.assertTrue(response.context["form"].errors)
 
     def test_post_user_already_exists(self):
-        existing_user = User.objects.create_user(
+        User.objects.create_user(
             username="existing_user",
             email="existing_user@example.com",
             password="existing_password",
@@ -195,6 +194,42 @@ class RegisterViewTestCase(TestCase):
         }
         response = self.client.post(self.url, data, follow=True)
         self.assertIn(
-            "A user with that username already exists.",
+            "Ya existe un usuario con este nombre.",
             response.context["form"].errors["username"],
         )
+
+
+class ChangePasswordViewTestCase(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="passuser", password="testpass")
+        self.client.force_login(self.user)
+        self.url = reverse("change-password")
+
+    def test_change_password_view_success(self):
+        response = self.client.post(
+            self.url,
+            {
+                "old_password": "testpass",
+                "new_password1": "newtestpass",
+                "new_password2": "newtestpass",
+            },
+        )
+        self.assertRedirects(response, expected_url="/")
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password("newtestpass"))
+
+    def test_change_password_view_failure(self):
+        response = self.client.post(
+            self.url,
+            {
+                "old_password": "wrongpass",
+                "new_password1": "newtestpass",
+                "new_password2": "newtestpass",
+            },
+        )
+        self.assertIn(
+            "Su contraseña antigua es incorrecta. Por favor, vuelva a introducirla. ",
+            response.context["form"].errors["old_password"],
+        )
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password("testpass"))

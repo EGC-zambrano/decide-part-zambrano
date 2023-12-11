@@ -1,5 +1,4 @@
 import datetime
-import time
 
 from allauth.socialaccount.models import SocialApp
 from base.models import Auth

@@ -1,15 +1,10 @@
 import datetime
 import random
 
-from base import mods
-from base.models import Auth
 from base.tests import BaseTestCase
 from census.models import Census
 from django.contrib.auth.models import User
-from django.test import TestCase
 from django.utils import timezone
-from mixnet.models import Key
-from rest_framework.test import APIClient, APITestCase
 from voting.models import Question, Voting
 
 from .models import Vote
@@ -177,7 +172,7 @@ class StoreTextCase(BaseTestCase):
         self.assertEqual(len(votes), Vote.objects.filter(voter_id=v).count())
 
     def test_hasvote(self):
-        votings, voters = self.gen_votes_single()
+        self.gen_votes_single()
         vo = Vote.objects.first()
         v = vo.voting_id
         u = vo.voter_id
