@@ -103,6 +103,40 @@ class LoginGoogleTestCase(StaticLiveServerTestCase):
         )
 
 
+class LoginGithubTestCase(StaticLiveServerTestCase):
+    def setUp(self):
+        self.base = BaseTestCase()
+        self.base.setUp()
+
+        # Opciones de Chrome
+        options = webdriver.ChromeOptions()
+        options.headless = True
+        self.driver = webdriver.Chrome(options=options)
+        self.user = User.objects.create_user(username="testuser", password="testpass")
+        super().setUp()
+
+        app = SocialApp.objects.create(
+            provider="google",
+            name="Google",
+            client_id="test",
+            secret="test",
+        )
+        # Add the current site to the SocialApp's sites
+        app.sites.add(Site.objects.get_current())
+
+    def tearDown(self):
+        super().tearDown()
+        self.driver.quit()
+
+        self.base.tearDown()
+
+    def test_sucessful_login(self):
+        self.driver.get(f"{self.live_server_url}/signin")
+
+        self.driver.find_element(By.CLASS_NAME, "github-button").click()
+        self.assertTrue(self.driver.current_url.startswith("https://github.com/login"))
+
+
 class RegisterViewTestCase(StaticLiveServerTestCase):
     def setUp(self):
         self.base = BaseTestCase()

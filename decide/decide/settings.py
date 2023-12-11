@@ -34,6 +34,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 SITE_ID = int(os.getenv("DJANGO_SITE_ID", "2"))
+SOCIAL_AUTH_GITHUB_KEY = os.getenv("GITHUB_KEY", "")
+SOCIAL_AUTH_GITHUB_SECRET = os.getenv("GITHUB_SECRET", "")
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -53,6 +55,7 @@ INSTALLED_APPS = [
     "allauth.account",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
+    "social_django",
 ]
 
 SOCIALACCOUNT_PROVIDERS = {
@@ -67,8 +70,11 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
+SOCIAL_AUTH_GITHUB_SCOPE = ["user:email"]
+
 
 LOGIN_REDIRECT_URL = "/"
+
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -82,6 +88,7 @@ AUTHENTICATION_BACKENDS = [
     "base.backends.AuthBackend",
     "django.contrib.auth.backends.ModelBackend",
     "allauth.account.auth_backends.AuthenticationBackend",
+    "social_core.backends.github.GithubOAuth2",
 ]
 
 MODULES = [
@@ -107,6 +114,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
+    "social_django.middleware.SocialAuthExceptionMiddleware",
 ]
 
 ROOT_URLCONF = "decide.urls"
@@ -122,6 +130,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "social_django.context_processors.backends",
             ],
         },
     },

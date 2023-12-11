@@ -13,4 +13,5 @@ selenium==4.7.2
 django-allauth 
 python-dotenv
 pynose==1.4.8
+social-auth-app-django
 sendgrid
