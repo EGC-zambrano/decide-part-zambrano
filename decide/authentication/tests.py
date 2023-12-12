@@ -150,18 +150,19 @@ class RegisterViewTestCase(TestCase):
         self.assertIsInstance(response.context["form"], RegisterForm)
         self.assertIsNone(response.context["msg"])
 
-    # def test_post_valid_form(self):
-    #     data = {
-    #         "username": "new_user",
-    #         "first_name": "John",
-    #         "last_name": "Doe",
-    #         "email": "john.doe@example.com",
-    #         "password1": "strong_password123",
-    #         "password2": "strong_password123",
-    #     }
-    #     response = self.client.post(self.url, data, follow=True)
-    #     self.assertTrue(User.objects.filter(username=data["username"]).exists())
-    #     self.assertRedirects(response, "/signin/")
+    def test_post_valid_form(self):
+        data = {
+            "username": "new_user",
+            "first_name": "John",
+            "last_name": "Doe",
+            "email": "john.doe@example.com",
+            "password1": "strong_password123",
+            "password2": "strong_password123",
+        }
+        response = self.client.post(self.url, data, follow=True)
+        self.assertTrue(User.objects.filter(username=data["username"]).exists())
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "booth/homepage.html")
 
     def test_post_invalid_form(self):
         data = {
