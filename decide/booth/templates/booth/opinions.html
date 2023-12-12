@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}Opinions{% endblock %}
+
+{% block extrahead %}   
+    <link rel="stylesheet" href="{% static "booth/style.css" %}">
+{% endblock %}
+
+{% block content %}
+    <section class="vertical-list">
+        <h1>{{voting.name}}</h1>
+        <h2>Añadir opinión</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.text }}
+            <button id="submit-opinion" type="submit">Enviar</button>
+        </form>
+        {% if opinions %}
+            <h2>Opiniones</h2>
+            <section id="voting-list">
+                {% for opinion in opinions.all %}
+                    <article class="card opinion-card">
+                        <p>{{opinion.text}}</p>
+                        <p id="date">{{opinion.date}}</p>
+                    </article>
+                {% endfor %}
+            </section>
+        {% else %}
+            <h2>No hay opiniones en esta votación</h2>
+        {% endif %}
+    </section>
+{% endblock %}
