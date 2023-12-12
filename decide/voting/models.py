@@ -24,12 +24,12 @@ class Question(models.Model):
             or self.question_type == "M"
             and self.voteBlank
             and QuestionOption.objects.filter(
-                question__id=self.id, option__startswith="Voto en blanco"
+                question__id=self.id, option__startswith="Voto En Blanco"
             ).count()
             == 0
         ):
             enBlanco = QuestionOption(
-                question=self, number=self.options.count() + 1, option="Voto En blanco"
+                question=self, number=self.options.count() + 1, option="Voto En Blanco"
             )
             enBlanco.save()
             self.options.add(enBlanco)
@@ -153,13 +153,27 @@ class Voting(models.Model):
         tally = self.tally
         options = self.question.options.all()
 
+        # Check if voteBlank is True and there is more than one option selected
+        if self.question.voteBlank and len(options) > 1:
+            # Skip the blank vote (-1) in the tally
+            options = [opt for opt in options if opt.number != -1]
+
         opts = []
         for opt in options:
             if isinstance(tally, list):
                 votes = tally.count(opt.number)
             else:
                 votes = 0
-            opts.append({"option": opt.option, "number": opt.number, "votes": votes})
+            if self.question.voteBlank:
+                opts.append(
+                    {"option": opt.option, "number": opt.number, "votes": votes}
+                )
+            else:
+                # If voteBlank is False and opt.number is -1, skip tallying this vote
+                if opt.number > 0:
+                    opts.append(
+                        {"option": opt.option, "number": opt.number, "votes": votes}
+                    )
 
         data = {"type": "IDENTITY", "options": opts}
         postp = mods.post("postproc", json=data)
