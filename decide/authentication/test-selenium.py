@@ -183,7 +183,7 @@ class RegisterViewTestCase(StaticLiveServerTestCase):
         self.driver.find_element(By.ID, "id_password2").send_keys("strong_password123")
         self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
 
-        self.assertNotEqual(self.driver.title, "Decide | Login")
+        self.assertEqual(self.driver.title, "Decide | Homepage")
 
     def test_failed_registration(self):
         self.driver.get(f"{self.live_server_url}/register")
