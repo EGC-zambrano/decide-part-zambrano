@@ -20,8 +20,7 @@ class Question(models.Model):
         super().save()
 
         if (
-            self.question_type == "S"
-            or self.question_type == "M"
+            (self.question_type == "S" or self.question_type == "M")
             and self.voteBlank
             and QuestionOption.objects.filter(
                 question__id=self.id, option__startswith="Voto En Blanco"
@@ -103,6 +102,7 @@ class Voting(models.Model):
                 votes_format.append(option["b"])
                 vote_list.append(votes_format)
                 votes_format = []
+
         return vote_list
 
     def tally_votes(self, token=""):
@@ -145,6 +145,7 @@ class Voting(models.Model):
             pass
 
         self.tally = response.json()
+        print(self.tally)
         self.save()
 
         self.do_postproc()
@@ -153,10 +154,10 @@ class Voting(models.Model):
         tally = self.tally
         options = self.question.options.all()
 
-        # Check if voteBlank is True and there is more than one option selected
-        if self.question.voteBlank and len(options) > 1:
-            # Skip the blank vote (-1) in the tally
-            options = [opt for opt in options if opt.number != -1]
+        selected_options = [opt for opt in options if tally.count(opt.number) > 0]
+        print(selected_options)
+        if self.question.voteBlank and len(selected_options) > 1:
+            options = [opt for opt in options if opt.option == "Voto En Blanco"]
 
         opts = []
         for opt in options:
@@ -169,8 +170,12 @@ class Voting(models.Model):
                     {"option": opt.option, "number": opt.number, "votes": votes}
                 )
             else:
-                # If voteBlank is False and opt.number is -1, skip tallying this vote
-                if opt.number > 0:
+                if (
+                    opt.option != "Voto En Blanco"
+                    and opt.option != "voto en blanco"
+                    and opt.option != "en blanco"
+                    and opt.option != "En Blanco"
+                ):
                     opts.append(
                         {"option": opt.option, "number": opt.number, "votes": votes}
                     )
