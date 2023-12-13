@@ -17,6 +17,7 @@ from django.contrib.auth.models import User
 from booth.views import index
 from django.contrib.sites.models import Site
 
+
 # Non-api view
 class LoginView(TemplateView):
     def post(self, request):
@@ -70,18 +71,22 @@ class RegisterView(APIView):
         form = RegisterForm(request.POST)
 
         if form.is_valid():
-            
             mailMessage = Mail(
-                from_email='decidezambrano@gmail.com',
+                from_email="decidezambrano@gmail.com",
                 to_emails=form.cleaned_data.get("email"),
-                )
+            )
             usernameToEncode = f'{form.cleaned_data.get("username")}'
-            encoded = base64.b64encode(bytes(usernameToEncode, encoding='utf-8')).decode('utf-8')
-            urlVerificar =f"{Site.objects.get_current().domain}/verificar/{encoded}"
-            mailMessage.dynamic_template_data = {"urlVerificar":urlVerificar, "username":f'{form.cleaned_data.get("username")}'}
+            encoded = base64.b64encode(
+                bytes(usernameToEncode, encoding="utf-8")
+            ).decode("utf-8")
+            urlVerificar = f"{Site.objects.get_current().domain}/verificar/{encoded}"
+            mailMessage.dynamic_template_data = {
+                "urlVerificar": urlVerificar,
+                "username": f'{form.cleaned_data.get("username")}',
+            }
             mailMessage.template_id = "d-e468c8fe83504fa981029f794ae02c4e"
             try:
-                sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+                sg = SendGridAPIClient(os.environ.get("SENDGRID_API_KEY"))
                 sg.send(mailMessage)
             except Exception as e:
                 print(e)
@@ -89,28 +94,31 @@ class RegisterView(APIView):
             userToCheck = User.objects.get(username=usernameToEncode)
             emailCheck = EmailCheck(user=userToCheck, emailChecked=False)
             emailCheck.save()
-            message = "Un último paso: entra en tu cuenta y entra en tu email. Comprueba la carpeta \"Spam\"."
+            message = 'Un último paso: entra en tu cuenta y entra en tu email. Comprueba la carpeta "Spam".'
             return index(request, message)
         else:
             return render(request, "authentication/register.html", {"form": form})
+
     def get(self, request):
         form = RegisterForm(None)
 
         return render(
             request, "authentication/register.html", {"form": form, "msg": None}
         )
+
+
 class EmailView(TemplateView):
     def emailCheck(request, **kwargs):
         encoded = kwargs.get("user_encode", 0)
         print(request.user.username)
-        print(base64.b64decode(str(encoded)).decode('utf-8'))
-        if request.user.username == base64.b64decode(str(encoded)).decode('utf-8'):
-            checkToAdd =EmailCheck.objects.get(user=request.user)
+        print(base64.b64decode(str(encoded)).decode("utf-8"))
+        if request.user.username == base64.b64decode(str(encoded)).decode("utf-8"):
+            checkToAdd = EmailCheck.objects.get(user=request.user)
             print(checkToAdd.user.username)
-            checkToAdd.emailChecked=True
+            checkToAdd.emailChecked = True
             checkToAdd.save()
             message = "¡Muchas gracias! Tu cuenta ha sido verificada. ¡A votar!"
-        else: 
+        else:
             message = "¡Este no es tu link para activar tu cuenta!"
         return index(request, message)
 

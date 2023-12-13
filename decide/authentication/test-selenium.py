@@ -304,8 +304,6 @@ class RegisterViewTestCase(StaticLiveServerTestCase):
 
 
 
-
-
 class LogoutTestCase(StaticLiveServerTestCase):
     def setUp(self):
         self.base = BaseTestCase()
