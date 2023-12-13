@@ -99,12 +99,12 @@ textarea {
     margin: 0;
 }
 
-#submit-opinion:hover {
-    background-color: var(--green-dark-color);
+#submit-opinion:hover, #opinions-button:hover {
+    background-color: var(--green-dark-color); 
     cursor: pointer;
 }
 
-#date {
+#opinion-date {
     display: flex;
     align-items: center;
     justify-content: flex-end;

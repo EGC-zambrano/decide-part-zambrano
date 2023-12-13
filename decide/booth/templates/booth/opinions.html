@@ -20,9 +20,9 @@
             <h2>Opiniones</h2>
             <section id="voting-list">
                 {% for opinion in opinions.all %}
-                    <article class="card opinion-card">
-                        <p>{{opinion.text}}</p>
-                        <p id="date">{{opinion.date}}</p>
+                    <article id="opinion" class="card opinion-card">
+                        <p id="opinion-text">{{opinion.text}}</p>
+                        <p id="opinion-date">{{opinion.date}}</p>
                     </article>
                 {% endfor %}
             </section>
