@@ -353,6 +353,7 @@ class LogoutTestCase(StaticLiveServerTestCase):
             len(self.driver.find_elements(By.LINK_TEXT, "Iniciar Sesión")) == 1
         )
 
+
 class ChangePasswordViewTestCase(StaticLiveServerTestCase):
     def setUp(self):
         self.base = BaseTestCase()
