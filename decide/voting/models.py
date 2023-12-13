@@ -154,11 +154,6 @@ class Voting(models.Model):
         tally = self.tally
         options = self.question.options.all()
 
-        selected_options = [opt for opt in options if tally.count(opt.number) > 0]
-        print(selected_options)
-        if self.question.voteBlank and len(selected_options) > 1:
-            options = [opt for opt in options if opt.option == "Voto En Blanco"]
-
         opts = []
         for opt in options:
             if isinstance(tally, list):
