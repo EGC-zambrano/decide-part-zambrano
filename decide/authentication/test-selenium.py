@@ -303,8 +303,6 @@ class RegisterViewTestCase(StaticLiveServerTestCase):
         self.assertEqual(self.driver.title, "Decide | Homepage")
 
 
-
-
 class LogoutTestCase(StaticLiveServerTestCase):
     def setUp(self):
         self.base = BaseTestCase()

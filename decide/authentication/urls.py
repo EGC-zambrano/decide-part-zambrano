@@ -1,7 +1,14 @@
 from django.urls import path, include
 from rest_framework.authtoken.views import obtain_auth_token
 
-from .views import GetUserView, LoginView, LogoutView, RegisterView, ChangePasswordView ,EmailView
+from .views import (
+    GetUserView,
+    LoginView,
+    LogoutView,
+    RegisterView,
+    ChangePasswordView,
+    EmailView,
+)
 
 urlpatterns = [
     path("login/", obtain_auth_token),

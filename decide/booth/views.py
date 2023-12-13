@@ -9,11 +9,15 @@ from django.http import Http404
 from django.shortcuts import redirect, render
 from django.views.generic import TemplateView
 from voting.models import Voting
+
+
 def index(request, message=None):
-    return render(request, "booth/homepage.html", {"message":message})
+    return render(request, "booth/homepage.html", {"message": message})
+
 
 def email_is_checked(request):
     return EmailCheck.objects.get(user=request.user).emailChecked
+
 
 @login_required(login_url="/signin")
 def voting_list(request):
