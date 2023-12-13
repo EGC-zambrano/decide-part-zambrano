@@ -39,6 +39,3 @@ DATABASES = {
 
 # number of bits for the key, all auths should use the same number of bits
 KEYBITS = 256
-SENDGRID_API_KEY = (
-    "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"
-)
