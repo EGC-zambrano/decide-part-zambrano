@@ -172,6 +172,7 @@ class VotingListViewTestCase(StaticLiveServerTestCase):
             len(self.driver.find_elements(By.CLASS_NAME, "voting-closed")) == 1
         )
 
+
 class OpinionsViewTestCase(StaticLiveServerTestCase):
     def setUp(self):
         # Crea un usuario admin y otro no admin
@@ -252,7 +253,7 @@ class OpinionsViewTestCase(StaticLiveServerTestCase):
         self.assertTrue(
             len(self.driver.find_elements(By.CLASS_NAME, "opinions-card")) == 1
         )
-    
+
     def test_form_opinions(self):
         # Abre la ruta del navegador
         self.driver.get(f"{self.live_server_url}")
@@ -266,30 +267,14 @@ class OpinionsViewTestCase(StaticLiveServerTestCase):
         # Presiona el botón de login
         self.driver.find_element(By.CLASS_NAME, "btn-primary").click()
 
-
         # Verifica que existe el boton de Opiniones
         self.driver.find_element(By.LINK_TEXT, "Opiniones").click()
 
         # Verifica que hay dos h2
-        self.assertTrue(
-            len(self.driver.find_elements(By.TAG_NAME, "h2")) == 2
-        )
+        self.assertTrue(len(self.driver.find_elements(By.TAG_NAME, "h2")) == 2)
 
         # Verifica que hay una form con textarea
-        self.assertTrue(
-            len(self.driver.find_elements(By.TAG_NAME, "textarea")) == 1
-        )
+        self.assertTrue(len(self.driver.find_elements(By.TAG_NAME, "textarea")) == 1)
 
         # Verifica que hay un boton de enviar
-        self.assertTrue(
-            len(self.driver.find_elements(By.ID ,"submit-opinion")) == 1
-        )
-
-        
-
-    
-        
-
-
-
-        
+        self.assertTrue(len(self.driver.find_elements(By.ID, "submit-opinion")) == 1)

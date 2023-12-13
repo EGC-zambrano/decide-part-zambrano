@@ -74,6 +74,7 @@ class BoothVotingListTestCase(TestCase):
         response = self.client.get("/voting-list")
         self.assertEqual(response.status_code, 302)
 
+
 class BoothOpinionsTestCase(TestCase):
     def setUp(self):
         self.client = Client()
@@ -128,7 +129,7 @@ class BoothOpinionsTestCase(TestCase):
         self.assertEqual(len(opinions), 1)
         self.assertEqual(opinions[0].text, "test opinion")
         self.assertEqual(opinions[0].voting.id, 1)
-        
+
     def test_opinions_invalid_form_view_with_authenticated_user(self):
         self.client.login(username="testuser", password="testpassword")
         response = self.client.get("/booth/opinions/1", follow=True)
