@@ -115,7 +115,6 @@ class EmailView(TemplateView):
         encoded = kwargs.get("user_encode", 0)
         if request.user.username == base64.b64decode(str(encoded)).decode("utf-8"):
             checkToAdd = EmailCheck.objects.get(user=request.user)
-            print(checkToAdd.user.username)
             checkToAdd.emailChecked = True
             checkToAdd.save()
             message = "¡Muchas gracias! Tu cuenta ha sido verificada. ¡A votar!"
