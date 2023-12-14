@@ -2,42 +2,43 @@
 {% load i18n static %}
 
 {% block extrahead %}
-<head>
-    <title>Decide | {% block title %} Vote {% endblock %}</title>
-    <link rel="stylesheet" href="{% static "base/style.css" %}">
-    <link rel="stylesheet" href="{% static "booth/style.css" %}">
-</head>
+    <head>
+        <title>Decide | {% block title %} Vote {% endblock %}</title>
+        <link rel="stylesheet" href="{% static "base/style.css" %}">
+        <link rel="stylesheet" href="{% static "booth/style.css" %}">
+    </head>
 {% endblock %}
 
 {% block content %}
 
-<div>
-    <div class="card-container">
-        <div class="card-voting">
-            <h1 class="voting-title">{{ voting.id }} - {{ voting.name }}</h1>
-            <h2 class="voting-desc">{{ voting.question.desc }}</h2>
-            <form>
-                <div class="form-options">
-                    {% for option in options %}
-                        {% if question_type == "S" %}
-                            <div>
-                                <input class="voting-options" type="radio" v-model="selected" :value="option" name="voting-option">
-                                {{ option.option }}
-                            </div>
-                        {% else %}
-                            <div>
-                                <input class="voting-options" type="checkbox" v-model="selected" :value="option">
-                                {{ option.option }}
-                            </div>
-                        {% endif %}
-                    {% endfor %}     
-                </div>
-            </form>
-            <button class="btn btn-vote mt-3" v-on:click="decideSend">
-                {% trans "Vote" %}
-            </button>
+<div id="app-booth">
+
+    <div class="voting" >
+        <!-- Voting -->
+        <div class="card-container">
+            <div class="card-voting" v-if="!signup">
+                <h1 class="voting-title">[[ voting.name ]]</h1>
+                <h2 class="voting-desc">[[ voting.question.desc ]]</h2>
+                <form v-for="opt in voting.question.options" :key="opt.number">
+                    <div class="form-options">
+                        <input type="radio" v-model="selected" v-if="questionType == 'S'"
+                                    :id="'q' + opt.number"
+                                    name="question"
+                                    :value="opt.number">
+                        <input type="checkbox" v-model="selected" v-if="questionType == 'M'"
+                                    :id="'q' + opt.number"
+                                    name="question"
+                                    :value="opt.number">
+                            [[ opt.option ]]
+                    </div>
+                </form>
+                <button class="btn btn-vote mt-3" v-on:click="decideSend">
+                    {% trans "Vote" %}
+                </button>
+            </div>
         </div>
     </div>
+
 </div>
     
 {% endblock %}
@@ -62,53 +63,38 @@
     <script>
         const { createApp } = Vue
         var voting = {{voting|safe}};
+        var questionType = "{{ question_type }}";
         createApp({
             delimiters: ['[[', ']]'],
             data() {
                 return {
                     voting: voting,
-                    selected: "",
-                    signup: true,
+                    selected: [],
                     successVote: false,
                     alertShow: false,
                     alertMsg: "",
                     alertLvl: "info",
-                    token: null,
-                    user: null,
-                    form: {
-                        username: '',
-                        password: ''
-                    },
+                    token: '{{ csrf_token }}',
+                    user_id: '{{user.id}}',
                     bigpk: {
                         p: BigInt.fromJSONObject(voting.pub_key.p.toString()),
                         g: BigInt.fromJSONObject(voting.pub_key.g.toString()),
                         y: BigInt.fromJSONObject(voting.pub_key.y.toString()),
                     },
-                    keybits: {{ KEYBITS }}
+                    keybits: {{ KEYBITS }},
+                    questionType: questionType
                 }
             },
             beforeMount() {
-                this.init()
                 ElGamal.BITS = this.keybits;
             },
             methods: {
-                init() {
-                    var cookies = document.cookie.split("; ");
-                    cookies.forEach((c) => {
-                        var cs = c.split("=");
-                        if (cs[0] == 'decide' && cs[1]) {
-                            this.token = cs[1];
-                            this.getUser();
-                        }
-                    });
-                },
                 postData(url, data) {
                     // Default options are marked with *
                     var fdata = {
                         body: JSON.stringify(data),
                         headers: {
                             'content-type': 'application/json',
-                            'X-CSRFToken': '{{ csrf_token }}',
                         },
                         method: 'POST',
                     };
@@ -133,13 +119,30 @@
                 },
                 decideSend(evt) {
                     evt.preventDefault();
-                    var v = this.decideEncrypt(this.selected.toString());
-                    var data = {
-                        vote: {a: v.alpha.toString(), b: v.beta.toString()},
-                        voting: this.voting.id,
-                        voter: this.user.id,
-                        token: this.token
+                    if (this.questionType === 'S'){
+                        var v = this.decideEncrypt(this.selected.toString());
+                        var data = {
+                            vote: {a: v.alpha.toString(), b: v.beta.toString()},
+                            voting: this.voting.id,
+                            voter: this.user_id,
+                            token: this.token
+                        }
                     }
+                    else if (this.questionType === 'M') {
+                        var selected = []
+                        var vote = []
+                        for (i=0; i < selected.lenght; i++){
+                          var v = this.decideEncrypt(selected[i].toString())
+                          vote.push({a: v.alpha.toString(), b: v.beta.toString()})
+                        }
+                        var data = {
+                            vote: vote,
+                            voting: this.voting.id,
+                            voter: this.user.id,
+                            token: this.token
+                        }
+                    }
+                    
                     this.postData("{% url "gateway" "store" "/" %}", data)
                         .then(data => {
                             this.successVote = true;
