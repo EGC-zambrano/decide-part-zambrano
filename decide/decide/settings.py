@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
     "social_django",
+    "django_rest_passwordreset",
 ]
 
 SOCIALACCOUNT_PROVIDERS = {
@@ -200,6 +201,11 @@ KEYBITS = 256
 # Versioning
 ALLOWED_VERSIONS = ["v1", "v2"]
 DEFAULT_VERSION = "v1"
+
+
+# Restore password
+EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
+EMAIL_FILE_PATH = BASE_DIR + "/sent_emails"
 
 try:
     from local_settings import *

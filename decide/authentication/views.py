@@ -9,6 +9,20 @@ from rest_framework.views import APIView
 from .forms import LoginForm, RegisterForm
 from .serializers import UserSerializer
 
+from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
+from django.urls import reverse_lazy
+from django.views.generic.edit import FormView
+from django.contrib.auth.views import (
+    PasswordResetConfirmView as BasePasswordResetConfirmView,
+)
+from django.contrib.auth import update_session_auth_hash
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
+from dotenv import load_dotenv
+import os
+import base64
+from django.contrib.auth.models import User
+
 
 # Non-api view
 class LoginView(TemplateView):
@@ -79,3 +93,69 @@ class RegisterView(APIView):
 class ChangePasswordView(PasswordChangeView):
     template_name = "authentication/change_password.html"
     success_url = "/"
+
+
+class PasswordResetRequestView(FormView):
+    template_name = "authentication/password_reset.html"
+    form_class = PasswordResetForm
+    success_url = reverse_lazy("/")  # Replace 'home' with your home page URL name
+
+    def post(self, request):
+        form = PasswordResetForm(request.POST)
+
+        if form.is_valid():
+            email = form.cleaned_data.get("email")
+
+            user = User.objects.get(email=email)
+
+            mailMessage = Mail(
+                from_email="decidezambrano@gmail.com",
+                to_emails=email,
+            )
+            idEncode = f"salt{user.pk}"
+            encoded = base64.b64encode(bytes(idEncode, encoding="utf-8")).decode(
+                "utf-8"
+            )
+            urlVerificar = f"{request.build_absolute_uri()}/{encoded}"
+            mailMessage.dynamic_template_data = {
+                "urlVerificar": urlVerificar,
+                "user": user.first_name,
+            }
+            mailMessage.template_id = "d-01c8e3b0691044009b4512599cf77eca"
+            load_dotenv()
+            print(os.getenv("SENDGRID_API_KEY"))
+            sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
+            response = sg.send(mailMessage)
+
+    def form_valid(self, form):
+        form.save(
+            use_https=self.request.is_secure(),
+            request=self.request,
+        )
+        return super().form_valid(form)
+
+
+def consulta_email(request, **kwargs):
+    encoded = kwargs.get("encoded", 0)
+    email = request.POST.get("email", None)
+    decode = base64.b64decode(str(encoded)).decode("utf-8")
+    userId = decode.replace("salt", "")
+    user = User.objects.get(pk=userId)
+    return render(
+        request,
+        "authentication/password_reset_confirm.html",
+        {"user": user, "hash": encoded},
+    )
+
+
+class PasswordResetConfirmView(BasePasswordResetConfirmView):
+    template_name = "password_reset.html"
+    form_class = SetPasswordForm
+    success_url = reverse_lazy(
+        "/signin/"
+    )  # Replace 'login' with your login page URL name
+
+    def form_valid(self, form):
+        user = form.save()
+        update_session_auth_hash(self.request, user)
+        return super().form_valid(form)
