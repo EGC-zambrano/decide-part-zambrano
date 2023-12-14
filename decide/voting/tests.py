@@ -456,3 +456,36 @@ class QuestionsTests(StaticLiveServerTestCase):
             self.cleaner.current_url
             == self.live_server_url + "/admin/voting/question/add/"
         )
+
+
+class TestBooleanVoting(BaseTestCase):
+    def setUp(self):
+        super().setUp()
+
+    def tearDown(self):
+        super().tearDown()
+        self.assertTrue(True, False)
+
+    def encrypt_msg(self, msg, v, bits=settings.KEYBITS):
+        pk = v.pub_key
+        p, g, y = (pk.p, pk.g, pk.y)
+        k = MixCrypt(bits=bits)
+        k.k = ElGamal.construct((p, g, y))
+        return k.encrypt(msg)
+
+    def create_voting(self):
+        q = Question(desc="test question")
+        q.save()
+        for i in range(5):
+            opt = QuestionOption(question=q, option="option {}".format(i + 1))
+            opt.save()
+        v = Voting(name="test voting", question=q)
+        v.save()
+
+        a, _ = Auth.objects.get_or_create(
+            url=settings.BASEURL, defaults={"me": True, "name": "test auth"}
+        )
+        a.save()
+        v.auths.add(a)
+
+        return v
