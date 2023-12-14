@@ -125,12 +125,10 @@ class VotingListViewTestCase(StaticLiveServerTestCase):
         self.driver.find_element(By.ID, "id_password").send_keys("qwerty")
         # Presiona el botón de login
         self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
-        self.driver.switch_to.alert.accept()
         # Verifica al usuario
         encoded = base64.b64encode(bytes("noadmin", encoding="utf-8")).decode("utf-8")
         urlVerificar = f"{self.live_server_url}/verificar/{encoded}"
         self.driver.get(urlVerificar)
-        self.driver.switch_to.alert.accept()
         self.driver.find_element(By.LINK_TEXT, "Votaciones").click()
 
         # Verifica que el nombre de la página sea el correcto
@@ -201,9 +199,7 @@ class VotingListViewTestCase(StaticLiveServerTestCase):
 
         # Presiona el botón de login
         self.driver.find_element(By.CLASS_NAME, "btn-primary").click()
-        self.driver.switch_to.alert.accept()
         self.driver.find_element(By.LINK_TEXT, "Votaciones").click()
-        self.driver.switch_to.alert.accept()
 
         # Verifica que el nombre de la página sea el correcto, debería dar un error de servidor al no existir ningún email verificado
         self.assertTrue(self.driver.title == "Decide | Homepage")
@@ -216,6 +212,7 @@ class OpinionsViewTestCase(StaticLiveServerTestCase):
         self.base.setUp()
 
         user = User.objects.get(username="noadmin")
+        emailCheck = EmailCheck.objects.create(user=user, emailChecked=True)
         # Crea la votacion
         question = Question.objects.create(desc="Test question")
         voting1 = Voting.objects.create(
@@ -273,7 +270,6 @@ class OpinionsViewTestCase(StaticLiveServerTestCase):
 
         # Presiona el botón de login
         self.driver.find_element(By.CLASS_NAME, "btn-primary").click()
-
         # Verifica que el nombre de la página sea el correcto
         self.assertTrue(self.driver.title == "Decide | Votings")
 

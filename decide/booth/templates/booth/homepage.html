@@ -8,12 +8,13 @@
 {% endblock %}
 
 {% block content %}
-<script>
-        var message = "{{ message }}";
-        if (message !== null && message !== "None"){
-            alert(message);
-        }
-</script>
+    <section>
+        {% if message %}
+            <div class="caja-mensaje verde">
+                <p>{{ message }}</p>
+            </div>
+        {% endif %}
+    </section>
     <section class="hero">
         <div id="hero-text">
             <h1 id="text1">Tu plataforma de</h1>

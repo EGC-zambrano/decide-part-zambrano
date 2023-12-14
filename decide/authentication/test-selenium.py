@@ -182,7 +182,6 @@ class RegisterViewTestCase(StaticLiveServerTestCase):
         self.driver.find_element(By.ID, "id_password1").send_keys("strong_password123")
         self.driver.find_element(By.ID, "id_password2").send_keys("strong_password123")
         self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
-        self.driver.switch_to.alert.accept()
 
         self.assertEqual(self.driver.title, "Decide | Homepage")
 
@@ -263,7 +262,6 @@ class RegisterViewTestCase(StaticLiveServerTestCase):
         self.driver.find_element(By.ID, "id_password1").send_keys("strong_password123")
         self.driver.find_element(By.ID, "id_password2").send_keys("strong_password123")
         self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
-        self.driver.switch_to.alert.accept()
 
         self.driver.find_element(By.LINK_TEXT, "Iniciar Sesión").click()
 
@@ -274,7 +272,6 @@ class RegisterViewTestCase(StaticLiveServerTestCase):
         encoded = base64.b64encode(bytes("luffy", encoding="utf-8")).decode("utf-8")
         urlVerificar = f"{self.live_server_url}/verificar/{encoded}"
         self.driver.get(urlVerificar)
-        self.driver.switch_to.alert.accept()
         self.driver.find_element(By.LINK_TEXT, "Votaciones").click()
 
         self.assertTrue(self.driver.title == "Decide | Votings")
@@ -296,7 +293,6 @@ class RegisterViewTestCase(StaticLiveServerTestCase):
         self.driver.find_element(By.ID, "id_password1").send_keys("strong_password123")
         self.driver.find_element(By.ID, "id_password2").send_keys("strong_password123")
         self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
-        self.driver.switch_to.alert.accept()
         self.driver.find_element(By.LINK_TEXT, "Iniciar Sesión").click()
 
         self.driver.find_element(By.ID, "id_username").send_keys("luffy")
@@ -304,7 +300,6 @@ class RegisterViewTestCase(StaticLiveServerTestCase):
         self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
 
         self.driver.find_element(By.LINK_TEXT, "Votaciones").click()
-        self.driver.switch_to.alert.accept()
         self.assertEqual(self.driver.title, "Decide | Homepage")
 
 
