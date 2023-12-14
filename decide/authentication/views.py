@@ -109,9 +109,10 @@ class RegisterView(APIView):
 
 class EmailView(TemplateView):
     def emailCheck(request, **kwargs):
+        if not request.user.is_authenticated:
+            message = "Entre en su cuenta antes de intentar verificarla"
+            return index(request, message)
         encoded = kwargs.get("user_encode", 0)
-        print(request.user.username)
-        print(base64.b64decode(str(encoded)).decode("utf-8"))
         if request.user.username == base64.b64decode(str(encoded)).decode("utf-8"):
             checkToAdd = EmailCheck.objects.get(user=request.user)
             print(checkToAdd.user.username)

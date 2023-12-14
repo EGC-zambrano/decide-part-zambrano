@@ -8,15 +8,19 @@
 {% endblock %}
 
 {% block content %}
+<script>
+        var message = "{{ message }}";
+        if (message !== null && message !== "None"){
+            alert(message);
+        }
+</script>
     <section class="hero">
-        {% if message %}
-        <ul class="message">
-            <li class="info">{{ message }}</li>
-        </ul>
-    {% endif %}
         <div id="hero-text">
             <h1 id="text1">Tu plataforma de</h1>
             <h1 id="text2">votos online de confianza</h1>
         </div>
-    </section> 
+    </section>
+
 {% endblock %}
+
+
