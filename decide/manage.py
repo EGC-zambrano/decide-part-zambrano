@@ -15,4 +15,7 @@ if __name__ == "__main__":
     if sys.argv[1] == "test":
         os.environ["RECAPTCHA_PUBLIC_KEY"] = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
         os.environ["RECAPTCHA_PRIVATE_KEY"] = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
+
+        # Disable recaptcha
+        os.environ["DISABLE_RECAPTCHA"] = "1"
     execute_from_command_line(sys.argv)
