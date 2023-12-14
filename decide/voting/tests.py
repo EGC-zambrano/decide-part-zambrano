@@ -136,6 +136,32 @@ class VotingTestCase(BaseTestCase):
         response = self.client.post("/voting/", data, format="json")
         self.assertEqual(response.status_code, 201)
 
+    def test_create_boolean_voting_from_api(self):
+        data = {"name": "Example boolean"}
+        response = self.client.post("/voting/", data, format="json")
+        self.assertEqual(response.status_code, 401)
+
+        # login with user no admin
+        self.login(user="noadmin")
+        response = mods.post("voting", params=data, response=True)
+        self.assertEqual(response.status_code, 403)
+
+        # login with user admin
+        self.login()
+        response = mods.post("voting", params=data, response=True)
+        self.assertEqual(response.status_code, 400)
+
+        data = {
+            "name": "Example boolean",
+            "desc": "Description example boolean",
+            "question_type": "B",
+            "question": "I want a ",
+            "question_opt": ["cat", "dog"],
+        }
+
+        response = self.client.post("/voting/", data, format="json")
+        self.assertEqual(response.status_code, 201)
+
     def test_update_voting(self):
         voting = self.create_voting()
 
@@ -458,34 +484,34 @@ class QuestionsTests(StaticLiveServerTestCase):
         )
 
 
-class TestBooleanVoting(BaseTestCase):
+class QuestionOptionTestCase(TestCase):
     def setUp(self):
-        super().setUp()
-
-    def tearDown(self):
-        super().tearDown()
-        self.assertTrue(True, False)
-
-    def encrypt_msg(self, msg, v, bits=settings.KEYBITS):
-        pk = v.pub_key
-        p, g, y = (pk.p, pk.g, pk.y)
-        k = MixCrypt(bits=bits)
-        k.k = ElGamal.construct((p, g, y))
-        return k.encrypt(msg)
-
-    def create_voting(self):
-        q = Question(desc="test question")
-        q.save()
-        for i in range(5):
-            opt = QuestionOption(question=q, option="option {}".format(i + 1))
-            opt.save()
-        v = Voting(name="test voting", question=q)
-        v.save()
-
-        a, _ = Auth.objects.get_or_create(
-            url=settings.BASEURL, defaults={"me": True, "name": "test auth"}
+        self.question = Question.objects.create(question_type="B")
+        self.option1 = QuestionOption.objects.create(
+            question=self.question, option="Option 1"
         )
-        a.save()
-        v.auths.add(a)
+        self.option2 = QuestionOption.objects.create(
+            question=self.question, option="Option 2"
+        )
 
-        return v
+    def test_save_method_with_boolean_question_and_multiple_options(self):
+        with self.assertRaises(ValueError):
+            option3 = QuestionOption(question=self.question, option="Option 3")
+            option3.save()
+
+    def test_save_method_with_boolean_question_and_single_option(self):
+        self.question.options.all().delete()
+        option3 = QuestionOption(question=self.question, option="Option 3")
+        option3.save()
+        self.assertEqual(option3.number, 2)
+
+    def test_save_method_with_non_boolean_question(self):
+        self.question.question_type = "S"
+        self.question.save()
+        option3 = QuestionOption(question=self.question, option="Option 3")
+        option3.save()
+        self.assertEqual(option3.number, 4)
+
+    def test_str_method(self):
+        self.assertEqual(str(self.option1), "Option 1 (2)")
+        self.assertEqual(str(self.option2), "Option 2 (3)")
