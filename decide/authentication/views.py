@@ -1,3 +1,5 @@
+import os
+import base64
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.views import PasswordChangeView
 from django.shortcuts import get_object_or_404, redirect, render
@@ -13,15 +15,17 @@ from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
 from django.urls import reverse_lazy
 from django.views.generic.edit import FormView
 from django.contrib.auth.views import (
-    PasswordResetConfirmView as BasePasswordResetConfirmView,
+    PasswordResetView,
+    PasswordResetDoneView,
+    PasswordResetCompleteView,
+    PasswordResetConfirmView,
 )
 from django.contrib.auth import update_session_auth_hash
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 from dotenv import load_dotenv
-import os
-import base64
 from django.contrib.auth.models import User
+from django.contrib.sites.models import Site
 
 
 # Non-api view
@@ -95,67 +99,65 @@ class ChangePasswordView(PasswordChangeView):
     success_url = "/"
 
 
-class PasswordResetRequestView(FormView):
+class ResetPasswordView(PasswordResetView):
     template_name = "authentication/password_reset.html"
-    form_class = PasswordResetForm
-    success_url = reverse_lazy("/")  # Replace 'home' with your home page URL name
+    success_url = "/password_reset/done/"
 
     def post(self, request):
         form = PasswordResetForm(request.POST)
 
         if form.is_valid():
             email = form.cleaned_data.get("email")
-
-            user = User.objects.get(email=email)
-
             mailMessage = Mail(
                 from_email="decidezambrano@gmail.com",
                 to_emails=email,
             )
+
+            user = User.objects.get(email=email)
+            token = form.cleaned_data.get("csrf_token")
+
             idEncode = f"salt{user.pk}"
             encoded = base64.b64encode(bytes(idEncode, encoding="utf-8")).decode(
                 "utf-8"
             )
-            urlVerificar = f"{request.build_absolute_uri()}/{encoded}"
+            urlVerificar = (
+                f"{Site.objects.get_current().domain}/reset/{encoded}/<token>/"
+            )
+
             mailMessage.dynamic_template_data = {
                 "urlVerificar": urlVerificar,
                 "user": user.first_name,
             }
             mailMessage.template_id = "d-01c8e3b0691044009b4512599cf77eca"
-            load_dotenv()
-            print(os.getenv("SENDGRID_API_KEY"))
-            sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
-            response = sg.send(mailMessage)
+            try:
+                sg = SendGridAPIClient(os.environ.get("SENDGRID_API_KEY"))
+                sg.send(mailMessage)
+            except Exception as e:
+                print(e)
 
-    def form_valid(self, form):
-        form.save(
-            use_https=self.request.is_secure(),
-            request=self.request,
-        )
-        return super().form_valid(form)
+            return render(
+                request, "authentication/password_reset_done.html", {"form": form}
+            )
 
-
-def consulta_email(request, **kwargs):
-    encoded = kwargs.get("encoded", 0)
-    email = request.POST.get("email", None)
-    decode = base64.b64decode(str(encoded)).decode("utf-8")
-    userId = decode.replace("salt", "")
-    user = User.objects.get(pk=userId)
-    return render(
-        request,
-        "authentication/password_reset_confirm.html",
-        {"user": user, "hash": encoded},
-    )
+        else:
+            msg = "No user with that email"
+            return render(
+                request,
+                "authentication/password_reset.html",
+                {"form": form, "message": msg},
+            )
 
 
-class PasswordResetConfirmView(BasePasswordResetConfirmView):
-    template_name = "password_reset.html"
-    form_class = SetPasswordForm
-    success_url = reverse_lazy(
-        "/signin/"
-    )  # Replace 'login' with your login page URL name
+class ResetPasswordDoneView(PasswordResetDoneView):
+    template_name = "authentication/password_reset_done.html"
+    success_url = "/"
 
-    def form_valid(self, form):
-        user = form.save()
-        update_session_auth_hash(self.request, user)
-        return super().form_valid(form)
+
+class ResetPasswordConfirmView(PasswordResetConfirmView):
+    template_name = "authentication/password_reset_confirm.html"
+    success_url = "/reset/done/"
+
+
+class ResetPasswordCompleteView(PasswordResetCompleteView):
+    template_name = "authentication/password_reset_complete.html"
+    success_url = "/"
