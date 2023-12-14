@@ -1,14 +1,15 @@
+import os
+import time
+
 from allauth.socialaccount.models import SocialApp
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from base.tests import BaseTestCase
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-
-import os, time
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 
 def click_captcha(driver):
@@ -61,6 +62,9 @@ class LoginPageTestCase(StaticLiveServerTestCase):
     def tearDown(self):
         super().tearDown()
         self.driver.quit()
+
+        # Disable recaptcha
+        os.environ["DISABLE_RECAPTCHA"] = "1"
 
         self.base.tearDown()
 
@@ -133,9 +137,6 @@ class LoginGoogleTestCase(StaticLiveServerTestCase):
         # Add the current site to the SocialApp's sites
         app.sites.add(Site.objects.get_current())
 
-        # Disable recaptcha
-        os.environ["DISABLE_RECAPTCHA"] = "1"
-
     def tearDown(self):
         super().tearDown()
         self.driver.quit()
@@ -160,6 +161,7 @@ class LoginGithubTestCase(StaticLiveServerTestCase):
         # Opciones de Chrome
         options = webdriver.ChromeOptions()
         options.headless = True
+        options.add_argument("--no-sandbox")
         self.driver = webdriver.Chrome(options=options)
         self.user = User.objects.create_user(username="testuser", password="testpass")
         super().setUp()
@@ -172,9 +174,6 @@ class LoginGithubTestCase(StaticLiveServerTestCase):
         )
         # Add the current site to the SocialApp's sites
         app.sites.add(Site.objects.get_current())
-
-        # Disable recaptcha
-        os.environ["DISABLE_RECAPTCHA"] = "1"
 
     def tearDown(self):
         super().tearDown()
@@ -217,6 +216,9 @@ class RegisterViewTestCase(StaticLiveServerTestCase):
     def tearDown(self):
         super().tearDown()
         self.driver.quit()
+
+        # Disable recaptcha
+        os.environ["DISABLE_RECAPTCHA"] = "1"
 
         self.base.tearDown()
 
@@ -347,9 +349,6 @@ class LogoutTestCase(StaticLiveServerTestCase):
         # Add the current site to the SocialApp's sites
         app.sites.add(Site.objects.get_current())
 
-        # Disable recaptcha
-        os.environ["DISABLE_RECAPTCHA"] = "1"
-
     def tearDown(self):
         super().tearDown()
         self.driver.quit()
@@ -400,9 +399,6 @@ class ChangePasswordViewTestCase(StaticLiveServerTestCase):
         )
         # Add the current site to the SocialApp's sites
         app.sites.add(Site.objects.get_current())
-
-        # Disable recaptcha
-        os.environ["DISABLE_RECAPTCHA"] = "1"
 
     def tearDown(self):
         super().tearDown()

@@ -213,6 +213,7 @@ class OpinionsViewTestCase(StaticLiveServerTestCase):
         # Opciones de Chrome
         options = webdriver.ChromeOptions()
         options.headless = True
+        options.add_argument("--no-sandbox")
         self.driver = webdriver.Chrome(options=options)
 
         super().setUp()
