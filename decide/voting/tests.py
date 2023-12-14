@@ -13,6 +13,7 @@ from mixnet.models import Auth
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from voting.models import Question, QuestionOption, Voting
+from selenium.webdriver.chrome.webdriver import WebDriver
 
 
 class VotingTestCase(BaseTestCase):
@@ -46,6 +47,74 @@ class VotingTestCase(BaseTestCase):
 
         return v
 
+    def create_white_voting(self):
+        q = Question(desc="test question", voteBlank=True)
+        q.save()
+        for i in range(5):
+            opt = QuestionOption(question=q, option="option {}".format(i + 1))
+            opt.save()
+        v = Voting(name="test voting", question=q)
+        v.save()
+
+        a, _ = Auth.objects.get_or_create(
+            url=settings.BASEURL, defaults={"me": True, "name": "test auth"}
+        )
+        a.save()
+        v.auths.add(a)
+
+        return v
+
+    def test_white_vote_is_first_option(self):
+        v = self.create_white_voting()
+
+        # Retrieve the options for the voting's question
+        options = QuestionOption.objects.filter(question=v.question)
+
+        # Check if the first option is 'En blanco'
+        first_option = options.first()
+        self.assertEqual(
+            first_option.option, "Voto En Blanco", "En blanco is not the first option"
+        )
+
+    def create_white_voting_false(self):
+        q = Question(desc="test question", voteBlank=False)
+        q.save()
+
+        opt = QuestionOption(question=q, option="Voto En Blanco")
+        opt.save()
+        v = Voting(name="test voting", question=q)
+        v.save()
+
+        a, _ = Auth.objects.get_or_create(
+            url=settings.BASEURL, defaults={"me": True, "name": "test auth"}
+        )
+        a.save()
+        v.auths.add(a)
+
+        return v
+
+    def test_white_vote_is_false_tally(self):
+        v = self.create_white_voting_false()
+        self.create_voters(v)
+
+        v.create_pubkey()
+        v.start_date = timezone.now()
+        v.save()
+
+        clear = self.store_votes(v)
+
+        self.login()  # set token
+        v.tally_votes(self.token)
+
+        tally = v.tally
+        tally.sort()
+        tally = {k: len(list(x)) for k, x in itertools.groupby(tally)}
+
+        for q in v.question.options.all():
+            self.assertEqual(tally.get(q.number, 0), clear.get(q.number, 0))
+
+        self.assertEqual(len(v.postproc), 0)  # Expecting an empty postproc list
+
     def create_voters(self, v):
         for i in range(100):
             u, _ = User.objects.get_or_create(username="testvoter{}".format(i))
@@ -66,7 +135,8 @@ class VotingTestCase(BaseTestCase):
         voter = voters.pop()
 
         clear = {}
-        for opt in v.question.options.all():
+        if v.question.options.count() == 1:
+            opt = v.question.options.first()
             clear[opt.number] = 0
             for i in range(random.randint(0, 5)):
                 a, b = self.encrypt_msg(opt.number, v)
@@ -80,6 +150,21 @@ class VotingTestCase(BaseTestCase):
                 self.login(user=user.username)
                 voter = voters.pop()
                 mods.post("store", json=data)
+        else:
+            for opt in v.question.options.all():
+                clear[opt.number] = 0
+                for i in range(random.randint(0, 5)):
+                    a, b = self.encrypt_msg(opt.number, v)
+                    data = {
+                        "voting": v.id,
+                        "voter": voter.voter_id,
+                        "vote": {"a": a, "b": b},
+                    }
+                    clear[opt.number] += 1
+                    user = self.get_or_create_user(voter.voter_id)
+                    self.login(user=user.username)
+                    voter = voters.pop()
+                    mods.post("store", json=data)
         return clear
 
     def test_complete_voting(self):
@@ -104,6 +189,29 @@ class VotingTestCase(BaseTestCase):
 
         for q in v.postproc:
             self.assertEqual(tally.get(q["number"], 0), q["votes"])
+
+    # def test_complete_empty_voting(self):
+    #     v = self.create_empty_voting()
+    #     self.create_voters(v)
+
+    #     v.create_pubkey()
+    #     v.start_date = timezone.now()
+    #     v.save()
+
+    #     clear = self.store_votes(v)
+
+    #     self.login()  # set token
+    #     v.tally_votes(self.token)
+
+    #     tally = v.tally
+    #     tally.sort()
+    #     tally = {k: len(list(x)) for k, x in itertools.groupby(tally)}
+
+    #     for q in v.question.options.all():
+    #         self.assertEqual(tally.get(q.number, 0), clear.get(q.number, 0))
+
+    #     for q in v.postproc:
+    #         self.assertEqual(tally.get(q["number"], 0), q["votes"])
 
     def test_create_voting_from_api(self):
         data = {"name": "Example"}
@@ -417,6 +525,7 @@ class QuestionsTests(StaticLiveServerTestCase):
         options = webdriver.ChromeOptions()
         options.headless = True
         self.driver = webdriver.Chrome(options=options)
+        self.cleaner: WebDriver = self.driver
 
         super().setUp()
 

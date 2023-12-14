@@ -14,6 +14,25 @@ class Question(models.Model):
 
     question_type = models.CharField(max_length=1, choices=QUESTION_TYPES, default="S")
     desc = models.TextField()
+    voteBlank = models.BooleanField(default=False)
+
+    def save(self, **kwargs):
+        super().save()
+
+        if (
+            (self.question_type == "S" or self.question_type == "M")
+            and self.voteBlank
+            and QuestionOption.objects.filter(
+                question__id=self.id, option__startswith="Voto En Blanco"
+            ).count()
+            == 0
+        ):
+            enBlanco = QuestionOption(
+                question=self, number=self.options.count() + 1, option="Voto En Blanco"
+            )
+            enBlanco.save()
+            self.options.add(enBlanco)
+        return super().save()
 
     def __str__(self):
         return self.desc
@@ -25,10 +44,14 @@ class QuestionOption(models.Model):
     )
     number = models.PositiveIntegerField(blank=True, null=True)
     option = models.TextField()
+    hidden = models.BooleanField(default=False)
 
     def save(self):
         if not self.number:
-            self.number = self.question.options.count() + 2
+            self.number = self.question.options.count() + 1
+        else:
+            if self.number and Question.voteBlank:
+                self.number = self.question.options.count() + 1
         return super().save()
 
     def __str__(self):
@@ -82,6 +105,7 @@ class Voting(models.Model):
                 votes_format.append(option["b"])
                 vote_list.append(votes_format)
                 votes_format = []
+
         return vote_list
 
     def tally_votes(self, token=""):
@@ -138,7 +162,20 @@ class Voting(models.Model):
                 votes = tally.count(opt.number)
             else:
                 votes = 0
-            opts.append({"option": opt.option, "number": opt.number, "votes": votes})
+            if self.question.voteBlank:
+                opts.append(
+                    {"option": opt.option, "number": opt.number, "votes": votes}
+                )
+            else:
+                if (
+                    opt.option != "Voto En Blanco"
+                    and opt.option != "voto en blanco"
+                    and opt.option != "en blanco"
+                    and opt.option != "En Blanco"
+                ):
+                    opts.append(
+                        {"option": opt.option, "number": opt.number, "votes": votes}
+                    )
 
         data = {"type": "IDENTITY", "options": opts}
         postp = mods.post("postproc", json=data)
