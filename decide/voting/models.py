@@ -49,6 +49,9 @@ class QuestionOption(models.Model):
     def save(self):
         if not self.number:
             self.number = self.question.options.count() + 1
+        else:
+            if self.number and Question.voteBlank:
+                self.number = self.question.options.count() + 1
         return super().save()
 
     def __str__(self):
