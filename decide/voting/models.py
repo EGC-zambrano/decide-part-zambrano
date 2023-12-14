@@ -145,7 +145,6 @@ class Voting(models.Model):
             pass
 
         self.tally = response.json()
-        print(self.tally)
         self.save()
 
         self.do_postproc()
