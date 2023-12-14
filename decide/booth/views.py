@@ -5,9 +5,11 @@ from census.models import Census
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.views.generic import TemplateView
 from voting.models import Voting
+
+from booth.form import OpinionForm
 
 
 def index(request):
@@ -24,6 +26,37 @@ def voting_list(request):
     user_votings = user_votings.order_by("-end_date")
 
     return render(request, "booth/voting-list.html", {"user_votings": user_votings})
+
+
+@login_required(login_url="/signin")
+def opinions(request, voting_id):
+    try:
+        voting = Voting.objects.get(id=voting_id)
+    except:
+        return redirect("voting-list")
+
+    try:
+        Census.objects.get(voting_id=voting_id, voter_id=request.user.id)
+    except:
+        return redirect("voting-list")
+
+    opinions = voting.opinions.all().order_by("-date")
+
+    if request.method == "POST":
+        form = OpinionForm(request.POST)
+        if form.is_valid():
+            opinion = form.save(commit=False)
+            opinion.voting = voting
+            opinion.save()
+            return redirect("opinions", voting_id=voting_id)
+    else:
+        form = OpinionForm()
+
+    return render(
+        request,
+        "booth/opinions.html",
+        {"voting": voting, "opinions": opinions, "form": form},
+    )
 
 
 class BoothView(TemplateView):
