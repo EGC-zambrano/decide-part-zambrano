@@ -267,7 +267,6 @@ class RegisterViewTestCase(StaticLiveServerTestCase):
 
         self.driver.find_element(By.LINK_TEXT, "Iniciar Sesión").click()
 
-
         self.driver.find_element(By.ID, "id_username").send_keys("luffy")
         self.driver.find_element(By.ID, "id_password").send_keys("strong_password123")
         self.driver.find_element(By.CSS_SELECTOR, ".btn").click()

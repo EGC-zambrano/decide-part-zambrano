@@ -107,79 +107,79 @@ class VotingListViewTestCase(StaticLiveServerTestCase):
         self.base.tearDown()
 
     def test_voting_list(self):
-         # Abre la ruta del navegador
-         self.driver.get(f"{self.live_server_url}")
+        # Abre la ruta del navegador
+        self.driver.get(f"{self.live_server_url}")
 
-         self.driver.find_element(By.LINK_TEXT, "Votaciones").click()
+        self.driver.find_element(By.LINK_TEXT, "Votaciones").click()
 
-         # Verifica que el nombre de la página sea el correcto
-         self.assertTrue(self.driver.title == "Decide | Login")
+        # Verifica que el nombre de la página sea el correcto
+        self.assertTrue(self.driver.title == "Decide | Login")
 
-         # Verifica que los elementos de la página de login existen
-         self.assertTrue(len(self.driver.find_elements(By.CLASS_NAME, "header")) == 1)
-         self.assertTrue(len(self.driver.find_elements(By.TAG_NAME, "footer")) == 1)
-         self.assertTrue(len(self.driver.find_elements(By.CLASS_NAME, "form-card")) == 1)
+        # Verifica que los elementos de la página de login existen
+        self.assertTrue(len(self.driver.find_elements(By.CLASS_NAME, "header")) == 1)
+        self.assertTrue(len(self.driver.find_elements(By.TAG_NAME, "footer")) == 1)
+        self.assertTrue(len(self.driver.find_elements(By.CLASS_NAME, "form-card")) == 1)
 
-         # Ingresa el usuario y contraseña
-         self.driver.find_element(By.ID, "id_username").send_keys("noadmin")
-         self.driver.find_element(By.ID, "id_password").send_keys("qwerty")
-         # Presiona el botón de login
-         self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
-         self.driver.switch_to.alert.accept()
-         # Verifica al usuario
-         encoded = base64.b64encode(bytes("noadmin", encoding="utf-8")).decode("utf-8")
-         urlVerificar = f"{self.live_server_url}/verificar/{encoded}"
-         self.driver.get(urlVerificar)
-         self.driver.switch_to.alert.accept()
-         self.driver.find_element(By.LINK_TEXT, "Votaciones").click()
+        # Ingresa el usuario y contraseña
+        self.driver.find_element(By.ID, "id_username").send_keys("noadmin")
+        self.driver.find_element(By.ID, "id_password").send_keys("qwerty")
+        # Presiona el botón de login
+        self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
+        self.driver.switch_to.alert.accept()
+        # Verifica al usuario
+        encoded = base64.b64encode(bytes("noadmin", encoding="utf-8")).decode("utf-8")
+        urlVerificar = f"{self.live_server_url}/verificar/{encoded}"
+        self.driver.get(urlVerificar)
+        self.driver.switch_to.alert.accept()
+        self.driver.find_element(By.LINK_TEXT, "Votaciones").click()
 
-         # Verifica que el nombre de la página sea el correcto
-         self.assertTrue(self.driver.title == "Decide | Votings")
+        # Verifica que el nombre de la página sea el correcto
+        self.assertTrue(self.driver.title == "Decide | Votings")
 
-         # Verifica que los elementos de la página de listar existen
-         self.assertTrue(len(self.driver.find_elements(By.CLASS_NAME, "header")) == 1)
-         self.assertTrue(len(self.driver.find_elements(By.ID, "voting-list")) == 1)
-         self.assertTrue(len(self.driver.find_elements(By.TAG_NAME, "footer")) == 1)
-         self.assertTrue(
-             len(self.driver.find_elements(By.CLASS_NAME, "voting-card")) == 2
-         )
+        # Verifica que los elementos de la página de listar existen
+        self.assertTrue(len(self.driver.find_elements(By.CLASS_NAME, "header")) == 1)
+        self.assertTrue(len(self.driver.find_elements(By.ID, "voting-list")) == 1)
+        self.assertTrue(len(self.driver.find_elements(By.TAG_NAME, "footer")) == 1)
+        self.assertTrue(
+            len(self.driver.find_elements(By.CLASS_NAME, "voting-card")) == 2
+        )
 
-         # Verifica que existe una votación cerrada y otra abierta
-         self.assertTrue(
-             len(self.driver.find_elements(By.CLASS_NAME, "voting-closed")) == 1
-         )
+        # Verifica que existe una votación cerrada y otra abierta
+        self.assertTrue(
+            len(self.driver.find_elements(By.CLASS_NAME, "voting-closed")) == 1
+        )
 
-         self.assertTrue(
-             len(self.driver.find_elements(By.CLASS_NAME, "voting-open")) == 1
-         )
+        self.assertTrue(
+            len(self.driver.find_elements(By.CLASS_NAME, "voting-open")) == 1
+        )
 
-         # Verifica la barra de búsqueda
-         search_bar = self.driver.find_element(By.ID, "search-bar")
-         search_bar.send_keys("Test1")
-         self.assertTrue(
-             len(self.driver.find_elements(By.CLASS_NAME, "voting-open")) == 1
-         )
-         search_bar.clear()
+        # Verifica la barra de búsqueda
+        search_bar = self.driver.find_element(By.ID, "search-bar")
+        search_bar.send_keys("Test1")
+        self.assertTrue(
+            len(self.driver.find_elements(By.CLASS_NAME, "voting-open")) == 1
+        )
+        search_bar.clear()
 
-         search_bar.send_keys("Test2")
-         self.assertTrue(
-             len(self.driver.find_elements(By.CLASS_NAME, "voting-closed")) == 1
-         )
-         search_bar.clear()
+        search_bar.send_keys("Test2")
+        self.assertTrue(
+            len(self.driver.find_elements(By.CLASS_NAME, "voting-closed")) == 1
+        )
+        search_bar.clear()
 
-         # Verifica el filtrado
-         select_filter = self.driver.find_element(By.ID, "filter")
-         select_filter.find_element(By.XPATH, "//option[. = 'Open']").click()
+        # Verifica el filtrado
+        select_filter = self.driver.find_element(By.ID, "filter")
+        select_filter.find_element(By.XPATH, "//option[. = 'Open']").click()
 
-         self.assertTrue(
-             len(self.driver.find_elements(By.CLASS_NAME, "voting-open")) == 1
-         )
+        self.assertTrue(
+            len(self.driver.find_elements(By.CLASS_NAME, "voting-open")) == 1
+        )
 
-         select_filter.find_element(By.XPATH, "//option[. = 'Closed']").click()
+        select_filter.find_element(By.XPATH, "//option[. = 'Closed']").click()
 
-         self.assertTrue(
-             len(self.driver.find_elements(By.CLASS_NAME, "voting-closed")) == 1
-         )
+        self.assertTrue(
+            len(self.driver.find_elements(By.CLASS_NAME, "voting-closed")) == 1
+        )
 
     def test_voting_list_no_email(self):
         # Abre la ruta del navegador
@@ -207,7 +207,8 @@ class VotingListViewTestCase(StaticLiveServerTestCase):
 
         # Verifica que el nombre de la página sea el correcto, debería dar un error de servidor al no existir ningún email verificado
         self.assertTrue(self.driver.title == "Decide | Homepage")
-        
+
+
 class OpinionsViewTestCase(StaticLiveServerTestCase):
     def setUp(self):
         # Crea un usuario admin y otro no admin
