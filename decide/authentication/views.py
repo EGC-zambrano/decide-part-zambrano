@@ -12,20 +12,17 @@ from .forms import LoginForm, RegisterForm
 from .serializers import UserSerializer
 
 from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
-from django.urls import reverse_lazy
-from django.views.generic.edit import FormView
 from django.contrib.auth.views import (
     PasswordResetView,
     PasswordResetDoneView,
     PasswordResetCompleteView,
     PasswordResetConfirmView,
 )
-from django.contrib.auth import update_session_auth_hash
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
-from dotenv import load_dotenv
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
 
 # Non-api view
@@ -114,14 +111,14 @@ class ResetPasswordView(PasswordResetView):
             )
 
             user = User.objects.get(email=email)
-            token = form.cleaned_data.get("csrf_token")
+            token = PasswordResetTokenGenerator().make_token(user)
 
             idEncode = f"salt{user.pk}"
             encoded = base64.b64encode(bytes(idEncode, encoding="utf-8")).decode(
                 "utf-8"
             )
             urlVerificar = (
-                f"{Site.objects.get_current().domain}/reset/{encoded}/<token>/"
+                f"{Site.objects.get_current().domain}/reset/{encoded}/{token}/"
             )
 
             mailMessage.dynamic_template_data = {
@@ -156,6 +153,30 @@ class ResetPasswordDoneView(PasswordResetDoneView):
 class ResetPasswordConfirmView(PasswordResetConfirmView):
     template_name = "authentication/password_reset_confirm.html"
     success_url = "/reset/done/"
+
+    def post(self, request):
+        form = SetPasswordForm(request.POST)
+
+        new_password = request.POST.get("new_password1", None)
+        confirm_new_password = request.POST.get("new_password2", None)
+        print(new_password)
+        print(confirm_new_password)
+        if new_password:
+            if new_password == confirm_new_password:
+                request.user.set_password(new_password)
+                request.user.save()
+                return render(
+                    request,
+                    "authentication/password_reset_complete.html",
+                    {"form": form},
+                )
+            else:
+                msg = "Las contraseñas no coinciden."
+                return render(
+                    request,
+                    "authentication/password_reset_complete.html",
+                    {"form": form, "message": msg},
+                )
 
 
 class ResetPasswordCompleteView(PasswordResetCompleteView):
