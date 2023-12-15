@@ -1,3 +1,4 @@
+import socket
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.views import PasswordChangeView
 from django.shortcuts import get_object_or_404, redirect, render
@@ -90,7 +91,7 @@ class RegisterView(APIView):
             encoded = base64.b64encode(
                 bytes(usernameToEncode, encoding="utf-8")
             ).decode("utf-8")
-            urlVerificar = f"{request.META['HTTP_HOST']}/verificar/{encoded}"
+            urlVerificar = f"{request._get_raw_host()}/verificar/{encoded}"
             mailMessage.dynamic_template_data = {
                 "urlVerificar": urlVerificar,
                 "username": f'{form.cleaned_data.get("username")}',
