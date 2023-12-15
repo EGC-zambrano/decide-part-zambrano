@@ -1,5 +1,6 @@
 import base64
 import datetime
+import os
 
 from allauth.socialaccount.models import SocialApp
 from base.models import Auth
@@ -25,6 +26,7 @@ class HomepageTestCase(StaticLiveServerTestCase):
         # Opciones de Chrome
         options = webdriver.ChromeOptions()
         options.headless = True
+        options.add_argument("--no-sandbox")
         self.driver = webdriver.Chrome(options=options)
 
         super().setUp()
@@ -96,7 +98,11 @@ class VotingListViewTestCase(StaticLiveServerTestCase):
         # Opciones de Chrome
         options = webdriver.ChromeOptions()
         options.headless = True
+        options.add_argument("--no-sandbox")
         self.driver = webdriver.Chrome(options=options)
+
+        # Disable recaptcha
+        os.environ["DISABLE_RECAPTCHA"] = "1"
 
         super().setUp()
 
@@ -240,6 +246,7 @@ class OpinionsViewTestCase(StaticLiveServerTestCase):
         # Opciones de Chrome
         options = webdriver.ChromeOptions()
         options.headless = True
+        options.add_argument("--no-sandbox")
         self.driver = webdriver.Chrome(options=options)
 
         super().setUp()

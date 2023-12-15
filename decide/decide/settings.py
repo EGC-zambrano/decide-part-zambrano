@@ -37,6 +37,19 @@ SITE_ID = int(os.getenv("DJANGO_SITE_ID", "2"))
 SOCIAL_AUTH_GITHUB_KEY = os.getenv("GITHUB_KEY", "")
 SOCIAL_AUTH_GITHUB_SECRET = os.getenv("GITHUB_SECRET", "")
 
+RECAPTCHA_PUBLIC_KEY = os.getenv("RECAPTCHA_PUBLIC_KEY", "")
+RECAPTCHA_PRIVATE_KEY = os.getenv("RECAPTCHA_PRIVATE_KEY", "")
+
+os.environ["RECAPTCHA_PUBLIC_KEY"] = (
+    RECAPTCHA_PUBLIC_KEY or "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+)
+
+os.environ["RECAPTCHA_PRIVATE_KEY"] = (
+    RECAPTCHA_PRIVATE_KEY or "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
+)
+
+SILENCED_SYSTEM_CHECKS = ["django_recaptcha.recaptcha_test_key_error"]
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -56,6 +69,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
     "social_django",
+    "django_recaptcha",
 ]
 
 SOCIALACCOUNT_PROVIDERS = {

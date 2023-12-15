@@ -10,18 +10,23 @@ import os
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 from .models import EmailCheck
-from .forms import LoginForm, RegisterForm
+from .forms import LoginForm, RegisterForm, TestLoginForm, TestRegisterForm
 from .serializers import UserSerializer
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from booth.views import index
 from django.contrib.sites.models import Site
 
+import os
+
 
 # Non-api view
 class LoginView(TemplateView):
     def post(self, request):
-        form = LoginForm(request.POST)
+        if int(os.environ.get("DISABLE_RECAPTCHA", "0")):
+            form = TestLoginForm(request.POST)
+        else:
+            form = LoginForm(request.POST)
 
         msg = None
 
@@ -47,7 +52,10 @@ class LoginView(TemplateView):
         return render(request, "authentication/login.html", {"form": form, "msg": msg})
 
     def get(self, request):
-        form = LoginForm(None)
+        if int(os.environ.get("DISABLE_RECAPTCHA", "0")):
+            form = TestLoginForm(None)
+        else:
+            form = LoginForm(None)
 
         return render(request, "authentication/login.html", {"form": form, "msg": None})
 
@@ -68,7 +76,10 @@ class LogoutView(TemplateView):
 
 class RegisterView(APIView):
     def post(self, request):
-        form = RegisterForm(request.POST)
+        if int(os.environ.get("DISABLE_RECAPTCHA", "0")):
+            form = TestRegisterForm(request.POST)
+        else:
+            form = RegisterForm(request.POST)
 
         if form.is_valid():
             mailMessage = Mail(
@@ -100,7 +111,10 @@ class RegisterView(APIView):
             return render(request, "authentication/register.html", {"form": form})
 
     def get(self, request):
-        form = RegisterForm(None)
+        if int(os.environ.get("DISABLE_RECAPTCHA", "0")):
+            form = TestRegisterForm()
+        else:
+            form = RegisterForm()
 
         return render(
             request, "authentication/register.html", {"form": form, "msg": None}
