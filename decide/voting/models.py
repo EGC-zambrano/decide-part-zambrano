@@ -30,6 +30,29 @@ class Question(models.Model):
             )
             enBlanco.save()
             self.options.add(enBlanco)
+        if self.question_type == "B":
+            if (
+                QuestionOption.objects.filter(
+                    question__id=self.id, option__startswith="Sí"
+                ).count()
+                == 0
+            ):
+                op1 = QuestionOption(
+                    question=self, number=self.options.count() + 1, option="Sí"
+                )
+                op1.save()
+                self.options.add(op1)
+            if (
+                QuestionOption.objects.filter(
+                    question__id=self.id, option__startswith="No"
+                ).count()
+                == 0
+            ):
+                op2 = QuestionOption(
+                    question=self, number=self.options.count() + 1, option="No"
+                )
+                op2.save()
+                self.options.add(op2)
         return super().save()
 
     def __str__(self):
@@ -46,7 +69,7 @@ class QuestionOption(models.Model):
 
     def save(self):
         if self.question.question_type == "B" and self.question.options.count() > 1:
-            raise BadRequest("Boolean questions can only have two options.")
+            raise BadRequest("Boolean questions cannot have any options.")
         if not self.number:
             self.number = self.question.options.count() + 1
         else:
