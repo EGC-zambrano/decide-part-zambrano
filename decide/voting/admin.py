@@ -12,12 +12,14 @@ def start(modeladmin, request, queryset):
     for v in queryset.all():
         v.create_pubkey()
         v.start_date = timezone.now()
+        v.status = "Started"  # Set the status to indicate the voting is started
         v.save()
 
 
 def stop(ModelAdmin, request, queryset):
     for v in queryset.all():
         v.end_date = timezone.now()
+        v.status = "Stopped"  # Set the status to indicate the voting is stopped
         v.save()
 
 
@@ -43,6 +45,27 @@ class VotingAdmin(admin.ModelAdmin):
     search_fields = ("name",)
 
     actions = [start, stop, tally]
+
+    def get_actions(self, request):
+        # Customize the list of available actions based on the current status
+        actions = super().get_actions(request)
+        # Reopen option is available if the status is "Stopped"
+        if Voting.objects.filter(end_date__isnull=False):
+            actions["reopen_selected"] = (
+                VotingAdmin.reopen_selected,
+                "reopen_selected",
+                "Reopen selected votings",
+            )
+
+        return actions
+
+    @staticmethod
+    def reopen_selected(modeladmin, request, queryset):
+        for v in queryset.all():
+            v.end_date = None  # Reset end_date to None
+            v.status = "Started"  # Set the status to indicate the voting is reopened
+            v.tally = None
+            v.save()
 
 
 admin.site.register(Voting, VotingAdmin)

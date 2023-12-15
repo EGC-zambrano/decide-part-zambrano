@@ -50,7 +50,7 @@ header {
 .form-content {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-end;
     gap: .5em;
 }
 
@@ -132,6 +132,36 @@ header {
 }
 
 .login-google-button svg {
+    width: 24px; 
+    height: 24px;
+    margin-right: 10px; 
+    fill: #888; 
+}
+
+.login-github-button {
+    text-align: center;
+}
+
+.login-github-button a {
+    display: inline-block;
+    background-color: #fff; 
+    color: #888; 
+    text-decoration: none;
+    border: 1px solid #ccc; 
+    border-radius: 4px;
+    padding: 10px 20px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+}
+
+.login-github-button a:hover {
+    background-color: #f7f7f7e5; 
+}
+
+.login-github-button svg {
     width: 24px; 
     height: 24px;
     margin-right: 10px; 

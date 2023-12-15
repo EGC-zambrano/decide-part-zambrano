@@ -1,3 +1,30 @@
+#app-visualizer{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 40px 0px;
+    width: 100%;
+    gap: 40px;
+}
+.show-charts{
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+.charts {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    width: 100%;
+}
+table {
+    width: 200px;
+}
 .page-title {
     font-size: 2em;
     font-weight: bold;
@@ -9,7 +36,14 @@
     margin-top: 20px;
     margin-left: 40px;
 }
+.chart{
+    display: flex;
+    width: 40%;
+}
 
+.bar{
+    width: 50%;
+}
 .vertical-list {
     display: flex;
     flex-direction: column;
@@ -30,7 +64,7 @@
     border-radius: 0.5em;
 }
 
-.voting-card {
+.voting-card, .opinion-card {
     display: flex;
     flex-wrap: nowrap;
     flex-direction: column;
@@ -39,6 +73,42 @@
     transition: all .15s ease-in-out;
     text-decoration: none;
     color: inherit;
+}
+
+.opinion-card {
+    transition: none;
+}
+
+textarea {
+    width: 100%;
+    border-radius: 5px;
+    padding: 10px
+}
+
+#submit-opinion, .opinions-card {
+    padding: 10px;
+    margin: 20px 0;
+    border-radius: 5px;
+    background-color: var(--green-color);
+    width: fit-content;
+    text-decoration: none;
+    color: var(--text-color)
+}
+
+.opinions-card {
+    margin: 0;
+}
+
+#submit-opinion:hover, #opinions-button:hover {
+    background-color: var(--green-dark-color); 
+    cursor: pointer;
+}
+
+#opinion-date {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    font-weight: bolder;
 }
 
 .voting-card:hover {
@@ -91,4 +161,15 @@
 
 .no-votings {
     width: 100%;
+}
+.caja-mensaje {
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.verde {
+    background-color: #4CAF50; /* Color verde */
+    color: white; /* Texto blanco */
 }
