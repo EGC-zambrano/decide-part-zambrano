@@ -1,3 +1,4 @@
+import base64
 import datetime
 import os
 
@@ -12,6 +13,7 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.utils import timezone
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from authentication.models import EmailCheck
 from voting.models import Question, Voting
 
 
@@ -56,6 +58,7 @@ class VotingListViewTestCase(StaticLiveServerTestCase):
         self.base.setUp()
 
         user = User.objects.get(username="noadmin")
+        emailCheck = EmailCheck.objects.create(user=user, emailChecked=False)
         # Crea 2 votaciones, una cerrada y otra abierta
         question = Question.objects.create(desc="Test question")
         voting1 = Voting.objects.create(
@@ -126,9 +129,13 @@ class VotingListViewTestCase(StaticLiveServerTestCase):
         # Ingresa el usuario y contraseña
         self.driver.find_element(By.ID, "id_username").send_keys("noadmin")
         self.driver.find_element(By.ID, "id_password").send_keys("qwerty")
-
         # Presiona el botón de login
-        self.driver.find_element(By.CLASS_NAME, "btn-primary").click()
+        self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
+        # Verifica al usuario
+        encoded = base64.b64encode(bytes("noadmin", encoding="utf-8")).decode("utf-8")
+        urlVerificar = f"{self.live_server_url}/verificar/{encoded}"
+        self.driver.get(urlVerificar)
+        self.driver.find_element(By.LINK_TEXT, "Votaciones").click()
 
         # Verifica que el nombre de la página sea el correcto
         self.assertTrue(self.driver.title == "Decide | Votings")
@@ -178,6 +185,31 @@ class VotingListViewTestCase(StaticLiveServerTestCase):
             len(self.driver.find_elements(By.CLASS_NAME, "voting-closed")) == 1
         )
 
+    def test_voting_list_no_email(self):
+        # Abre la ruta del navegador
+        self.driver.get(f"{self.live_server_url}")
+
+        self.driver.find_element(By.LINK_TEXT, "Votaciones").click()
+
+        # Verifica que el nombre de la página sea el correcto
+        self.assertTrue(self.driver.title == "Decide | Login")
+
+        # Verifica que los elementos de la página de login existen
+        self.assertTrue(len(self.driver.find_elements(By.CLASS_NAME, "header")) == 1)
+        self.assertTrue(len(self.driver.find_elements(By.TAG_NAME, "footer")) == 1)
+        self.assertTrue(len(self.driver.find_elements(By.CLASS_NAME, "form-card")) == 1)
+
+        # Ingresa el usuario y contraseña
+        self.driver.find_element(By.ID, "id_username").send_keys("noadmin")
+        self.driver.find_element(By.ID, "id_password").send_keys("qwerty")
+
+        # Presiona el botón de login
+        self.driver.find_element(By.CLASS_NAME, "btn-primary").click()
+        self.driver.find_element(By.LINK_TEXT, "Votaciones").click()
+
+        # Verifica que el nombre de la página sea el correcto, debería dar un error de servidor al no existir ningún email verificado
+        self.assertTrue(self.driver.title == "Decide | Homepage")
+
 
 class OpinionsViewTestCase(StaticLiveServerTestCase):
     def setUp(self):
@@ -186,6 +218,7 @@ class OpinionsViewTestCase(StaticLiveServerTestCase):
         self.base.setUp()
 
         user = User.objects.get(username="noadmin")
+        emailCheck = EmailCheck.objects.create(user=user, emailChecked=True)
         # Crea la votacion
         question = Question.objects.create(desc="Test question")
         voting1 = Voting.objects.create(
@@ -244,7 +277,6 @@ class OpinionsViewTestCase(StaticLiveServerTestCase):
 
         # Presiona el botón de login
         self.driver.find_element(By.CLASS_NAME, "btn-primary").click()
-
         # Verifica que el nombre de la página sea el correcto
         self.assertTrue(self.driver.title == "Decide | Votings")
 

@@ -2,6 +2,7 @@ import json
 
 from base import mods
 from census.models import Census
+from authentication.models import EmailCheck
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
@@ -12,12 +13,19 @@ from voting.models import Voting
 from booth.form import OpinionForm
 
 
-def index(request):
-    return render(request, "booth/homepage.html")
+def index(request, message=None):
+    return render(request, "booth/homepage.html", {"message": message})
+
+
+def email_is_checked(request):
+    return EmailCheck.objects.get(user=request.user).emailChecked
 
 
 @login_required(login_url="/signin")
 def voting_list(request):
+    if not email_is_checked(request):
+        message = "Por favor, entra en tu email y verifica tu cuenta antes de votar."
+        return index(request, message)
     votings_ids = Census.objects.filter(voter_id=request.user.id).values_list(
         "voting_id", flat=True
     )
