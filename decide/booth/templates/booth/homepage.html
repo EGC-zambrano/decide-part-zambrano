@@ -8,10 +8,20 @@
 {% endblock %}
 
 {% block content %}
+    <section>
+        {% if message %}
+            <div class="caja-mensaje verde">
+                <p>{{ message }}</p>
+            </div>
+        {% endif %}
+    </section>
     <section class="hero">
         <div id="hero-text">
             <h1 id="text1">Tu plataforma de</h1>
             <h1 id="text2">votos online de confianza</h1>
         </div>
-    </section> 
+    </section>
+
 {% endblock %}
+
+

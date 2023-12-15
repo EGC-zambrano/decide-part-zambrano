@@ -162,3 +162,14 @@ textarea {
 .no-votings {
     width: 100%;
 }
+.caja-mensaje {
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.verde {
+    background-color: #4CAF50; /* Color verde */
+    color: white; /* Texto blanco */
+}

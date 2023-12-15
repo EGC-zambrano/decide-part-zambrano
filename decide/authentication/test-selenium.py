@@ -1,6 +1,6 @@
+import base64
 import os
 import time
-
 from allauth.socialaccount.models import SocialApp
 from base.tests import BaseTestCase
 from django.contrib.auth.models import User
@@ -241,7 +241,7 @@ class RegisterViewTestCase(StaticLiveServerTestCase):
         click_captcha(self.driver)
         self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
 
-        self.assertTrue(self.driver.title == "Decide | Login")
+        self.assertEqual(self.driver.title, "Decide | Homepage")
 
     def test_failed_registration(self):
         self.driver.get(f"{self.live_server_url}/register")
@@ -325,6 +325,67 @@ class RegisterViewTestCase(StaticLiveServerTestCase):
         self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
 
         self.assertTrue(self.driver.title == "Decide | Registration")
+
+    def test_email_registration(self):
+        self.driver.get(f"{self.live_server_url}/register")
+
+        self.assertTrue(len(self.driver.find_elements(By.ID, "id_username")) == 1)
+        self.assertTrue(len(self.driver.find_elements(By.ID, "id_first_name")) == 1)
+        self.assertTrue(len(self.driver.find_elements(By.ID, "id_last_name")) == 1)
+        self.assertTrue(len(self.driver.find_elements(By.ID, "id_email")) == 1)
+        self.assertTrue(len(self.driver.find_elements(By.ID, "id_password1")) == 1)
+        self.assertTrue(len(self.driver.find_elements(By.ID, "id_password2")) == 1)
+
+        self.driver.find_element(By.ID, "id_username").send_keys("luffy")
+        self.driver.find_element(By.ID, "id_first_name").send_keys("John")
+        self.driver.find_element(By.ID, "id_last_name").send_keys("Doe")
+        self.driver.find_element(By.ID, "id_email").send_keys("john.doe@example.com")
+        self.driver.find_element(By.ID, "id_password1").send_keys("strong_password123")
+        self.driver.find_element(By.ID, "id_password2").send_keys("strong_password123")
+        click_captcha(self.driver)
+        self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
+
+        self.driver.find_element(By.LINK_TEXT, "Iniciar Sesión").click()
+
+        self.driver.find_element(By.ID, "id_username").send_keys("luffy")
+        self.driver.find_element(By.ID, "id_password").send_keys("strong_password123")
+        click_captcha(self.driver)
+        self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
+
+        encoded = base64.b64encode(bytes("luffy", encoding="utf-8")).decode("utf-8")
+        urlVerificar = f"{self.live_server_url}/verificar/{encoded}"
+        self.driver.get(urlVerificar)
+        self.driver.find_element(By.LINK_TEXT, "Votaciones").click()
+
+        self.assertTrue(self.driver.title == "Decide | Votings")
+
+    def test_email_registration_neg(self):
+        self.driver.get(f"{self.live_server_url}/register")
+
+        self.assertTrue(len(self.driver.find_elements(By.ID, "id_username")) == 1)
+        self.assertTrue(len(self.driver.find_elements(By.ID, "id_first_name")) == 1)
+        self.assertTrue(len(self.driver.find_elements(By.ID, "id_last_name")) == 1)
+        self.assertTrue(len(self.driver.find_elements(By.ID, "id_email")) == 1)
+        self.assertTrue(len(self.driver.find_elements(By.ID, "id_password1")) == 1)
+        self.assertTrue(len(self.driver.find_elements(By.ID, "id_password2")) == 1)
+
+        self.driver.find_element(By.ID, "id_username").send_keys("luffy")
+        self.driver.find_element(By.ID, "id_first_name").send_keys("John")
+        self.driver.find_element(By.ID, "id_last_name").send_keys("Doe")
+        self.driver.find_element(By.ID, "id_email").send_keys("john.doe@example.com")
+        self.driver.find_element(By.ID, "id_password1").send_keys("strong_password123")
+        self.driver.find_element(By.ID, "id_password2").send_keys("strong_password123")
+        click_captcha(self.driver)
+        self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
+        self.driver.find_element(By.LINK_TEXT, "Iniciar Sesión").click()
+
+        self.driver.find_element(By.ID, "id_username").send_keys("luffy")
+        self.driver.find_element(By.ID, "id_password").send_keys("strong_password123")
+        click_captcha(self.driver)
+        self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
+
+        self.driver.find_element(By.LINK_TEXT, "Votaciones").click()
+        self.assertEqual(self.driver.title, "Decide | Homepage")
 
 
 class LogoutTestCase(StaticLiveServerTestCase):

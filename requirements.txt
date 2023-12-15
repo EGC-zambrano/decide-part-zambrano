@@ -20,3 +20,4 @@ whitenoise==6.5.0
 gunicorn==21.2.0
 social-auth-app-django
 locust==2.20.0
+sendgrid
