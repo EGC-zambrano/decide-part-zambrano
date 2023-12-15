@@ -342,12 +342,14 @@ class RegisterViewTestCase(StaticLiveServerTestCase):
         self.driver.find_element(By.ID, "id_email").send_keys("john.doe@example.com")
         self.driver.find_element(By.ID, "id_password1").send_keys("strong_password123")
         self.driver.find_element(By.ID, "id_password2").send_keys("strong_password123")
+        click_captcha(self.driver)
         self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
 
         self.driver.find_element(By.LINK_TEXT, "Iniciar Sesión").click()
 
         self.driver.find_element(By.ID, "id_username").send_keys("luffy")
         self.driver.find_element(By.ID, "id_password").send_keys("strong_password123")
+        click_captcha(self.driver)
         self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
 
         encoded = base64.b64encode(bytes("luffy", encoding="utf-8")).decode("utf-8")
@@ -373,11 +375,13 @@ class RegisterViewTestCase(StaticLiveServerTestCase):
         self.driver.find_element(By.ID, "id_email").send_keys("john.doe@example.com")
         self.driver.find_element(By.ID, "id_password1").send_keys("strong_password123")
         self.driver.find_element(By.ID, "id_password2").send_keys("strong_password123")
+        click_captcha(self.driver)
         self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
         self.driver.find_element(By.LINK_TEXT, "Iniciar Sesión").click()
 
         self.driver.find_element(By.ID, "id_username").send_keys("luffy")
         self.driver.find_element(By.ID, "id_password").send_keys("strong_password123")
+        click_captcha(self.driver)
         self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
 
         self.driver.find_element(By.LINK_TEXT, "Votaciones").click()
