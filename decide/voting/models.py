@@ -44,20 +44,15 @@ class QuestionOption(models.Model):
     option = models.TextField()
     hidden = models.BooleanField(default=False)
 
-    def save(self, *args, **kwargs):
+    def save(self):
         if self.question.question_type == "B" and self.question.options.count() > 1:
             raise BadRequest("Boolean questions can only have two options.")
         if not self.number:
-<<<<<<< HEAD
-            self.number = self.question.options.count() + 2
-        super().save(*args, **kwargs)
-=======
             self.number = self.question.options.count() + 1
         else:
             if self.number and Question.voteBlank:
                 self.number = self.question.options.count() + 1
         return super().save()
->>>>>>> develop
 
     def __str__(self):
         return "{} ({})".format(self.option, self.number)
