@@ -4,9 +4,12 @@ from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.test import Client, TestCase
 from django.urls import reverse
+from unittest import mock
 from rest_framework.test import APIClient, APITestCase
 
-from .forms import LoginForm, RegisterForm
+from .forms import TestLoginForm, TestRegisterForm
+
+import os
 
 
 class AuthTestCase(APITestCase):
@@ -21,6 +24,9 @@ class AuthTestCase(APITestCase):
         u2.set_password("admin")
         u2.is_superuser = True
         u2.save()
+
+        # Disable recaptcha
+        os.environ["DISABLE_RECAPTCHA"] = "1"
 
     def tearDown(self):
         self.client = None
@@ -100,11 +106,14 @@ class LoginViewTestCase(TestCase):
         # Add the current site to the SocialApp's sites
         app.sites.add(Site.objects.get_current())
 
+        # Disable recaptcha
+        os.environ["DISABLE_RECAPTCHA"] = "1"
+
     def test_get(self):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "authentication/login.html")
-        self.assertIsInstance(response.context["form"], LoginForm)
+        self.assertIsInstance(response.context["form"], TestLoginForm)
         self.assertIsNone(response.context["msg"])
 
     def test_post_valid_credentials(self):
@@ -117,7 +126,7 @@ class LoginViewTestCase(TestCase):
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "authentication/login.html")
-        self.assertIsInstance(response.context["form"], LoginForm)
+        self.assertIsInstance(response.context["form"], TestLoginForm)
         self.assertEqual(response.context["msg"], "Credenciales incorrectas")
 
     def test_post_invalid_form(self):
@@ -125,7 +134,7 @@ class LoginViewTestCase(TestCase):
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "authentication/login.html")
-        self.assertIsInstance(response.context["form"], LoginForm)
+        self.assertIsInstance(response.context["form"], TestLoginForm)
         self.assertEqual(response.context["msg"], "Error en el formulario")
 
 
@@ -142,11 +151,14 @@ class RegisterViewTestCase(TestCase):
         # Add the current site to the SocialApp's sites
         app.sites.add(Site.objects.get_current())
 
+        # Disable recaptcha
+        os.environ["DISABLE_RECAPTCHA"] = "1"
+
     def test_get(self):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "authentication/register.html")
-        self.assertIsInstance(response.context["form"], RegisterForm)
+        self.assertIsInstance(response.context["form"], TestRegisterForm)
         self.assertIsNone(response.context["msg"])
 
     def test_post_valid_form(self):
@@ -160,7 +172,8 @@ class RegisterViewTestCase(TestCase):
         }
         response = self.client.post(self.url, data, follow=True)
         self.assertTrue(User.objects.filter(username=data["username"]).exists())
-        self.assertRedirects(response, "/signin/")
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "booth/homepage.html")
 
     def test_post_invalid_form(self):
         data = {
@@ -174,7 +187,7 @@ class RegisterViewTestCase(TestCase):
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "authentication/register.html")
-        self.assertIsInstance(response.context["form"], RegisterForm)
+        self.assertIsInstance(response.context["form"], TestRegisterForm)
         self.assertIn("form", response.context)
         self.assertTrue(response.context["form"].errors)
 
@@ -198,12 +211,35 @@ class RegisterViewTestCase(TestCase):
             response.context["form"].errors["username"],
         )
 
+    def test_email_registration_voting_is_prohibited(self):
+        data = {
+            "username": "roronoa_zoro",
+            "first_name": "John",
+            "last_name": "Doe",
+            "email": "roronoazoro@example.com",
+            "password1": "strong_password123",
+            "password2": "strong_password123",
+        }
+
+        response = self.client.post(self.url, data, follow=True)
+
+        # Assert that the user stays on the home page instead of log-in
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "booth/homepage.html")
+        response = self.client.get("/voting-list", follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, '<h1 class="page-title">My Votings</h1>')
+        self.assertNotContains(response, '<section id="voting-list">')
+
 
 class ChangePasswordViewTestCase(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="passuser", password="testpass")
         self.client.force_login(self.user)
         self.url = reverse("change-password")
+
+        # Disable recaptcha
+        os.environ["DISABLE_RECAPTCHA"] = "1"
 
     def test_change_password_view_success(self):
         response = self.client.post(

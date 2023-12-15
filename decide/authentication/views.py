@@ -5,15 +5,28 @@ from django.views.generic import TemplateView
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
-from .forms import LoginForm, RegisterForm
+import base64
+import os
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
+from .models import EmailCheck
+from .forms import LoginForm, RegisterForm, TestLoginForm, TestRegisterForm
 from .serializers import UserSerializer
+from django.shortcuts import render, redirect
+from django.contrib.auth.models import User
+from booth.views import index
+from django.contrib.sites.models import Site
+
+import os
 
 
 # Non-api view
 class LoginView(TemplateView):
     def post(self, request):
-        form = LoginForm(request.POST)
+        if int(os.environ.get("DISABLE_RECAPTCHA", "0")):
+            form = TestLoginForm(request.POST)
+        else:
+            form = LoginForm(request.POST)
 
         msg = None
 
@@ -39,7 +52,10 @@ class LoginView(TemplateView):
         return render(request, "authentication/login.html", {"form": form, "msg": msg})
 
     def get(self, request):
-        form = LoginForm(None)
+        if int(os.environ.get("DISABLE_RECAPTCHA", "0")):
+            form = TestLoginForm(None)
+        else:
+            form = LoginForm(None)
 
         return render(request, "authentication/login.html", {"form": form, "msg": None})
 
@@ -60,20 +76,65 @@ class LogoutView(TemplateView):
 
 class RegisterView(APIView):
     def post(self, request):
-        form = RegisterForm(request.POST)
+        if int(os.environ.get("DISABLE_RECAPTCHA", "0")):
+            form = TestRegisterForm(request.POST)
+        else:
+            form = RegisterForm(request.POST)
 
         if form.is_valid():
+            mailMessage = Mail(
+                from_email="decidezambrano@gmail.com",
+                to_emails=form.cleaned_data.get("email"),
+            )
+            usernameToEncode = f'{form.cleaned_data.get("username")}'
+            encoded = base64.b64encode(
+                bytes(usernameToEncode, encoding="utf-8")
+            ).decode("utf-8")
+            urlVerificar = f"{Site.objects.get_current().domain}/verificar/{encoded}"
+            mailMessage.dynamic_template_data = {
+                "urlVerificar": urlVerificar,
+                "username": f'{form.cleaned_data.get("username")}',
+            }
+            mailMessage.template_id = "d-e468c8fe83504fa981029f794ae02c4e"
+            try:
+                sg = SendGridAPIClient(os.environ.get("SENDGRID_API_KEY"))
+                sg.send(mailMessage)
+            except Exception as e:
+                print(e)
             form.save()
-            return redirect("/signin")
+            userToCheck = User.objects.get(username=usernameToEncode)
+            emailCheck = EmailCheck(user=userToCheck, emailChecked=False)
+            emailCheck.save()
+            message = 'Un último paso: entra en tu cuenta y entra en tu email. Comprueba la carpeta "Spam".'
+            return index(request, message)
         else:
             return render(request, "authentication/register.html", {"form": form})
 
     def get(self, request):
-        form = RegisterForm(None)
+        if int(os.environ.get("DISABLE_RECAPTCHA", "0")):
+            form = TestRegisterForm()
+        else:
+            form = RegisterForm()
 
         return render(
             request, "authentication/register.html", {"form": form, "msg": None}
         )
+
+
+class EmailView(TemplateView):
+    def emailCheck(request, **kwargs):
+        if not request.user.is_authenticated:
+            message = "Entre en su cuenta antes de intentar verificarla"
+            return index(request, message)
+        encoded = kwargs.get("user_encode", 0)
+        if request.user.username == base64.b64decode(str(encoded)).decode("utf-8"):
+            checkToAdd = EmailCheck.objects.get(user=request.user)
+            checkToAdd.emailChecked = True
+            checkToAdd.save()
+            message = "¡Muchas gracias! Tu cuenta ha sido verificada. ¡A votar!"
+        else:
+            message = "¡Este no es tu link para activar tu cuenta!"
+        return index(request, message)
 
 
 class ChangePasswordView(PasswordChangeView):

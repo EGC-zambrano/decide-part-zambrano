@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 
 import os
 from dotenv import load_dotenv
+import dj_database_url
 
 load_dotenv()
 
@@ -22,11 +23,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "^##ydkswfu0+=ofw0l#$kv^8n)0$i(qd&d&ol#p9!b$8*5%j1+"
-
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = "RENDER" not in os.environ
+
+SECRET_KEY = "^##ydkswfu0+=ofw0l#$kv^8n)0$i(qd&d&ol#p9!b$8*5%j1+"
 
 ALLOWED_HOSTS = []
 
@@ -34,6 +34,21 @@ ALLOWED_HOSTS = []
 # Application definition
 
 SITE_ID = int(os.getenv("DJANGO_SITE_ID", "2"))
+SOCIAL_AUTH_GITHUB_KEY = os.getenv("GITHUB_KEY", "")
+SOCIAL_AUTH_GITHUB_SECRET = os.getenv("GITHUB_SECRET", "")
+
+RECAPTCHA_PUBLIC_KEY = os.getenv("RECAPTCHA_PUBLIC_KEY", "")
+RECAPTCHA_PRIVATE_KEY = os.getenv("RECAPTCHA_PRIVATE_KEY", "")
+
+os.environ["RECAPTCHA_PUBLIC_KEY"] = (
+    RECAPTCHA_PUBLIC_KEY or "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+)
+
+os.environ["RECAPTCHA_PRIVATE_KEY"] = (
+    RECAPTCHA_PRIVATE_KEY or "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"
+)
+
+SILENCED_SYSTEM_CHECKS = ["django_recaptcha.recaptcha_test_key_error"]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -53,6 +68,8 @@ INSTALLED_APPS = [
     "allauth.account",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
+    "social_django",
+    "django_recaptcha",
 ]
 
 SOCIALACCOUNT_PROVIDERS = {
@@ -67,8 +84,11 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
+SOCIAL_AUTH_GITHUB_SCOPE = ["user:email"]
+
 
 LOGIN_REDIRECT_URL = "/"
+
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -82,6 +102,7 @@ AUTHENTICATION_BACKENDS = [
     "base.backends.AuthBackend",
     "django.contrib.auth.backends.ModelBackend",
     "allauth.account.auth_backends.AuthenticationBackend",
+    "social_core.backends.github.GithubOAuth2",
 ]
 
 MODULES = [
@@ -107,6 +128,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "social_django.middleware.SocialAuthExceptionMiddleware",
 ]
 
 ROOT_URLCONF = "decide.urls"
@@ -122,6 +145,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "social_django.context_processors.backends",
             ],
         },
     },
@@ -184,6 +208,11 @@ TEST_RUNNER = "django_nose.NoseTestSuiteRunner"
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = "/static/"
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
+]
+
 
 # number of bits for the key, all auths should use the same number of bits
 KEYBITS = 256

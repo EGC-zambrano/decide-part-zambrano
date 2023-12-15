@@ -76,7 +76,7 @@ table {
     position: relative;
 }
 
-.voting-card {
+.voting-card, .opinion-card {
     display: flex;
     flex-wrap: nowrap;
     flex-direction: column;
@@ -85,6 +85,42 @@ table {
     transition: all .15s ease-in-out;
     text-decoration: none;
     color: inherit;
+}
+
+.opinion-card {
+    transition: none;
+}
+
+textarea {
+    width: 100%;
+    border-radius: 5px;
+    padding: 10px
+}
+
+#submit-opinion, .opinions-card {
+    padding: 10px;
+    margin: 20px 0;
+    border-radius: 5px;
+    background-color: var(--green-color);
+    width: fit-content;
+    text-decoration: none;
+    color: var(--text-color)
+}
+
+.opinions-card {
+    margin: 0;
+}
+
+#submit-opinion:hover, #opinions-button:hover {
+    background-color: var(--green-dark-color); 
+    cursor: pointer;
+}
+
+#opinion-date {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    font-weight: bolder;
 }
 
 .voting-card:hover {
@@ -169,4 +205,16 @@ table {
 
 .form-options {
     margin-bottom: 15px;
+}
+
+.caja-mensaje {
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.verde {
+    background-color: #4CAF50; /* Color verde */
+    color: white; /* Texto blanco */
 }
