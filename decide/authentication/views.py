@@ -90,7 +90,7 @@ class RegisterView(APIView):
             encoded = base64.b64encode(
                 bytes(usernameToEncode, encoding="utf-8")
             ).decode("utf-8")
-            urlVerificar = f"{Site.objects.get_current().domain}/verificar/{encoded}"
+            urlVerificar = f"{request.META['HTTP_HOST']}/verificar/{encoded}"
             mailMessage.dynamic_template_data = {
                 "urlVerificar": urlVerificar,
                 "username": f'{form.cleaned_data.get("username")}',
