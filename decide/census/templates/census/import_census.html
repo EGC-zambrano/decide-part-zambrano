@@ -1,0 +1,12 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<div class="module">
+    <h2>Import Census Data</h2>
+    <form enctype="multipart/form-data" method="post" action="{% url 'admin:census_census_import' %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <p class="submit"><input type="submit" value="Import"></p>
+    </form>
+</div>
+{% endblock %}

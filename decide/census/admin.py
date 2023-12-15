@@ -41,7 +41,7 @@ class CensusAdmin(admin.ModelAdmin):
                 return HttpResponseRedirect("..")
         else:
             form = CensusImportForm()
-        return render(request, "import.html", {"form": form})
+        return render(request, "census/import_census.html", {"form": form})
 
 
 admin.site.register(Census, CensusAdmin)
