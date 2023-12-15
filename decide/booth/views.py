@@ -6,9 +6,9 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404
-from django.shortcuts import render, get_object_or_404, get_list_or_404
+from django.shortcuts import render, get_object_or_404
 from django.views.generic import TemplateView
-from voting.models import Voting, QuestionOption, Question
+from voting.models import Voting
 
 
 def index(request):
@@ -27,8 +27,7 @@ def voting_list(request):
     return render(request, "booth/voting-list.html", {"user_votings": user_votings})
 
 
-class BoothView(LoginRequiredMixin, TemplateView):
-    login_url = '/signin'
+class BoothView(TemplateView):
     template_name = "booth/booth.html"
 
     def get_context_data(self, **kwargs):
@@ -36,6 +35,9 @@ class BoothView(LoginRequiredMixin, TemplateView):
         vid = kwargs.get("voting_id", 0)
 
         try:
+            vote = get_object_or_404(Voting, pk=vid)
+            question_type = vote.question.question_type
+            
             r = mods.get("voting", params={"id": vid})
             # Casting numbers to string to manage in javascript with BigInt
             # and avoid problems with js and big number conversion
@@ -43,20 +45,11 @@ class BoothView(LoginRequiredMixin, TemplateView):
                 r[0]["pub_key"][k] = str(v)
 
             context["voting"] = json.dumps(r[0])
+            
         except:
             raise Http404
 
         context["KEYBITS"] = settings.KEYBITS
+        context["question_type"] = question_type
 
         return context
-    
-    def get(self, request, voting_id, **kwargs):
-        user = request.user
-        voting = get_object_or_404(Voting, pk=voting_id)
-        question_type = voting.question.question_type
-        options = voting.question.options.all()
-        try:
-            Census.objects.get(voting_id=voting_id, voter_id=user.id)
-        except Census.DoesNotExist:
-            raise Http404
-        return render(request, "booth/booth.html", {"voting": voting, "options": options, "question_type": question_type})
