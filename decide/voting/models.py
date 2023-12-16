@@ -76,7 +76,7 @@ class Voting(models.Model):
         )
         vote_list_p = []
         # anon votes
-        if self.question.question_type == "S":
+        if self.question.question_type != "P":
             votes_format = []
             vote_list = []
             for vote in votes:
@@ -86,24 +86,17 @@ class Voting(models.Model):
                     vote_list.append(votes_format)
                     votes_format = []
 
-        elif self.question.question_type == "P":
+        else:
             votes_format = []
-            votes_format_p = []
             vote_list = []
             for vote in votes:
                 for option in vote["options"]:
                     votes_format.append(option["a"])
                     votes_format.append(option["b"])
-
-                    if option["p"]:
-                        votes_format_p.append(option["a"])
-                        votes_format_p.append(option["b"])
-                        votes_format_p.append(option["p"])
+                    votes_format.append(option["p"])
                     vote_list.append(votes_format)
-                    vote_list_p.append(votes_format_p)
                     votes_format = []
-                    votes_format_p = []
-        return vote_list, vote_list_p
+        return vote_list
 
     def tally_votes(self, token=""):
         """
