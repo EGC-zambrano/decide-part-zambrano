@@ -258,8 +258,8 @@ class VotingTestCase(BaseTestCase):
             "name": "Example boolean",
             "desc": "Description example boolean",
             "question_type": "B",
-            "question": "I want a ",
-            "question_opt": ["cat", "dog"],
+            "question": "Do you agree?",
+            "question_opt": ["Sí", "No"],
         }
 
         response = self.client.post("/voting/", data, format="json")
