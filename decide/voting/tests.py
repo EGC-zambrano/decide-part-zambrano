@@ -14,6 +14,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from voting.models import Question, QuestionOption, Voting
 from selenium.webdriver.chrome.webdriver import WebDriver
+from django.core.exceptions import BadRequest
 
 
 class VotingTestCase(BaseTestCase):
@@ -619,34 +620,55 @@ class QuestionsTests(StaticLiveServerTestCase):
         )
 
 
-class QuestionOptionTestCase(TestCase):
+class BooleanQuestionTestCase(BaseTestCase):
     def setUp(self):
-        self.question = Question.objects.create(question_type="B")
-        self.option1 = QuestionOption.objects.create(
-            question=self.question, option="Option 1"
+        self.question = Question.objects.create(
+            question_type="B", desc="What is your favorite color?", voteBlank=False
         )
-        self.option2 = QuestionOption.objects.create(
-            question=self.question, option="Option 2"
-        )
-
-    def test_save_method_with_boolean_question_and_multiple_options(self):
-        with self.assertRaises(ValueError):
-            option3 = QuestionOption(question=self.question, option="Option 3")
-            option3.save()
-
-    def test_save_method_with_boolean_question_and_single_option(self):
-        self.question.options.all().delete()
-        option3 = QuestionOption(question=self.question, option="Option 3")
-        option3.save()
-        self.assertEqual(option3.number, 2)
-
-    def test_save_method_with_non_boolean_question(self):
-        self.question.question_type = "S"
         self.question.save()
-        option3 = QuestionOption(question=self.question, option="Option 3")
-        option3.save()
-        self.assertEqual(option3.number, 4)
 
-    def test_str_method(self):
-        self.assertEqual(str(self.option1), "Option 1 (2)")
-        self.assertEqual(str(self.option2), "Option 2 (3)")
+    def test_save_boolean_question(self):
+        self.assertEqual(QuestionOption.objects.count(), 2)
+        self.assertEqual(QuestionOption.objects.first().option, "Sí")
+        self.assertEqual(QuestionOption.objects.last().option, "No")
+
+    def test_str_representation(self):
+        self.assertEqual(str(self.question), "What is your favorite color?")
+
+    def test_one_option_boolean_question(self):
+        self.question = Question.objects.create(
+            question_type="B", desc="What is your favorite color?", voteBlank=False
+        )
+        self.question.save()
+
+        opt = QuestionOption(question=self.question, option="option {}".format(1))
+        with self.assertRaises(BadRequest):
+            opt.save()
+
+    def test_multiple_option_boolean_question(self):
+        self.question = Question.objects.create(
+            question_type="B", desc="What is your favorite color?", voteBlank=False
+        )
+        self.question.save()
+
+        opt1 = QuestionOption(question=self.question, option="option {}".format(1))
+        opt2 = QuestionOption(question=self.question, option="option {}".format(2))
+        opt3 = QuestionOption(question=self.question, option="option {}".format(3))
+        with self.assertRaises(BadRequest):
+            opt1.save()
+            opt2.save()
+            opt3.save()
+
+
+class BooleanWhiteTestCase(BaseTestCase):
+    def setUp(self):
+        self.question = Question.objects.create(
+            question_type="B", desc="What is your favorite color?", voteBlank=True
+        )
+        self.question.save()
+
+    def test_boolean_question_and_white(self):
+        self.assertEqual(QuestionOption.objects.count(), 3)
+        self.assertEqual(QuestionOption.objects.first().option, "Sí")
+        self.assertEqual(QuestionOption.objects.all()[1].option, "No")
+        self.assertEqual(QuestionOption.objects.last().option, "Voto En Blanco")
