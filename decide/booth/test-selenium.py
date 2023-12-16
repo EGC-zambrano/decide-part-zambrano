@@ -295,9 +295,10 @@ class OpinionsViewTestCase(StaticLiveServerTestCase):
         )
 
     def test_form_opinions(self):
+        self.driver.set_window_size(1280, 720)
+
         # Abre la ruta del navegador
         self.driver.get(f"{self.live_server_url}")
-
         self.driver.find_element(By.LINK_TEXT, "Votaciones").click()
 
         # Ingresa el usuario y contraseña
@@ -308,7 +309,7 @@ class OpinionsViewTestCase(StaticLiveServerTestCase):
         self.driver.find_element(By.CLASS_NAME, "btn-primary").click()
 
         # Verifica que existe el boton de Opiniones
-        self.driver.find_element(By.LINK_TEXT, "Opiniones").click()
+        self.driver.find_element(By.CLASS_NAME, "opinions-card").click()
 
         # Verifica que hay dos h2
         self.assertTrue(len(self.driver.find_elements(By.TAG_NAME, "h2")) == 2)
@@ -320,7 +321,7 @@ class OpinionsViewTestCase(StaticLiveServerTestCase):
         self.assertTrue(len(self.driver.find_elements(By.ID, "submit-opinion")) == 1)
 
 
-class VotingListViewTestCase(StaticLiveServerTestCase):
+class SingleMultipleVotingListViewTestCase(StaticLiveServerTestCase):
     def setUp(self):
         self.client = Client()
 
