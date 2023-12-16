@@ -4,15 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('voting', '0010_question_voteblank'),
+        ("voting", "0010_question_voteblank"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='question',
-            name='question_type',
-            field=models.CharField(choices=[('S', 'Single'), ('M', 'Multiple'), ('B', 'Boolean')], default='S', max_length=1),
+            model_name="question",
+            name="question_type",
+            field=models.CharField(
+                choices=[("S", "Single"), ("M", "Multiple"), ("B", "Boolean")],
+                default="S",
+                max_length=1,
+            ),
         ),
     ]
