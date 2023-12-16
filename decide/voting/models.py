@@ -110,7 +110,7 @@ class Voting(models.Model):
         The tally is a shuffle and then a decrypt
         """
 
-        votes, votes_p = self.get_votes(token)
+        votes = self.get_votes(token)
 
         auth = self.auths.first()
         shuffle_url = "/shuffle/{}/".format(self.id)
@@ -118,7 +118,7 @@ class Voting(models.Model):
         auths = [{"name": a.name, "url": a.url} for a in self.auths.all()]
 
         # first, we do the shuffle
-        data = {"msgs": votes_p}
+        data = {"msgs": votes}
         response = mods.post(
             "mixnet",
             entry_point=shuffle_url,
