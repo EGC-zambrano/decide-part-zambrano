@@ -53,6 +53,20 @@ class Question(models.Model):
                 )
                 op2.save()
                 self.options.add(op2)
+            if (
+                self.voteBlank
+                and QuestionOption.objects.filter(
+                    question_id=self.id, option__startswith="Voto En Blanco"
+                ).count()
+                == 0
+            ):
+                enBlanco = QuestionOption(
+                    question=self,
+                    number=self.options.count() + 1,
+                    option="Voto En Blanco",
+                )
+                enBlanco.save()
+                self.options.add(enBlanco)
         return super().save()
 
     def __str__(self):
@@ -69,7 +83,17 @@ class QuestionOption(models.Model):
 
     def save(self):
         if self.question.question_type == "B" and self.question.options.count() > 1:
-            raise BadRequest("Boolean questions cannot have any options.")
+            if self.question.voteBlank:
+                if (
+                    self.option != "Sí"
+                    and self.option != "No"
+                    and self.option != "Voto En Blanco"
+                ):
+                    raise BadRequest(
+                        "Boolean questions with white votes can only have 'Sí', 'No', or 'Voto En Blanco' options."
+                    )
+            else:
+                raise BadRequest("Boolean questions cannot have any options.")
         if not self.number:
             self.number = self.question.options.count() + 1
         else:
