@@ -5,7 +5,7 @@ from django.contrib import admin
 
 from .models import Census
 from django import forms
-import csv
+from django.contrib import messages
 
 
 class CensusImportForm(forms.Form):
@@ -20,28 +20,33 @@ class CensusAdmin(admin.ModelAdmin):
 
     def get_urls(self):
         urls = super().get_urls()
-        my_urls = [
+        new_urls = [
             path("import_census/", self.import_view),
         ]
-        return my_urls + urls
+        return new_urls + urls
 
     def import_view(self, request):
         if request.method == "POST":
             form = CensusImportForm(request.POST, request.FILES)
             if form.is_valid():
                 csv_file = request.FILES["csv_file"]
-                reader = csv.reader(csv_file)
-                header = next(reader)
-                for row in reader:
-                    voting_id, voter_id = row[0], row[1]
-                    Census.objects.create(voting_id=voting_id, voter_id=voter_id)
+
+                if not csv_file.name.endswith(".csv"):
+                    messages.error(request, "File is not in CSV format.")
+                    return HttpResponseRedirect(request.path_info)
+
+                file_data = csv_file.read().decode("utf-8")
+                csv_data = file_data.split("\n")
+                for row in csv_data:
+                    if len(row) == 0:
+                        continue
+                    fields = row.split(",")
+                    Census.objects.create(voting_id=fields[0], voter_id=fields[1])
                 self.message_user(
-                    request, f"Successfully imported {len(reader)} records."
+                    request,
+                    f"Successfully imported {len(csv_data)-1} census instances.",
                 )
-                return HttpResponseRedirect("..")
+                return HttpResponseRedirect("/admin/census/census/")
         else:
             form = CensusImportForm()
-        return render(request, "census/import_census.html", {"form": form})
-
-
-admin.site.register(Census, CensusAdmin)
+        return render(request, "admin/import_census.html", {"form": form})
