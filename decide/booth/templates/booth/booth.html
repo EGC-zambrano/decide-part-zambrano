@@ -263,18 +263,26 @@
                 },
                 decideSend(evt) {
                     evt.preventDefault();
-                    var selected = [[1,1],[3,2],[2,3]]
-                    var vote = []
-                    for (i=0; i < selected.length; i++){
-                      var v = this.decideEncrypt(selected[i][0].toString())
-                      vote.push({a: v.alpha.toString(), b: v.beta.toString(), p: selected[i][1].toString()})
-                    }
+
+                    // Check if the selected option is 'Voto en Blanco'
+                    // Check if the selected option is 'Voto en Blanco'
+                    // const selectedOption = this.voting.question.options.find(opt => opt.number === this.selected);
+            
+
+                    // if (selectedOption.option === 'Voto En blanco') {
+                    //     this.showAlert("danger", "No puedes votar en blanco");
+                    //     return;
+                    // }
+
+                    var v = this.decideEncrypt(this.selected.toString());
+                                       
                     var data = {
-                        vote: vote,
+                        vote: {a: v.alpha.toString(), b: v.beta.toString()},
                         voting: this.voting.id,
                         voter: this.user.id,
                         token: this.token
                     }
+  
                     this.postData("{% url "gateway" "store" "/" %}", data)
                         .then(data => {
                             this.successVote = true;
@@ -294,5 +302,6 @@
             },
         }).mount('#app-booth')
     </script>
+    
 </body>
 {% endblock %}
