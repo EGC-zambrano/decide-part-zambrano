@@ -4,13 +4,11 @@ from django.db import models
 from django.db.models import JSONField
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.core.exceptions import BadRequest
 
 
 class Question(models.Model):
-    QUESTION_TYPES = (
-        ("S", "Single"),
-        ("M", "Multiple"),
-    )
+    QUESTION_TYPES = (("S", "Single"), ("M", "Multiple"), ("B", "Boolean"))
 
     question_type = models.CharField(max_length=1, choices=QUESTION_TYPES, default="S")
     desc = models.TextField()
@@ -32,6 +30,43 @@ class Question(models.Model):
             )
             enBlanco.save()
             self.options.add(enBlanco)
+        if self.question_type == "B":
+            if (
+                QuestionOption.objects.filter(
+                    question__id=self.id, option__startswith="Sí"
+                ).count()
+                == 0
+            ):
+                op1 = QuestionOption(
+                    question=self, number=self.options.count() + 1, option="Sí"
+                )
+                op1.save()
+                self.options.add(op1)
+            if (
+                QuestionOption.objects.filter(
+                    question__id=self.id, option__startswith="No"
+                ).count()
+                == 0
+            ):
+                op2 = QuestionOption(
+                    question=self, number=self.options.count() + 1, option="No"
+                )
+                op2.save()
+                self.options.add(op2)
+            if (
+                self.voteBlank
+                and QuestionOption.objects.filter(
+                    question_id=self.id, option__startswith="Voto En Blanco"
+                ).count()
+                == 0
+            ):
+                enBlanco = QuestionOption(
+                    question=self,
+                    number=self.options.count() + 1,
+                    option="Voto En Blanco",
+                )
+                enBlanco.save()
+                self.options.add(enBlanco)
         return super().save()
 
     def __str__(self):
@@ -47,6 +82,18 @@ class QuestionOption(models.Model):
     hidden = models.BooleanField(default=False)
 
     def save(self):
+        if self.question.question_type == "B" and self.question.options.count() > 1:
+            if self.question.voteBlank:
+                if (
+                    self.option != "Sí"
+                    and self.option != "No"
+                    and self.option != "Voto En Blanco"
+                ):
+                    raise BadRequest(
+                        "Boolean questions with white votes can only have 'Sí', 'No', or 'Voto En Blanco' options."
+                    )
+            else:
+                raise BadRequest("Boolean questions cannot have any options.")
         if not self.number:
             self.number = self.question.options.count() + 1
         else:

@@ -14,6 +14,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from voting.models import Question, QuestionOption, Voting
 from selenium.webdriver.chrome.webdriver import WebDriver
+from django.core.exceptions import BadRequest
 
 
 class VotingTestCase(BaseTestCase):
@@ -233,6 +234,32 @@ class VotingTestCase(BaseTestCase):
             "desc": "Description example",
             "question": "I want a ",
             "question_opt": ["cat", "dog", "horse"],
+        }
+
+        response = self.client.post("/voting/", data, format="json")
+        self.assertEqual(response.status_code, 201)
+
+    def test_create_boolean_voting_from_api(self):
+        data = {"name": "Example boolean"}
+        response = self.client.post("/voting/", data, format="json")
+        self.assertEqual(response.status_code, 401)
+
+        # login with user no admin
+        self.login(user="noadmin")
+        response = mods.post("voting", params=data, response=True)
+        self.assertEqual(response.status_code, 403)
+
+        # login with user admin
+        self.login()
+        response = mods.post("voting", params=data, response=True)
+        self.assertEqual(response.status_code, 400)
+
+        data = {
+            "name": "Example boolean",
+            "desc": "Description example boolean",
+            "question_type": "B",
+            "question": "Do you agree?",
+            "question_opt": ["Sí", "No"],
         }
 
         response = self.client.post("/voting/", data, format="json")
@@ -591,3 +618,57 @@ class QuestionsTests(StaticLiveServerTestCase):
             self.cleaner.current_url
             == self.live_server_url + "/admin/voting/question/add/"
         )
+
+
+class BooleanQuestionTestCase(BaseTestCase):
+    def setUp(self):
+        self.question = Question.objects.create(
+            question_type="B", desc="What is your favorite color?", voteBlank=False
+        )
+        self.question.save()
+
+    def test_save_boolean_question(self):
+        self.assertEqual(QuestionOption.objects.count(), 2)
+        self.assertEqual(QuestionOption.objects.first().option, "Sí")
+        self.assertEqual(QuestionOption.objects.last().option, "No")
+
+    def test_str_representation(self):
+        self.assertEqual(str(self.question), "What is your favorite color?")
+
+    def test_one_option_boolean_question(self):
+        self.question = Question.objects.create(
+            question_type="B", desc="What is your favorite color?", voteBlank=False
+        )
+        self.question.save()
+
+        opt = QuestionOption(question=self.question, option="option {}".format(1))
+        with self.assertRaises(BadRequest):
+            opt.save()
+
+    def test_multiple_option_boolean_question(self):
+        self.question = Question.objects.create(
+            question_type="B", desc="What is your favorite color?", voteBlank=False
+        )
+        self.question.save()
+
+        opt1 = QuestionOption(question=self.question, option="option {}".format(1))
+        opt2 = QuestionOption(question=self.question, option="option {}".format(2))
+        opt3 = QuestionOption(question=self.question, option="option {}".format(3))
+        with self.assertRaises(BadRequest):
+            opt1.save()
+            opt2.save()
+            opt3.save()
+
+
+class BooleanWhiteTestCase(BaseTestCase):
+    def setUp(self):
+        self.question = Question.objects.create(
+            question_type="B", desc="What is your favorite color?", voteBlank=True
+        )
+        self.question.save()
+
+    def test_boolean_question_and_white(self):
+        self.assertEqual(QuestionOption.objects.count(), 3)
+        self.assertEqual(QuestionOption.objects.first().option, "Sí")
+        self.assertEqual(QuestionOption.objects.all()[1].option, "No")
+        self.assertEqual(QuestionOption.objects.last().option, "Voto En Blanco")
