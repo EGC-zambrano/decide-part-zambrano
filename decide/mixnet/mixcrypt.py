@@ -161,17 +161,7 @@ class MixCrypt:
     def shuffle_decrypt(self, msgs, last=True):
         msgs2 = msgs.copy()
         msgs3 = []
-        if len(msgs2[0]) == 2:
-            while msgs2:
-                n = random.StrongRandom().randint(0, len(msgs2) - 1)
-                a, b = msgs2.pop(n)
-                clear = self.decrypt((a, b))
-                if last:
-                    msg = clear
-                else:
-                    msg = (a, clear)
-                msgs3.append(msg)
-        elif len(msgs2[0]) == 3:
+        if len(msgs2[0]) == 3:
             while msgs2:
                 n = random.StrongRandom().randint(0, len(msgs2) - 1)
                 a, b, priority = msgs2.pop(n)
@@ -180,6 +170,16 @@ class MixCrypt:
                     msg = (clear, priority)  # Return a list of two elements
                 else:
                     msg = (a, clear, priority)  # Return a list of three elements
+                msgs3.append(msg)
+        else:
+            while msgs2:
+                n = random.StrongRandom().randint(0, len(msgs2) - 1)
+                a, b = msgs2.pop(n)
+                clear = self.decrypt((a, b))
+                if last:
+                    msg = clear
+                else:
+                    msg = (a, clear)
                 msgs3.append(msg)
 
         return msgs3
