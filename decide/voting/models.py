@@ -151,7 +151,6 @@ class Voting(models.Model):
         votes = mods.get(
             "store", params={"voting_id": self.id}, HTTP_AUTHORIZATION="Token " + token
         )
-        vote_list_p = []
         # anon votes
         if self.question.question_type != "P":
             votes_format = []
