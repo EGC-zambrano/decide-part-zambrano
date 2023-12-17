@@ -4,15 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('voting', '0006_remove_questionoption_question_type_and_more'),
+        ("voting", "0006_remove_questionoption_question_type_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='question',
-            name='question_type',
-            field=models.CharField(choices=[('S', 'Single'), ('M', 'Multiple'), ('P', 'Priority')], default='S', max_length=1),
+            model_name="question",
+            name="question_type",
+            field=models.CharField(
+                choices=[("S", "Single"), ("M", "Multiple"), ("P", "Priority")],
+                default="S",
+                max_length=1,
+            ),
         ),
     ]

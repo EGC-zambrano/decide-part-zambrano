@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('store', '0005_rename_vote_id_voteoption_vote'),
+        ("store", "0005_rename_vote_id_voteoption_vote"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='voteoption',
-            name='p',
+            model_name="voteoption",
+            name="p",
             field=models.PositiveIntegerField(blank=True, null=True),
         ),
     ]

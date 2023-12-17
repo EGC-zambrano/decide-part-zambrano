@@ -63,7 +63,7 @@ class StoreTextCase(BaseTestCase):
         self.logout()
         return votings, users
 
-    '''def gen_voting_multiple_options(self, pk):
+    """def gen_voting_multiple_options(self, pk):
         question = Question(desc="multiple_options_question", question_type="M")
         question.save()
         voting = Voting(
@@ -73,8 +73,8 @@ class StoreTextCase(BaseTestCase):
             start_date=timezone.now(),
             end_date=timezone.now() + datetime.timedelta(days=1),
         )
-        voting.save()'''
-    
+        voting.save()"""
+
     def gen_voting_priority(self, pk):
         question = Question(desc="priority_question", question_type="P")
         question.save()
@@ -112,7 +112,7 @@ class StoreTextCase(BaseTestCase):
         self.assertEqual(Vote.objects.first().options.first().a, CTE_A)
         self.assertEqual(Vote.objects.first().options.first().b, CTE_B)
 
-    '''def test_store_vote_multiple_options(self):
+    """def test_store_vote_multiple_options(self):
         VOTING_PK = 346
         census = Census(voting_id=VOTING_PK, voter_id=2)
         census.save()
@@ -139,8 +139,8 @@ class StoreTextCase(BaseTestCase):
         self.assertEqual(options[1].a, 40)
         self.assertEqual(options[1].b, 50)
         self.assertEqual(options[2].a, 60)
-        self.assertEqual(options[2].b, 70)'''
-        
+        self.assertEqual(options[2].b, 70)"""
+
     def test_store_vote_priority(self):
         VOTING_PK = 347
         census = Census(voting_id=VOTING_PK, voter_id=2)
@@ -149,7 +149,11 @@ class StoreTextCase(BaseTestCase):
         data = {
             "voting": VOTING_PK,
             "voter": 2,
-            "vote": [{"a": 20, "b": 30, "p": 2}, {"a": 40, "b": 50, "p": 1}, {"a": 60, "b": 70, "p": 3}],
+            "vote": [
+                {"a": 20, "b": 30, "p": 2},
+                {"a": 40, "b": 50, "p": 1},
+                {"a": 60, "b": 70, "p": 3},
+            ],
         }
         user = self.get_or_create_user(2)
         self.login(user=user.username)
@@ -165,13 +169,13 @@ class StoreTextCase(BaseTestCase):
         options = Vote.objects.first().options.all()
         self.assertEqual(options[0].a, 20)
         self.assertEqual(options[0].b, 30)
-        self.assertEqual(options[0].p,  2)
+        self.assertEqual(options[0].p, 2)
         self.assertEqual(options[1].a, 40)
         self.assertEqual(options[1].b, 50)
-        self.assertEqual(options[1].p,  1)
+        self.assertEqual(options[1].p, 1)
         self.assertEqual(options[2].a, 60)
         self.assertEqual(options[2].b, 70)
-        self.assertEqual(options[2].p,  3)
+        self.assertEqual(options[2].p, 3)
 
     def test_vote(self):
         self.gen_votes_single()
