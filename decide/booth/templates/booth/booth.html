@@ -84,7 +84,7 @@
                 <h2 class="voting-desc">[[ voting.question.desc ]]</h2>
                 <form v-for="opt in voting.question.options" :key="opt.number">
                     <div class="form-options">
-                        <input type="radio" v-model="selected" v-if="questionType == 'S'"
+                        <input type="radio" v-model="selected" v-if="questionType == 'S' || questionType == 'B'"
                                     :id="'q' + opt.number"
                                     name="question"
                                     :value="opt.number">
@@ -233,7 +233,7 @@
                 },
                 decideSend(evt) {
                     evt.preventDefault();
-                    if (this.questionType === 'S'){
+                    if (this.questionType === 'S' or this.questionType === 'B'){
                         var v = this.decideEncrypt(this.selected.toString());
                         var data = {
                             vote: {a: v.alpha.toString(), b: v.beta.toString()},
