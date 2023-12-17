@@ -43,6 +43,13 @@
                             <p class="voting-status voting-open">Voting Open</p>
                         {% endif %}
                     </div>
+                    <div>
+                        {% if voting.question.question_type == 'S' %}
+                            <p class="question_type">Single </p>
+                        {% elif voting.question.question_type == 'M' %}
+                            <p class="question_type">Multiple </p>
+                        {% endif %}
+                    </div>
                     <p class="voting-description">{{ voting.desc }}</p>
                 </a>
                 <a id="opinions-button" class="opinions-card" href={% url 'opinions' voting_id=voting.id %}>Opiniones</a>
