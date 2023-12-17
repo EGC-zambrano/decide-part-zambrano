@@ -76,7 +76,10 @@ class StoreView(generics.ListAPIView):
             return Response({}, status=status.HTTP_401_UNAUTHORIZED)
 
         with transaction.atomic():
-            if voting[0]["question"]["question_type"] == "S":
+            if (
+                voting[0]["question"]["question_type"] == "S"
+                or voting[0]["question"]["question_type"] == "B"
+            ):
                 v, _ = Vote.objects.get_or_create(voting_id=vid, voter_id=uid)
                 # Delete previous options
                 VoteOption.objects.filter(vote=v).delete()
