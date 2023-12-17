@@ -14,29 +14,7 @@
 <div id="app-booth">
 
     <div class="voting" >
-        <!-- Navbar -->
-        <nav class="navbar navbar-dark bg-primary">
-            <div class="container-fluid">
-                <div class="navbar-brand" >Decide</div>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item" v-if="!signup">
-                            <button v-on:click="decideLogout" class="btn btn-secondary">{% trans "Logout" %}</button>
-                        </li>
-                        <li class="nav-item" v-if="signup">
-                            <!-- Button trigger modal -->
-                            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#registerModal">
-                                Login
-                            </button>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-
+        
         <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
             <symbol id="check-circle-fill" viewBox="0 0 16 16">
               <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"></path>
@@ -66,46 +44,38 @@
             </div>
         </div>
 
-        <div class="container-fluid">
+        <div class="form-card">
             <!-- Modal -->
-            <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="registerModalLabel">Login</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div  id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+                <div>
+                    <!-- Register -->
+                    <form class="form-card" @submit="onSubmitLogin" v-if="signup">
+                        <section class="form-title">Confirma tus credenciales antes de continuar</section>
+                        <div class="form-content">
+                            <div class="input-group">
+                                <label for="username">{% trans "Username" %}</label>:
+                                <input
+                                    id="username"
+                                    type="text"
+                                    v-model="form.username"
+                                    autocomplete="username"
+                                    required />
+                            </div>
+                            <div class="input-group">
+                                <label for="password">{% trans "Password" %}</label>:
+                                <input
+                                    id="password"
+                                    type="password"
+                                    autocomplete="current-password"
+                                    v-model="form.password"
+                                    required />
+                            </div>
+                            <button class="btn btn-primary mt-3" type="submit" data-bs-dismiss="modal">{% trans "Login" %}</button>
                         </div>
-                        <div class="modal-body">
-                            <!-- Register -->
-                            <form @submit="onSubmitLogin" v-if="signup">
-                                <div class="form-group mt-2">
-                                    <label for="username">{% trans "Username" %}</label>:
-                                    <input
-                                        class="ml-2 form-control"
-                                        id="username"
-                                        type="text"
-                                        v-model="form.username"
-                                        autocomplete="username"
-                                        required />
-                                </div>
-                                <div class="form-group mt-1">
-                                    <label for="password">{% trans "Password" %}</label>:
-                                    <input
-                                        class = "form-control"
-                                        id="password"
-                                        type="password"
-                                        autocomplete="current-password"
-                                        v-model="form.password"
-                                        required />
-                                </div>
-                                <button class="btn btn-primary mt-3" type="submit" data-bs-dismiss="modal">{% trans "Login" %}</button>
-                            </form>
-                        </div>
-                    </div>
+                    </form>
                 </div>
             </div>
         </div>
-
 
         <!-- Voting -->
         <div class="card-container">
@@ -272,7 +242,7 @@
                         }
                     }
                     else if (this.questionType === 'M') {
-                        var selected = [2,1]
+                        selected = [2,1]
                         var vote = []
                         for (i=0; i < selected.length; i++){
                           var v = this.decideEncrypt(selected[i].toString())

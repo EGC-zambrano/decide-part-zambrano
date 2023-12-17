@@ -218,3 +218,38 @@ textarea {
     background-color: #4CAF50; /* Color verde */
     color: white; /* Texto blanco */
 }
+
+.form-title {
+    font-family: var(--fuente1);
+    font-size: 1.5em;
+    font-weight: bold;
+    color: var(--text-color);
+  }
+  
+.form-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5em;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5em;
+}
+
+.input-group input {
+    width: 20em;
+    padding: 8px;
+    margin-top: 5px;
+    border-radius: 0.25em;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+    color: var(--input-text);
+    font-family: var(--fuente2);
+}
+
+.input-group i {
+    font-size: 1.5em;
+}
