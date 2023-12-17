@@ -51,8 +51,7 @@ class StoreView(generics.ListAPIView):
         if (
             voting[0]["question"]["question_type"] == "M"
             or voting[0]["question"]["question_type"] == "P"
-            and not isinstance(vote, list)
-        ):
+        ) and not isinstance(vote, list):
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
         if not vid or not uid or not vote:

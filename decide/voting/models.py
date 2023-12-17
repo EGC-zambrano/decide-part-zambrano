@@ -146,7 +146,7 @@ class Voting(models.Model):
         tally = self.tally
         options = self.question.options.all()
 
-        if self.question.question_type == "S":
+        if self.question.question_type != "P":
             opts = []
             for opt in options:
                 if isinstance(tally, list):
@@ -163,7 +163,7 @@ class Voting(models.Model):
             self.postproc = postp
             self.save()
 
-        elif self.question.question_type == "P":
+        else:
             opts = []
             vote_priority = {}
             votes = {}
