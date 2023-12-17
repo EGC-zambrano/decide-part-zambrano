@@ -127,12 +127,13 @@
         const { createApp } = Vue
         var voting = {{voting|safe}};
         var questionType = "{{ question_type }}";
+        var selected = [];
         createApp({
             delimiters: ['[[', ']]'],
             data() {
                 return {
                     voting: voting,
-                    selected: [],
+                    selected: selected,
                     successVote: false,
                     alertShow: false,
                     signup: true,
@@ -242,10 +243,9 @@
                         }
                     }
                     else if (this.questionType === 'M') {
-                        selected = [2,1]
                         var vote = []
-                        for (i=0; i < selected.length; i++){
-                          var v = this.decideEncrypt(selected[i].toString())
+                        for (i=0; i < this.selected.length; i++){
+                          var v = this.decideEncrypt(this.selected[i].toString())
                           vote.push({a: v.alpha.toString(), b: v.beta.toString()})
                         }
                         var data = {
