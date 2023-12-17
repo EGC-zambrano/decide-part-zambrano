@@ -319,6 +319,89 @@ class VotingTestCase(BaseTestCase):
         return clear
 
 
+    def test_priority_voting(self):
+        v = self.create_voting_priority()
+        self.create_voters(v)
+
+        v.create_pubkey()
+        v.start_date = timezone.now()
+        v.save()
+
+        clear = self.store_votes_priority(v)
+
+        self.login()  # set token
+        v.tally_votes(self.token)
+        
+        tally = v.tally
+
+        tally = {value[0]: len(list(group)) for value, group in itertools.groupby(sorted(tally))}
+        
+        # Call the do_postproc method
+        v.do_postproc()
+
+        # Access the postproc attribute
+        postproc = v.postproc
+
+        for q in v.question.options.all():
+            postproc_item = postproc[0].get("options", {}).get(q.number, {})
+            
+            print(f"Question {q.number}: postproc_item = {postproc_item}, clear = {clear.get(q.number, 0)}")
+            
+            self.assertEqual(postproc_item.get("votes", 0), clear.get(q.number, 0))
+            self.assertEqual(postproc_item.get("points", 0), clear.get(q.number, 0))
+
+
+    def create_voting_priority(self):
+            q = Question(
+                desc="test question priority", question_type="P"
+            )  
+            q.save()
+            for i in range(5):
+                opt = QuestionOption(
+                    question=q, option="option {}".format(i + 1), number=i + 1
+                )
+                opt.save()
+            v = Voting(name="test voting priority", question=q)
+            v.save()
+
+            a, _ = Auth.objects.get_or_create(
+                url=settings.BASEURL, defaults={"me": True, "name": "test auth"}
+            )
+            a.save()
+            v.auths.add(a)
+
+            return v
+
+    def store_votes_priority(self, v):
+            voters = list(Census.objects.filter(voting_id=v.id))
+            voter = voters.pop()
+
+            clear = {}
+            for _ in range(5):  # Adjust the range based on the number of votes per voter
+                selected_options = []
+                encrypted_options = []
+                for opt in v.question.options.all():
+                    if random.choice([True, False]):
+                        selected_options.append((opt.number, random.randint(1, 5)))  # Replace 5 with the maximum priority
+
+                for option in selected_options:
+                    clear[option] = clear.get(option, 0) + 1
+                    a, b = self.encrypt_msg(option[0], v)
+                    encrypted_options.append({"a": a, "b": b, "p": option[1]})
+
+                data = {
+                    "voting": v.id,
+                    "voter": voter.voter_id,
+                    "vote": encrypted_options,
+                }
+
+                user = self.get_or_create_user(voter.voter_id)
+                self.login(user=user.username)
+                voter = voters.pop()
+                mods.post("store", json=data)
+
+            return clear
+
 class LogInSuccessTests(StaticLiveServerTestCase):
     def setUp(self):
         # Load base test functionality for decide
