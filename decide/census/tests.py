@@ -15,6 +15,12 @@ from base import mods
 from base.tests import BaseTestCase
 from datetime import datetime
 
+from django.contrib.admin.sites import AdminSite
+from django.test import RequestFactory
+from django.contrib.messages.storage.fallback import FallbackStorage
+from census.admin import CensusAdmin
+import io
+
 
 class CensusTestCase(BaseTestCase):
     def setUp(self):
@@ -189,3 +195,66 @@ class CensusTest(StaticLiveServerTestCase):
             self.cleaner.current_url
             == self.live_server_url + "/admin/census/census/add"
         )
+
+
+class ImportCSVCensusTestCase(TestCase):
+    def setUp(self):
+        self.site = AdminSite()
+        self.factory = RequestFactory()
+        self.admin = CensusAdmin(Census, self.site)
+
+    def test_get_urls(self):
+        request = self.factory.get("/admin/census/census/")
+        urls = self.admin.get_urls()
+        self.assertEqual(len(urls), 7)
+        self.assertEqual(urls[0].pattern._route, "import_census/")
+        self.assertEqual(urls[0].callback, self.admin.import_view)
+        self.assertEqual(urls[1].pattern._route, "")
+        self.assertEqual(urls[1].callback.__name__, "changelist_view")
+
+    def test_import_view_get(self):
+        request = self.factory.get("/admin/census/census/import_census/")
+        response = self.admin.import_view(request)
+        self.assertEqual(response.status_code, 200)
+
+    def test_import_view_post_valid_csv(self):
+        admin = CensusAdmin(Census, None)
+        request = self.factory.post(
+            "/admin/import/",
+            {"csv_file": io.BytesIO(b"1,100\n2,200\n")},
+        )
+        request.method = "POST"
+        request.FILES["csv_file"].name = "test.csv"
+        request.session = {}
+        request._messages = FallbackStorage(request)
+        response = admin.import_view(request)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, "/admin/census/census/")
+        self.assertEqual(Census.objects.count(), 2)
+
+    def test_import_view_post_empty_csv(self):
+        admin = CensusAdmin(Census, None)
+        request = self.factory.post("/admin/import/", {"csv_file": io.BytesIO(b"")})
+        request.method = "POST"
+        request.FILES["csv_file"].name = "test.csv"
+        request.session = {}
+        request._messages = FallbackStorage(request)
+        response = admin.import_view(request)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, "/admin/import/")
+        self.assertEqual(Census.objects.count(), 0)
+
+    def test_import_view_post_invalid_file(self):
+        request = self.factory.post("/admin/census/census/import_census/")
+        setattr(request, "session", "session")
+        messages = FallbackStorage(request)
+        setattr(request, "_messages", messages)
+        file_content = b"1,John\n2,Alice\n"
+        csv_file = io.BytesIO(file_content)
+        csv_file.name = "invalid_file.txt"
+        request.FILES["csv_file"] = csv_file
+        request.FILES["csv_file"].seek(0)
+        response = self.admin.import_view(request)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, "/admin/census/census/import_census/")
+        self.assertEqual(Census.objects.count(), 0)

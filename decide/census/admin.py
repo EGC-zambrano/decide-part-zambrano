@@ -47,6 +47,10 @@ class CensusAdmin(admin.ModelAdmin):
                     f"Successfully imported {len(csv_data)-1} census instances.",
                 )
                 return HttpResponseRedirect("/admin/census/census/")
+
+            else:
+                messages.error(request, "Invalid form.")
+                return HttpResponseRedirect(request.path_info)
         else:
             form = CensusImportForm()
         return render(request, "admin/import_census.html", {"form": form})
