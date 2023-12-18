@@ -60,8 +60,20 @@ table {
     height: fit-content;
     width: fit-content;
     padding: 1em;
-    background-color: #efefef;
+    background-color: #eedbd3;
     border-radius: 0.5em;
+}
+
+.card-voting {
+    height: 25em;
+    width:50em;
+    align-self: center;
+    background-color: #ead4ca;
+    padding: 1em;
+    margin: 50px;
+    border-radius: 0.5em;
+    gap: 20px;
+    position: relative;
 }
 
 .voting-card, .opinion-card {
@@ -112,7 +124,7 @@ textarea {
 }
 
 .voting-card:hover {
-    background-color: #e0e0e0;
+    background-color: #e5cfc6;
     cursor: pointer;
     transform: scale(1.01);
 }
@@ -161,4 +173,83 @@ textarea {
 
 .no-votings {
     width: 100%;
+}
+
+.btn-vote {
+    background-color: var(--primary-color);
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    margin-bottom: 20px;
+    margin-right: 20px;
+}
+
+.btn-vote:hover {
+    background-color: var(--primary-dark-color);
+}
+
+.voting-title {
+    font-weight: bold;
+    margin-left: 20px;
+}
+
+.voting-desc {
+    margin-left: 20px;
+    margin-top: 10px;
+}
+
+.voting-options {
+    margin-left: 20px;
+    margin-top: 20px;
+}
+
+.form-options {
+    margin-bottom: 15px;
+}
+
+.caja-mensaje {
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.verde {
+    background-color: #4CAF50; /* Color verde */
+    color: white; /* Texto blanco */
+}
+
+.form-title {
+    font-family: var(--fuente1);
+    font-size: 1.5em;
+    font-weight: bold;
+    color: var(--text-color);
+  }
+  
+.form-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5em;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5em;
+}
+
+.input-group input {
+    width: 20em;
+    padding: 8px;
+    margin-top: 5px;
+    border-radius: 0.25em;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+    color: var(--input-text);
+    font-family: var(--fuente2);
+}
+
+.input-group i {
+    font-size: 1.5em;
 }

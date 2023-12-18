@@ -1,11 +1,11 @@
 :root {
-    --primary-color: #3498db;
-    --primary-dark-color: #2980b9;
+    --primary-color: #be8c76;
+    --primary-dark-color: #af836f;
     --green-dark-color: #2ecc71;
     --green-color: #69dd9a;
     --red-dark-color: #e74c3c;
     --red-color: #ef8b80;
-    --neutral-background: #f5f5f5;
+    --neutral-background: #f9f7f6; 
     --card-background: #ffffff;
     --card-semi-transparent: rgba(255, 255, 255, 0.9);
     --text-color: #333333 ;

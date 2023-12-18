@@ -8,7 +8,9 @@ from .views import (
     RegisterView,
     ChangePasswordView,
     ResetPasswordView,
+    EmailView,
 )
+
 from django.contrib.auth.views import (
     PasswordResetDoneView,
     PasswordResetCompleteView,
@@ -22,6 +24,7 @@ urlpatterns = [
     path("getuser/", GetUserView.as_view()),
     path("accounts/", include("allauth.urls")),
     path("register/", RegisterView.as_view(), name="register"),
+    path("verificar/<str:user_encode>/", EmailView.emailCheck),
     path("change-password/", ChangePasswordView.as_view(), name="change-password"),
     path(
         "password_reset/",
