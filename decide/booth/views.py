@@ -5,8 +5,9 @@ from census.models import Census
 from authentication.models import EmailCheck
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from django.views.generic import TemplateView
 from voting.models import Voting
 
@@ -75,6 +76,9 @@ class BoothView(TemplateView):
         vid = kwargs.get("voting_id", 0)
 
         try:
+            vote = get_object_or_404(Voting, pk=vid)
+            question_type = vote.question.question_type
+
             r = mods.get("voting", params={"id": vid})
             # Casting numbers to string to manage in javascript with BigInt
             # and avoid problems with js and big number conversion
@@ -82,9 +86,11 @@ class BoothView(TemplateView):
                 r[0]["pub_key"][k] = str(v)
 
             context["voting"] = json.dumps(r[0])
+
         except:
             raise Http404
 
         context["KEYBITS"] = settings.KEYBITS
+        context["question_type"] = question_type
 
         return context
