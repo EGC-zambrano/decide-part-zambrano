@@ -191,7 +191,6 @@ class VotingTestCase(BaseTestCase):
         for q in v.postproc:
             self.assertEqual(tally.get(q["number"], 0), q["votes"])
 
-
     def test_create_voting_from_api(self):
         data = {"name": "Example"}
         response = self.client.post("/voting/", data, format="json")
