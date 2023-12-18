@@ -6,7 +6,7 @@ from .models import Vote, VoteOption
 class VoteOptionSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = VoteOption
-        fields = ("a", "b")
+        fields = ("a", "b", "p")
 
 
 class VoteSerializer(serializers.HyperlinkedModelSerializer):

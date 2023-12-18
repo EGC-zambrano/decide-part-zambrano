@@ -16,3 +16,4 @@ class VoteOption(models.Model):
     vote = models.ForeignKey(Vote, related_name="options", on_delete=models.CASCADE)
     a = BigBigField()
     b = BigBigField()
+    p = models.PositiveIntegerField(blank=True, null=True)
