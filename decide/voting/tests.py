@@ -508,14 +508,15 @@ class VotingTestCase(BaseTestCase):
         voter = voters.pop()
 
         clear = {}
-        for _ in range(5):  # Adjust the range based on the number of votes per voter
+        for _ in range(5):  
             selected_options = []
             encrypted_options = []
+            i = 1
             for opt in v.question.options.all():
-                if random.choice([True, False]):
-                    selected_options.append(
-                        (opt.number, random.randint(1, 5))
-                    )  # Replace 5 with the maximum priority
+                selected_options.append(
+                    (opt.number, i)
+                )
+                i += 1
 
             for option in selected_options:
                 clear[option] = clear.get(option, 0) + 1
@@ -761,3 +762,4 @@ class BooleanWhiteTestCase(BaseTestCase):
         self.assertEqual(QuestionOption.objects.first().option, "Sí")
         self.assertEqual(QuestionOption.objects.all()[1].option, "No")
         self.assertEqual(QuestionOption.objects.last().option, "Voto En Blanco")
+
