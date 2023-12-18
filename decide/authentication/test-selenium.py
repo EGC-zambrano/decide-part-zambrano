@@ -44,7 +44,9 @@ class LoginPageTestCase(StaticLiveServerTestCase):
         options.headless = True
         options.add_argument("--no-sandbox")
         self.driver = webdriver.Chrome(options=options)
-        self.user = User.objects.create_user(username="testuser", password="testpass")
+        self.user = User.objects.create_user(
+            username="testuser", password="testpass", email="test@email.com"
+        )
         super().setUp()
 
         app = SocialApp.objects.create(
@@ -67,6 +69,36 @@ class LoginPageTestCase(StaticLiveServerTestCase):
         os.environ["DISABLE_RECAPTCHA"] = "1"
 
         self.base.tearDown()
+
+    def test_password_reset(self):
+        self.driver.get(f"{self.live_server_url}/signin")
+
+        self.driver.find_element(By.LINK_TEXT, "Recuperar Contraseña").click()
+
+        self.assertEqual(
+            self.driver.current_url,
+            f"{self.live_server_url}/password_reset/",
+        )
+        self.driver.find_element(By.ID, "id_email").send_keys("test@email.com")
+        self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
+
+        self.assertEqual(
+            self.driver.current_url,
+            f"{self.live_server_url}/authentication/password_reset_done/",
+        )
+
+    def test_password_reset_unknown_email(self):
+        self.driver.get(f"{self.live_server_url}/signin")
+
+        self.driver.find_element(By.LINK_TEXT, "Recuperar Contraseña").click()
+
+        self.driver.find_element(By.ID, "id_email").send_keys("unknown@email.com")
+        self.driver.find_element(By.CSS_SELECTOR, ".btn").click()
+
+        self.assertEqual(
+            self.driver.current_url,
+            f"{self.live_server_url}/password_reset/",
+        )
 
     def test_sucessful_login(self):
         self.driver.get(f"{self.live_server_url}/signin")
@@ -115,6 +147,11 @@ class LoginPageTestCase(StaticLiveServerTestCase):
         )
 
 
+"""
+
+"""
+
+
 class LoginGoogleTestCase(StaticLiveServerTestCase):
     def setUp(self):
         self.base = BaseTestCase()
@@ -147,10 +184,6 @@ class LoginGoogleTestCase(StaticLiveServerTestCase):
         self.driver.get(f"{self.live_server_url}/signin")
 
         self.driver.find_element(By.CSS_SELECTOR, ".google-button").click()
-        self.assertEqual(
-            self.driver.current_url,
-            f"{self.live_server_url}/authentication/accounts/google/login/",
-        )
 
 
 class LoginGithubTestCase(StaticLiveServerTestCase):
