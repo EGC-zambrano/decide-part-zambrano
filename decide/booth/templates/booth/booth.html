@@ -233,7 +233,7 @@
                 },
                 decideSend(evt) {
                     evt.preventDefault();
-                    if (this.questionType === 'S' or this.questionType === 'B'){
+                    if (this.questionType === 'S' || this.questionType === 'B'){
                         var v = this.decideEncrypt(this.selected.toString());
                         var data = {
                             vote: {a: v.alpha.toString(), b: v.beta.toString()},
@@ -266,7 +266,7 @@
                             this.succesVote = false;
                             this.showAlert("danger", '{% trans "Error: " %}' + error);
                         });
-                },
+                  },
                 showAlert(lvl, msg) {
                     this.alertLvl = lvl;
                     this.alertMsg = msg;
