@@ -221,7 +221,6 @@ class Voting(models.Model):
     def do_postproc(self):
         tally = self.tally
         options = self.question.options.all()
-
         if self.question.question_type != "P":
             opts = []
             for opt in options:
@@ -231,7 +230,12 @@ class Voting(models.Model):
                     votes = 0
                 if self.question.voteBlank:
                     opts.append(
-                        {"option": opt.option, "number": opt.number, "votes": votes}
+                        {
+                            "option": opt.option,
+                            "number": opt.number,
+                            "votes": votes,
+                            "points": votes,
+                        }
                     )
                 else:
                     if (
@@ -241,7 +245,12 @@ class Voting(models.Model):
                         and opt.option != "En Blanco"
                     ):
                         opts.append(
-                            {"option": opt.option, "number": opt.number, "votes": votes}
+                            {
+                                "option": opt.option,
+                                "number": opt.number,
+                                "votes": votes,
+                                "points": votes,
+                            }
                         )
 
             data = {"type": "IDENTITY", "options": opts}
