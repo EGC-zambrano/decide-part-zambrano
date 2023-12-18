@@ -140,21 +140,22 @@ class MixCrypt:
 
     def multiple_decrypt(self, msgs, last=True):
         msgs2 = []
-        if len(msgs[0]) == 2:
-            for a, b in msgs:
-                clear = self.decrypt((a, b))
-                if last:
-                    msg = clear
-                else:
-                    msg = (a, clear)
-                msgs2.append(msg)
-        elif len(msgs[0]) == 3:
+        if len(msgs[0]) == 3:
             for a, b, priority in msgs:
                 clear = self.decrypt((a, b))
                 if last:
                     msg = clear
                 else:
                     msg = (a, clear, priority)
+                msgs2.append(msg)
+
+        else:
+            for a, b in msgs:
+                clear = self.decrypt((a, b))
+                if last:
+                    msg = clear
+                else:
+                    msg = (a, clear)
                 msgs2.append(msg)
         return msgs2
 
@@ -171,6 +172,7 @@ class MixCrypt:
                 else:
                     msg = (a, clear, priority)  # Return a list of three elements
                 msgs3.append(msg)
+
         else:
             while msgs2:
                 n = random.StrongRandom().randint(0, len(msgs2) - 1)
