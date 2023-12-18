@@ -34,7 +34,7 @@
             <section id="voting-list">
             <h3 class="no-votings" style="display:none">No votings found</h3>
             {% for voting in user_votings %}
-                <a href="/vote/{{ voting.id }}"  class="card voting-card">
+                <a href="/vote/{{ voting.id }}" id="card-{{voting.id}}" class="card voting-card">
                     <div class="row row-apart">
                         <h3 class="voting-name">{{ voting.name }}</h3>
                         {% if voting.end_date %}
@@ -52,7 +52,7 @@
                     </div>
                     <p class="voting-description">{{ voting.desc }}</p>
                 </a>
-                <a id="opinions-button" class="opinions-card" href={% url 'opinions' voting_id=voting.id %}>Opiniones</a>
+                <a id="opinions-button opinion-{{voting.id}}" class="opinions-card" href={% url 'opinions' voting_id=voting.id %}>Opiniones</a>
             {% endfor %}
             </section>
         {% endif %}
@@ -68,15 +68,22 @@
             const filterTerm = document.getElementById('filter').value.toLowerCase();
 
             listItems.forEach(function (item) {
-                const votingStatus = item.querySelector('.voting-status').textContent.toLowerCase();
-                const votingName = item.querySelector('.voting-name').textContent.toLowerCase();
+                if (item.classList.contains('voting-card')) {
+                    const votingStatus = item.querySelector('.voting-status').textContent.toLowerCase();
+                    const votingName = item.querySelector('.voting-name').textContent.toLowerCase();
 
-                if (filterTerm == 'all' && votingName.includes(searchTerm)) {
-                    item.style.display = 'flex';
-                } else if (votingStatus.includes(filterTerm) && votingName.includes(searchTerm)) {
-                    item.style.display = 'flex';
-                } else {
-                    item.style.display = 'none';
+                    id = item.id.split('-')[1];
+                    opinionButton = document.getElementById('opinions-button opinion-' + id);
+                    if (filterTerm == 'all' && votingName.includes(searchTerm)) {
+                        item.style.display = 'flex';
+                        opinionButton.style.display = 'flex';
+                    } else if (votingStatus.includes(filterTerm) && votingName.includes(searchTerm)) {
+                        item.style.display = 'flex';
+                        opinionButton.style.display = 'flex';
+                    } else {
+                        item.style.display = 'none';
+                        opinionButton.style.display = 'none';
+                    }
                 }
             });
 
