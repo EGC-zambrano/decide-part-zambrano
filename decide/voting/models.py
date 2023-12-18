@@ -211,7 +211,7 @@ class Voting(models.Model):
                 votes = 0
             if self.question.voteBlank:
                 opts.append(
-                    {"option": opt.option, "number": opt.number, "votes": votes}
+                    {"option": opt.option, "number": opt.number, "votes": votes, "points": votes}
                 )
             else:
                 if (
@@ -221,7 +221,7 @@ class Voting(models.Model):
                     and opt.option != "En Blanco"
                 ):
                     opts.append(
-                        {"option": opt.option, "number": opt.number, "votes": votes}
+                        {"option": opt.option, "number": opt.number, "votes": votes, "points": votes}
                     )
 
         data = {"type": "IDENTITY", "options": opts}
