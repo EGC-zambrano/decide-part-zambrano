@@ -508,14 +508,12 @@ class VotingTestCase(BaseTestCase):
         voter = voters.pop()
 
         clear = {}
-        for _ in range(5):  
+        for _ in range(5):
             selected_options = []
             encrypted_options = []
             i = 1
             for opt in v.question.options.all():
-                selected_options.append(
-                    (opt.number, i)
-                )
+                selected_options.append((opt.number, i))
                 i += 1
 
             for option in selected_options:
@@ -762,4 +760,3 @@ class BooleanWhiteTestCase(BaseTestCase):
         self.assertEqual(QuestionOption.objects.first().option, "Sí")
         self.assertEqual(QuestionOption.objects.all()[1].option, "No")
         self.assertEqual(QuestionOption.objects.last().option, "Voto En Blanco")
-
