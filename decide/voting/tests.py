@@ -191,29 +191,6 @@ class VotingTestCase(BaseTestCase):
         for q in v.postproc:
             self.assertEqual(tally.get(q["number"], 0), q["votes"])
 
-    # def test_complete_empty_voting(self):
-    #     v = self.create_empty_voting()
-    #     self.create_voters(v)
-
-    #     v.create_pubkey()
-    #     v.start_date = timezone.now()
-    #     v.save()
-
-    #     clear = self.store_votes(v)
-
-    #     self.login()  # set token
-    #     v.tally_votes(self.token)
-
-    #     tally = v.tally
-    #     tally.sort()
-    #     tally = {k: len(list(x)) for k, x in itertools.groupby(tally)}
-
-    #     for q in v.question.options.all():
-    #         self.assertEqual(tally.get(q.number, 0), clear.get(q.number, 0))
-
-    #     for q in v.postproc:
-    #         self.assertEqual(tally.get(q["number"], 0), q["votes"])
-
     def test_create_voting_from_api(self):
         data = {"name": "Example"}
         response = self.client.post("/voting/", data, format="json")
@@ -269,8 +246,6 @@ class VotingTestCase(BaseTestCase):
         voting = self.create_voting()
 
         data = {"action": "start"}
-        # response = self.client.post('/voting/{}/'.format(voting.pk), data, format='json')
-        # self.assertEqual(response.status_code, 401)
 
         # login with user no admin
         self.login(user="noadmin")
@@ -452,6 +427,94 @@ class VotingTestCase(BaseTestCase):
             mods.post("store", json=data)
 
         return clear
+
+    def test_priority_voting(self):
+        v = self.create_voting_priority()
+        self.create_voters(v)
+
+        v.create_pubkey()
+        v.start_date = timezone.now()
+        v.save()
+
+        clear = self.store_votes_priority(v)
+
+        self.login()  # set token
+        v.tally_votes(self.token)
+
+        tally = v.tally
+
+        tally = {
+            value[0]: len(list(group))
+            for value, group in itertools.groupby(sorted(tally))
+        }
+
+        # Call the do_postproc method
+        v.do_postproc()
+
+        # Access the postproc attribute
+        postproc = v.postproc
+
+        for q in v.question.options.all():
+            postproc_item = postproc[0].get("options", {}).get(q.number, {})
+            self.assertEqual(postproc_item.get("votes", 0), clear.get(q.number, 0))
+            self.assertEqual(postproc_item.get("points", 0), clear.get(q.number, 0))
+
+    def create_voting_priority(self):
+        q = Question(desc="test question priority", question_type="P")
+        q.save()
+        for i in range(5):
+            opt = QuestionOption(
+                question=q, option="option {}".format(i + 1), number=i + 1
+            )
+            opt.save()
+        v = Voting(name="test voting priority", question=q)
+        v.save()
+
+        a, _ = Auth.objects.get_or_create(
+            url=settings.BASEURL, defaults={"me": True, "name": "test auth"}
+        )
+        a.save()
+        v.auths.add(a)
+
+        return v
+
+    def store_votes_priority(self, v):
+        voters = list(Census.objects.filter(voting_id=v.id))
+        voter = voters.pop()
+
+        clear = {}
+        for _ in range(5):
+            selected_options = []
+            encrypted_options = []
+            i = 1
+            for opt in v.question.options.all():
+                selected_options.append((opt.number, i))
+                i += 1
+
+            for option in selected_options:
+                clear[option] = clear.get(option, 0) + 1
+                a, b = self.encrypt_msg(option[0], v)
+                encrypted_options.append({"a": a, "b": b, "p": option[1]})
+
+            data = {
+                "voting": v.id,
+                "voter": voter.voter_id,
+                "vote": encrypted_options,
+            }
+
+            user = self.get_or_create_user(voter.voter_id)
+            self.login(user=user.username)
+            voter = voters.pop()
+            mods.post("store", json=data)
+
+        return clear
+
+    def test_voting_priority_with_white(self):
+        q = Question(
+            desc="test question priority and white", question_type="P", voteBlank=True
+        )
+        with self.assertRaises(BadRequest):
+            q.save()
 
 
 class LogInSuccessTests(StaticLiveServerTestCase):

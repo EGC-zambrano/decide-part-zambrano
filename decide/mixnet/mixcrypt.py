@@ -140,27 +140,47 @@ class MixCrypt:
 
     def multiple_decrypt(self, msgs, last=True):
         msgs2 = []
-        for a, b in msgs:
-            clear = self.decrypt((a, b))
-            if last:
-                msg = clear
-            else:
-                msg = (a, clear)
-            msgs2.append(msg)
+        if len(msgs[0]) == 2:
+            for a, b in msgs:
+                clear = self.decrypt((a, b))
+                if last:
+                    msg = clear
+                else:
+                    msg = (a, clear)
+                msgs2.append(msg)
+        elif len(msgs[0]) == 3:
+            for a, b, priority in msgs:
+                clear = self.decrypt((a, b))
+                if last:
+                    msg = clear
+                else:
+                    msg = (a, clear, priority)
+                msgs2.append(msg)
         return msgs2
 
     def shuffle_decrypt(self, msgs, last=True):
         msgs2 = msgs.copy()
         msgs3 = []
-        while msgs2:
-            n = random.StrongRandom().randint(0, len(msgs2) - 1)
-            a, b = msgs2.pop(n)
-            clear = self.decrypt((a, b))
-            if last:
-                msg = clear
-            else:
-                msg = (a, clear)
-            msgs3.append(msg)
+        if len(msgs2[0]) == 3:
+            while msgs2:
+                n = random.StrongRandom().randint(0, len(msgs2) - 1)
+                a, b, priority = msgs2.pop(n)
+                clear = self.decrypt((a, b))
+                if last:
+                    msg = (clear, priority)  # Return a list of two elements
+                else:
+                    msg = (a, clear, priority)  # Return a list of three elements
+                msgs3.append(msg)
+        else:
+            while msgs2:
+                n = random.StrongRandom().randint(0, len(msgs2) - 1)
+                a, b = msgs2.pop(n)
+                clear = self.decrypt((a, b))
+                if last:
+                    msg = clear
+                else:
+                    msg = (a, clear)
+                msgs3.append(msg)
 
         return msgs3
 
@@ -185,11 +205,16 @@ class MixCrypt:
         else:
             k = self.k
 
-        a, b = map(int, cipher)
-        a1, b1 = map(int, self.encrypt(1, k=k))
-        p = int(k.p)
-
-        return ((a * a1) % p, (b * b1) % p)
+        if len(cipher) == 2:
+            a, b = map(int, cipher)
+            a1, b1 = map(int, self.encrypt(1, k=k))
+            p = int(k.p)
+            return ((a * a1) % p, (b * b1) % p)
+        elif len(cipher) == 3:
+            a, b, priority = map(int, cipher)
+            a1, b1 = map(int, self.encrypt(1, k=k))
+            p = int(k.p)
+            return ((a * a1) % p, (b * b1) % p, priority)
 
     def gen_perm(self, l):
         x = list(range(l))
