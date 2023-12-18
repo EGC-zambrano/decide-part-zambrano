@@ -51,7 +51,7 @@
 
     <script>
         let labels = voting.postproc.map((opt) => opt.option)
-        let postproc = voting.postproc.map((opt) => opt.postproc)
+        let points = voting.postproc.map((opt) => opt.points)
         let votes = voting.postproc.map((opt) => opt.votes)
 
         let ctx = document.getElementById("bar-chart").getContext("2d");
@@ -64,7 +64,7 @@
                     label: "Puntuación",
                     backgroundColor: 'rgba(84, 153, 199, 0.5)',
                     borderColor: "#417690",
-                    data: postproc
+                    data: points
                     },
                     {
                     label: "Votos",
@@ -99,7 +99,7 @@
             return `rgba(${r}, ${g}, ${b}, ${alpha})`;
         }
 
-        let backgroundColors = Array.from({ length: votes.length }, () => getRandomColor());
+        let backgroundColors = Array.from({ length: points.length }, () => getRandomColor());
         ctx = document.getElementById("pie-chart").getContext("2d");
         let pie_chart = new Chart(ctx, {
             type: "pie",  
@@ -110,7 +110,7 @@
                         label: "Votos",
                         backgroundColor: backgroundColors,
                         borderColor: "#417690",
-                        data: votes
+                        data: points
                     }
                 ]
             },
