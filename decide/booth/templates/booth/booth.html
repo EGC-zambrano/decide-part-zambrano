@@ -82,9 +82,9 @@
             <div class="card-voting" v-if="!signup">
                 <h1 class="voting-title">[[ voting.name ]]</h1>
                 <h2 class="voting-desc">[[ voting.question.desc ]]</h2>
-                <form v-for="opt in voting.question.options" :key="opt.number">
+                <form>
                     <div class="form-options">
-                        <div v-if="questionType == 'S' || questionType == 'B' || questionType == 'M'">
+                        <div v-if="questionType == 'S' || questionType == 'B' || questionType == 'M'" v-for="opt in voting.question.options" :key="opt.number">
                             <input type="radio" v-model="selected" v-if="questionType == 'S' || questionType == 'B'"
                                         :id="'q' + opt.number"
                                         name="question"
@@ -97,12 +97,18 @@
                                 [[ opt.option ]]
                         </div>
                         <div v-if="questionType == 'P'">
-                            <select v-model="selected" >
-                                <option v-for="opt in voting.question.options">
+                            <br>
+                            <p> Remember that 1 is the highest priority and [[voting.question.options.length]] is the lowest priority</p>
+                            <br>
+                            <div v-for="(opt, index) in voting.question.options">
+                                <select v-model="selected[index]">
+                                  <option v-for="opt in voting.question.options">
                                     [[ opt.number ]]
-                                </option>
-                            </select>
-                            [[ opt.option ]]
+                                  </option>
+                                </select> [[opt.option]]
+                                <div>Selected priority of [[ selected[index] ]] for [[opt.option]]</div>
+                                <br>
+                              </div>
                         </div>
                     </div>
                 </form>
@@ -267,10 +273,11 @@
                         }
                     }
                     else if (this.questionType === 'P') {
+                        var selectedOptions = this.voting.question.options.map((opt, index) => [opt.number, this.selected[index]]);
                         var vote = []
-                        for (i=0; i < selected.length; i++){
-                            var v = this.decideEncrypt(selected[i][0].toString())
-                            vote.push({a: v.alpha.toString(), b: v.beta.toString(), p: selected[i][1].toString()})
+                        for (i=0; i < selectedOptions.length; i++){
+                            var v = this.decideEncrypt(selectedOptions[i][0].toString())
+                            vote.push({a: v.alpha.toString(), b: v.beta.toString(), p: selectedOptions[i][1].toString()})
                         }
                         var data = {
                             vote: vote,
