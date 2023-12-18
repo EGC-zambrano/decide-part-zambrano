@@ -11,10 +11,11 @@ from rest_framework.views import APIView
 from .forms import LoginForm, RegisterForm
 from .serializers import UserSerializer
 
-from django.contrib.auth.forms import PasswordResetForm
+from django.contrib.auth.models import User
 from django.contrib.auth.views import (
     PasswordResetView,
 )
+from django.contrib import messages
 
 
 # Non-api view
@@ -89,9 +90,12 @@ class ChangePasswordView(PasswordChangeView):
 
 
 class ResetPasswordView(PasswordResetView):
-    template_name = "authentication/password_reset.html"
-
-    def post(self, request):
-        form = PasswordResetForm(request.POST)
-
-        ## TODO: Check that email is in database before sending to user
+    def form_valid(self, form):
+        email = form.cleaned_data.get("email")
+        if User.objects.filter(email=email).exists():
+            return super().form_valid(form)
+        else:
+            messages.error(self.request, "Este email no esta registrado")
+            return render(
+                self.request, "authentication/password_reset.html", {"form": form}
+            )
