@@ -82,17 +82,34 @@
             <div class="card-voting" v-if="!signup">
                 <h1 class="voting-title">[[ voting.name ]]</h1>
                 <h2 class="voting-desc">[[ voting.question.desc ]]</h2>
-                <form v-for="opt in voting.question.options" :key="opt.number">
+                <form>
                     <div class="form-options">
-                        <input type="radio" v-model="selected" v-if="questionType == 'S' || questionType == 'B'"
-                                    :id="'q' + opt.number"
-                                    name="question"
-                                    :value="opt.number">
-                        <input type="checkbox" v-model="selected" v-if="questionType == 'M'"
-                                    :id="'q' + opt.number"
-                                    name="question"
-                                    :value="opt.number">
-                            [[ opt.option ]]
+                        <div v-if="questionType == 'S' || questionType == 'B' || questionType == 'M'" v-for="opt in voting.question.options" :key="opt.number">
+                            <input type="radio" v-model="selected" v-if="questionType == 'S' || questionType == 'B'"
+                                        :id="'q' + opt.number"
+                                        name="question"
+                                        :value="opt.number">
+                            <input type="checkbox" v-model="selected" v-if="questionType == 'M'"
+                                        :id="'q' + opt.number"
+                                        name="question"
+                                        :value="opt.number">
+                            
+                                [[ opt.option ]]
+                        </div>
+                        <div v-if="questionType == 'P'">
+                            <br>
+                            <p> Remember that 1 is the highest priority and [[voting.question.options.length]] is the lowest priority</p>
+                            <br>
+                            <div v-for="(opt, index) in voting.question.options">
+                                <select class="select" v-model="selected[index]">
+                                  <option v-for="opt in voting.question.options">
+                                    [[ opt.number ]]
+                                  </option>
+                                </select> [[opt.option]]
+                                <div>Selected priority of [[ selected[index] ]] for [[opt.option]]</div>
+                                <br>
+                              </div>
+                        </div>
                     </div>
                 </form>
                 <button class="btn btn-vote mt-3" v-on:click="decideSend">
@@ -247,6 +264,25 @@
                         for (i=0; i < this.selected.length; i++){
                           var v = this.decideEncrypt(this.selected[i].toString())
                           vote.push({a: v.alpha.toString(), b: v.beta.toString()})
+                        }
+                        var data = {
+                            vote: vote,
+                            voting: this.voting.id,
+                            voter: this.user.id,
+                            token: this.token
+                        }
+                    }
+                    else if (this.questionType === 'P') {
+                        var selectedOptions = this.voting.question.options.map((opt, index) => [opt.number, this.selected[index]]);
+                        var vote = []
+                        var priorities = selectedOptions.map((opt) => opt[1]);
+                        var prioritiesSet = new Set(priorities);
+                        if (priorities.length > prioritiesSet.size){
+                            return
+                        }
+                        for (i=0; i < selectedOptions.length; i++){
+                            var v = this.decideEncrypt(selectedOptions[i][0].toString())
+                            vote.push({a: v.alpha.toString(), b: v.beta.toString(), p: selectedOptions[i][1].toString()})
                         }
                         var data = {
                             vote: vote,

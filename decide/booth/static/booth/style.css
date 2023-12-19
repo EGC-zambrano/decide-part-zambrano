@@ -253,3 +253,13 @@ textarea {
 .input-group i {
     font-size: 1.5em;
 }
+
+.select {
+    padding: 6px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    border-radius: 0.25em;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+    color: var(--input-text);
+    font-family: var(--fuente2);
+  }
