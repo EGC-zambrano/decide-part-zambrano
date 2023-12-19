@@ -146,12 +146,6 @@ class LoginPageTestCase(StaticLiveServerTestCase):
             "Error en el formulario",
         )
 
-
-"""
-
-"""
-
-
 class LoginGoogleTestCase(StaticLiveServerTestCase):
     def setUp(self):
         self.base = BaseTestCase()
