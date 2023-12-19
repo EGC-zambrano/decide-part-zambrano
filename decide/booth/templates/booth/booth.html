@@ -101,7 +101,7 @@
                             <p> Remember that 1 is the highest priority and [[voting.question.options.length]] is the lowest priority</p>
                             <br>
                             <div v-for="(opt, index) in voting.question.options">
-                                <select v-model="selected[index]">
+                                <select class="select" v-model="selected[index]">
                                   <option v-for="opt in voting.question.options">
                                     [[ opt.number ]]
                                   </option>
@@ -275,6 +275,11 @@
                     else if (this.questionType === 'P') {
                         var selectedOptions = this.voting.question.options.map((opt, index) => [opt.number, this.selected[index]]);
                         var vote = []
+                        var priorities = selectedOptions.map((opt) => opt[1]);
+                        var prioritiesSet = new Set(priorities);
+                        if (priorities.length > prioritiesSet.size){
+                            return
+                        }
                         for (i=0; i < selectedOptions.length; i++){
                             var v = this.decideEncrypt(selectedOptions[i][0].toString())
                             vote.push({a: v.alpha.toString(), b: v.beta.toString(), p: selectedOptions[i][1].toString()})
