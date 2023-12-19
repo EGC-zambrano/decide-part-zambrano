@@ -147,11 +147,6 @@ class LoginPageTestCase(StaticLiveServerTestCase):
         )
 
 
-"""
-
-"""
-
-
 class LoginGoogleTestCase(StaticLiveServerTestCase):
     def setUp(self):
         self.base = BaseTestCase()
