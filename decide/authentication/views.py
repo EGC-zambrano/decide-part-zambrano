@@ -1,3 +1,5 @@
+import os
+import base64
 import socket
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.views import PasswordChangeView
@@ -19,6 +21,12 @@ from booth.views import index
 from django.contrib.sites.models import Site
 
 import os
+
+from django.contrib.auth.models import User
+from django.contrib.auth.views import (
+    PasswordResetView,
+)
+from django.contrib import messages
 
 
 # Non-api view
@@ -141,3 +149,15 @@ class EmailView(TemplateView):
 class ChangePasswordView(PasswordChangeView):
     template_name = "authentication/change_password.html"
     success_url = "/"
+
+
+class ResetPasswordView(PasswordResetView):
+    def form_valid(self, form):
+        email = form.cleaned_data.get("email")
+        if User.objects.filter(email=email).exists():
+            return super().form_valid(form)
+        else:
+            messages.error(self.request, "Este email no esta registrado")
+            return render(
+                self.request, "authentication/password_reset.html", {"form": form}
+            )
