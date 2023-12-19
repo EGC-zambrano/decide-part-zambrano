@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
     "social_django",
+    "django_rest_passwordreset",
     "django_recaptcha",
 ]
 
@@ -209,17 +210,22 @@ TEST_RUNNER = "django_nose.NoseTestSuiteRunner"
 
 STATIC_URL = "/static/"
 
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
-]
-
-
 # number of bits for the key, all auths should use the same number of bits
 KEYBITS = 256
 
 # Versioning
 ALLOWED_VERSIONS = ["v1", "v2"]
 DEFAULT_VERSION = "v1"
+
+
+# Restore password
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
+
 
 try:
     from local_settings import *
