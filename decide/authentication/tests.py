@@ -6,6 +6,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from unittest import mock
 from rest_framework.test import APIClient, APITestCase
+from django.contrib.messages import get_messages
 
 from .forms import TestLoginForm, TestRegisterForm
 
@@ -269,3 +270,33 @@ class ChangePasswordViewTestCase(TestCase):
         )
         self.user.refresh_from_db()
         self.assertTrue(self.user.check_password("testpass"))
+
+
+class ResetPasswordViewTestCase(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="passuser", password="testpass", email="test@example.com"
+        )
+        self.url = reverse("password_reset")
+
+        # Disable recaptcha
+        os.environ["DISABLE_RECAPTCHA"] = "1"
+
+    def test_form_valid_with_existing_email(self):
+        email = self.user.email
+        data = {"email": email}
+
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("password_reset_done"))
+
+    def test_form_valid_with_non_existing_email(self):
+        data = {"email": "nonexisting@example.com"}
+
+        response = self.client.post(self.url, data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "authentication/password_reset.html")
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), "Este email no esta registrado")
