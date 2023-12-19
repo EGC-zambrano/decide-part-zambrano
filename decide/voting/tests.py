@@ -13,6 +13,8 @@ from mixnet.models import Auth
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from voting.models import Question, QuestionOption, Voting
+from selenium.webdriver.chrome.webdriver import WebDriver
+from django.core.exceptions import BadRequest
 
 
 class VotingTestCase(BaseTestCase):
@@ -46,6 +48,74 @@ class VotingTestCase(BaseTestCase):
 
         return v
 
+    def create_white_voting(self):
+        q = Question(desc="test question", voteBlank=True)
+        q.save()
+        for i in range(5):
+            opt = QuestionOption(question=q, option="option {}".format(i + 1))
+            opt.save()
+        v = Voting(name="test voting", question=q)
+        v.save()
+
+        a, _ = Auth.objects.get_or_create(
+            url=settings.BASEURL, defaults={"me": True, "name": "test auth"}
+        )
+        a.save()
+        v.auths.add(a)
+
+        return v
+
+    def test_white_vote_is_first_option(self):
+        v = self.create_white_voting()
+
+        # Retrieve the options for the voting's question
+        options = QuestionOption.objects.filter(question=v.question)
+
+        # Check if the first option is 'En blanco'
+        first_option = options.first()
+        self.assertEqual(
+            first_option.option, "Voto En Blanco", "En blanco is not the first option"
+        )
+
+    def create_white_voting_false(self):
+        q = Question(desc="test question", voteBlank=False)
+        q.save()
+
+        opt = QuestionOption(question=q, option="Voto En Blanco")
+        opt.save()
+        v = Voting(name="test voting", question=q)
+        v.save()
+
+        a, _ = Auth.objects.get_or_create(
+            url=settings.BASEURL, defaults={"me": True, "name": "test auth"}
+        )
+        a.save()
+        v.auths.add(a)
+
+        return v
+
+    def test_white_vote_is_false_tally(self):
+        v = self.create_white_voting_false()
+        self.create_voters(v)
+
+        v.create_pubkey()
+        v.start_date = timezone.now()
+        v.save()
+
+        clear = self.store_votes(v)
+
+        self.login()  # set token
+        v.tally_votes(self.token)
+
+        tally = v.tally
+        tally.sort()
+        tally = {k: len(list(x)) for k, x in itertools.groupby(tally)}
+
+        for q in v.question.options.all():
+            self.assertEqual(tally.get(q.number, 0), clear.get(q.number, 0))
+
+        self.assertEqual(len(v.postproc), 0)  # Expecting an empty postproc list
+
     def create_voters(self, v):
         for i in range(100):
             u, _ = User.objects.get_or_create(username="testvoter{}".format(i))
@@ -66,7 +136,8 @@ class VotingTestCase(BaseTestCase):
         voter = voters.pop()
 
         clear = {}
-        for opt in v.question.options.all():
+        if v.question.options.count() == 1:
+            opt = v.question.options.first()
             clear[opt.number] = 0
             for i in range(random.randint(0, 5)):
                 a, b = self.encrypt_msg(opt.number, v)
@@ -80,6 +151,21 @@ class VotingTestCase(BaseTestCase):
                 self.login(user=user.username)
                 voter = voters.pop()
                 mods.post("store", json=data)
+        else:
+            for opt in v.question.options.all():
+                clear[opt.number] = 0
+                for i in range(random.randint(0, 5)):
+                    a, b = self.encrypt_msg(opt.number, v)
+                    data = {
+                        "voting": v.id,
+                        "voter": voter.voter_id,
+                        "vote": {"a": a, "b": b},
+                    }
+                    clear[opt.number] += 1
+                    user = self.get_or_create_user(voter.voter_id)
+                    self.login(user=user.username)
+                    voter = voters.pop()
+                    mods.post("store", json=data)
         return clear
 
     def test_complete_voting(self):
@@ -130,12 +216,36 @@ class VotingTestCase(BaseTestCase):
         response = self.client.post("/voting/", data, format="json")
         self.assertEqual(response.status_code, 201)
 
+    def test_create_boolean_voting_from_api(self):
+        data = {"name": "Example boolean"}
+        response = self.client.post("/voting/", data, format="json")
+        self.assertEqual(response.status_code, 401)
+
+        # login with user no admin
+        self.login(user="noadmin")
+        response = mods.post("voting", params=data, response=True)
+        self.assertEqual(response.status_code, 403)
+
+        # login with user admin
+        self.login()
+        response = mods.post("voting", params=data, response=True)
+        self.assertEqual(response.status_code, 400)
+
+        data = {
+            "name": "Example boolean",
+            "desc": "Description example boolean",
+            "question_type": "B",
+            "question": "Do you agree?",
+            "question_opt": ["Sí", "No"],
+        }
+
+        response = self.client.post("/voting/", data, format="json")
+        self.assertEqual(response.status_code, 201)
+
     def test_update_voting(self):
         voting = self.create_voting()
 
         data = {"action": "start"}
-        # response = self.client.post('/voting/{}/'.format(voting.pk), data, format='json')
-        # self.assertEqual(response.status_code, 401)
 
         # login with user no admin
         self.login(user="noadmin")
@@ -318,6 +428,94 @@ class VotingTestCase(BaseTestCase):
 
         return clear
 
+    def test_priority_voting(self):
+        v = self.create_voting_priority()
+        self.create_voters(v)
+
+        v.create_pubkey()
+        v.start_date = timezone.now()
+        v.save()
+
+        clear = self.store_votes_priority(v)
+
+        self.login()  # set token
+        v.tally_votes(self.token)
+
+        tally = v.tally
+
+        tally = {
+            value[0]: len(list(group))
+            for value, group in itertools.groupby(sorted(tally))
+        }
+
+        # Call the do_postproc method
+        v.do_postproc()
+
+        # Access the postproc attribute
+        postproc = v.postproc
+
+        for q in v.question.options.all():
+            postproc_item = postproc[0].get("options", {}).get(q.number, {})
+            self.assertEqual(postproc_item.get("votes", 0), clear.get(q.number, 0))
+            self.assertEqual(postproc_item.get("points", 0), clear.get(q.number, 0))
+
+    def create_voting_priority(self):
+        q = Question(desc="test question priority", question_type="P")
+        q.save()
+        for i in range(5):
+            opt = QuestionOption(
+                question=q, option="option {}".format(i + 1), number=i + 1
+            )
+            opt.save()
+        v = Voting(name="test voting priority", question=q)
+        v.save()
+
+        a, _ = Auth.objects.get_or_create(
+            url=settings.BASEURL, defaults={"me": True, "name": "test auth"}
+        )
+        a.save()
+        v.auths.add(a)
+
+        return v
+
+    def store_votes_priority(self, v):
+        voters = list(Census.objects.filter(voting_id=v.id))
+        voter = voters.pop()
+
+        clear = {}
+        for _ in range(5):
+            selected_options = []
+            encrypted_options = []
+            i = 1
+            for opt in v.question.options.all():
+                selected_options.append((opt.number, i))
+                i += 1
+
+            for option in selected_options:
+                clear[option] = clear.get(option, 0) + 1
+                a, b = self.encrypt_msg(option[0], v)
+                encrypted_options.append({"a": a, "b": b, "p": option[1]})
+
+            data = {
+                "voting": v.id,
+                "voter": voter.voter_id,
+                "vote": encrypted_options,
+            }
+
+            user = self.get_or_create_user(voter.voter_id)
+            self.login(user=user.username)
+            voter = voters.pop()
+            mods.post("store", json=data)
+
+        return clear
+
+    def test_voting_priority_with_white(self):
+        q = Question(
+            desc="test question priority and white", question_type="P", voteBlank=True
+        )
+        with self.assertRaises(BadRequest):
+            q.save()
+
 
 class LogInSuccessTests(StaticLiveServerTestCase):
     def setUp(self):
@@ -417,6 +615,7 @@ class QuestionsTests(StaticLiveServerTestCase):
         options = webdriver.ChromeOptions()
         options.headless = True
         self.driver = webdriver.Chrome(options=options)
+        self.cleaner: WebDriver = self.driver
 
         super().setUp()
 
@@ -482,3 +681,57 @@ class QuestionsTests(StaticLiveServerTestCase):
             self.cleaner.current_url
             == self.live_server_url + "/admin/voting/question/add/"
         )
+
+
+class BooleanQuestionTestCase(BaseTestCase):
+    def setUp(self):
+        self.question = Question.objects.create(
+            question_type="B", desc="What is your favorite color?", voteBlank=False
+        )
+        self.question.save()
+
+    def test_save_boolean_question(self):
+        self.assertEqual(QuestionOption.objects.count(), 2)
+        self.assertEqual(QuestionOption.objects.first().option, "Sí")
+        self.assertEqual(QuestionOption.objects.last().option, "No")
+
+    def test_str_representation(self):
+        self.assertEqual(str(self.question), "What is your favorite color?")
+
+    def test_one_option_boolean_question(self):
+        self.question = Question.objects.create(
+            question_type="B", desc="What is your favorite color?", voteBlank=False
+        )
+        self.question.save()
+
+        opt = QuestionOption(question=self.question, option="option {}".format(1))
+        with self.assertRaises(BadRequest):
+            opt.save()
+
+    def test_multiple_option_boolean_question(self):
+        self.question = Question.objects.create(
+            question_type="B", desc="What is your favorite color?", voteBlank=False
+        )
+        self.question.save()
+
+        opt1 = QuestionOption(question=self.question, option="option {}".format(1))
+        opt2 = QuestionOption(question=self.question, option="option {}".format(2))
+        opt3 = QuestionOption(question=self.question, option="option {}".format(3))
+        with self.assertRaises(BadRequest):
+            opt1.save()
+            opt2.save()
+            opt3.save()
+
+
+class BooleanWhiteTestCase(BaseTestCase):
+    def setUp(self):
+        self.question = Question.objects.create(
+            question_type="B", desc="What is your favorite color?", voteBlank=True
+        )
+        self.question.save()
+
+    def test_boolean_question_and_white(self):
+        self.assertEqual(QuestionOption.objects.count(), 3)
+        self.assertEqual(QuestionOption.objects.first().option, "Sí")
+        self.assertEqual(QuestionOption.objects.all()[1].option, "No")
+        self.assertEqual(QuestionOption.objects.last().option, "Voto En Blanco")

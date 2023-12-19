@@ -4,16 +4,78 @@ from django.db import models
 from django.db.models import JSONField
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.core.exceptions import BadRequest
 
 
 class Question(models.Model):
     QUESTION_TYPES = (
         ("S", "Single"),
         ("M", "Multiple"),
+        ("P", "Priority"),
+        ("B", "Boolean"),
     )
 
     question_type = models.CharField(max_length=1, choices=QUESTION_TYPES, default="S")
     desc = models.TextField()
+    voteBlank = models.BooleanField(default=False)
+
+    def save(self, **kwargs):
+        super().save()
+
+        if self.question_type == "P" and self.voteBlank:
+            raise BadRequest("Priority voting is incompatible with blank voting")
+
+        if (
+            (self.question_type == "S" or self.question_type == "M")
+            and self.voteBlank
+            and QuestionOption.objects.filter(
+                question__id=self.id, option__startswith="Voto En Blanco"
+            ).count()
+            == 0
+        ):
+            enBlanco = QuestionOption(
+                question=self, number=self.options.count() + 1, option="Voto En Blanco"
+            )
+            enBlanco.save()
+            self.options.add(enBlanco)
+        if self.question_type == "B":
+            if (
+                QuestionOption.objects.filter(
+                    question__id=self.id, option__startswith="Sí"
+                ).count()
+                == 0
+            ):
+                op1 = QuestionOption(
+                    question=self, number=self.options.count() + 1, option="Sí"
+                )
+                op1.save()
+                self.options.add(op1)
+            if (
+                QuestionOption.objects.filter(
+                    question__id=self.id, option__startswith="No"
+                ).count()
+                == 0
+            ):
+                op2 = QuestionOption(
+                    question=self, number=self.options.count() + 1, option="No"
+                )
+                op2.save()
+                self.options.add(op2)
+            if (
+                self.voteBlank
+                and QuestionOption.objects.filter(
+                    question_id=self.id, option__startswith="Voto En Blanco"
+                ).count()
+                == 0
+            ):
+                enBlanco = QuestionOption(
+                    question=self,
+                    number=self.options.count() + 1,
+                    option="Voto En Blanco",
+                )
+                enBlanco.save()
+                self.options.add(enBlanco)
+        return super().save()
 
     def __str__(self):
         return self.desc
@@ -25,10 +87,26 @@ class QuestionOption(models.Model):
     )
     number = models.PositiveIntegerField(blank=True, null=True)
     option = models.TextField()
+    hidden = models.BooleanField(default=False)
 
     def save(self):
+        if self.question.question_type == "B" and self.question.options.count() > 1:
+            if self.question.voteBlank:
+                if (
+                    self.option != "Sí"
+                    and self.option != "No"
+                    and self.option != "Voto En Blanco"
+                ):
+                    raise BadRequest(
+                        "Boolean questions with white votes can only have 'Sí', 'No', or 'Voto En Blanco' options."
+                    )
+            else:
+                raise BadRequest("Boolean questions cannot have any options.")
         if not self.number:
-            self.number = self.question.options.count() + 2
+            self.number = self.question.options.count() + 1
+        else:
+            if self.number and Question.voteBlank:
+                self.number = self.question.options.count() + 1
         return super().save()
 
     def __str__(self):
@@ -74,14 +152,26 @@ class Voting(models.Model):
             "store", params={"voting_id": self.id}, HTTP_AUTHORIZATION="Token " + token
         )
         # anon votes
-        votes_format = []
-        vote_list = []
-        for vote in votes:
-            for option in vote["options"]:
-                votes_format.append(option["a"])
-                votes_format.append(option["b"])
-                vote_list.append(votes_format)
-                votes_format = []
+        if self.question.question_type != "P":
+            votes_format = []
+            vote_list = []
+            for vote in votes:
+                for option in vote["options"]:
+                    votes_format.append(option["a"])
+                    votes_format.append(option["b"])
+                    vote_list.append(votes_format)
+                    votes_format = []
+
+        else:
+            votes_format = []
+            vote_list = []
+            for vote in votes:
+                for option in vote["options"]:
+                    votes_format.append(option["a"])
+                    votes_format.append(option["b"])
+                    votes_format.append(option["p"])
+                    vote_list.append(votes_format)
+                    votes_format = []
         return vote_list
 
     def tally_votes(self, token=""):
@@ -131,20 +221,72 @@ class Voting(models.Model):
     def do_postproc(self):
         tally = self.tally
         options = self.question.options.all()
+        if self.question.question_type != "P":
+            opts = []
+            for opt in options:
+                if isinstance(tally, list):
+                    votes = tally.count(opt.number)
+                else:
+                    votes = 0
+                if self.question.voteBlank:
+                    opts.append(
+                        {
+                            "option": opt.option,
+                            "number": opt.number,
+                            "votes": votes,
+                            "points": votes,
+                        }
+                    )
+                else:
+                    if (
+                        opt.option != "Voto En Blanco"
+                        and opt.option != "voto en blanco"
+                        and opt.option != "en blanco"
+                        and opt.option != "En Blanco"
+                    ):
+                        opts.append(
+                            {
+                                "option": opt.option,
+                                "number": opt.number,
+                                "votes": votes,
+                                "points": votes,
+                            }
+                        )
 
-        opts = []
-        for opt in options:
-            if isinstance(tally, list):
-                votes = tally.count(opt.number)
-            else:
-                votes = 0
-            opts.append({"option": opt.option, "number": opt.number, "votes": votes})
+            data = {"type": "IDENTITY", "options": opts}
+            postp = mods.post("postproc", json=data)
 
-        data = {"type": "IDENTITY", "options": opts}
-        postp = mods.post("postproc", json=data)
+            self.postproc = postp
+            self.save()
 
-        self.postproc = postp
-        self.save()
+        else:
+            opts = []
+            vote_priority = {}
+            votes = {}
+            n_options = len(options)
+            for opt in options:
+                if isinstance(tally, list):
+                    for vote in tally:
+                        if vote[0] == opt.number:
+                            if vote[0] in vote_priority:
+                                vote_priority[vote[0]] += n_options - vote[1] + 1
+                                votes[vote[0]] += 1
+                            else:
+                                vote_priority[vote[0]] = n_options - vote[1] + 1
+                                votes[vote[0]] = 1
+                opts.append(
+                    {
+                        "option": opt.option,
+                        "number": opt.number,
+                        "votes": votes[opt.number],
+                        "points": vote_priority[opt.number],
+                    }
+                )
+            data = {"type": "IDENTITY", "options": opts}
+            postp = mods.post("postproc", json=data)
+
+            self.postproc = postp
+            self.save()
 
     def __str__(self):
         return self.name
