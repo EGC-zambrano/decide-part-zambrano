@@ -1,0 +1,14 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<div class="module">
+    <h1>Import Census via CSV</h1>
+    <form action="/admin/census/census/import_census/" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <p>Upload a CSV file containing the census data to be imported.</p>
+        {{ form.as_p }}
+        <p><button type="submit">Upload file</button></p>
+    </form>
+    
+</div>
+{% endblock %}
